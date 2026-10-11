@@ -50,9 +50,9 @@ Dividir cada pantalla en componentes y aplicar el nuevo diseño.
 - [x] Icono, nombre e instalador
 - [x] README con capturas
 
-## Fase 5 · ZeeBoard en el iPad (por wifi, sin nube)
-- [ ] Servidor local en la app + código QR para abrirla desde el iPad
-- [ ] Enviar imágenes de progreso desde el iPad a una comisión
+## Fase 5 · ZeeBoard en el iPad (por Tailscale o wifi, sin nube)
+- [x] Servidor local en la app + código QR para abrirla desde el iPad (interruptor en Ajustes, enlace con clave; con Tailscale funciona también con datos del móvil)
+- [x] Enviar imágenes de progreso desde el iPad a una comisión (como alternativa nueva o como nueva versión de una alternativa)
 - [ ] Vista del tablero adaptada al iPad
 
 ---
