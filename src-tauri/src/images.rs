@@ -26,7 +26,7 @@ const THUMB_QUALITY: f32 = 72.0;
 const IMAGES_DIR: &str = "images";
 const THUMBS_DIR: &str = "images/thumbs";
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct StoredImage {
     /// Path relative to the app data folder, e.g. `images/ab12….webp`
@@ -177,6 +177,17 @@ fn folder_size(folder: &Path) -> (u32, u64) {
         .flatten()
         .filter_map(|entry| entry.metadata().ok().filter(|metadata| metadata.is_file()))
         .fold((0, 0), |(count, total), metadata| (count + 1, total + metadata.len()))
+}
+
+/// Imports an image already in memory (received from the iPad).
+pub(crate) fn import_bytes(app: &AppHandle, original: &[u8]) -> Result<StoredImage, String> {
+    process(&data_dir(app)?, original)
+}
+
+/// Reads a stored image file (path relative to the data folder, inside `images/`); `None` if it isn't there.
+pub(crate) fn read_image(app: &AppHandle, relative: &str) -> Option<Vec<u8>> {
+    let path = safe_image_path(&data_dir(app).ok()?, relative)?;
+    fs::read(path).ok()
 }
 
 /// Imports an image from a disk file (picker, drag and drop, migration).

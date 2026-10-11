@@ -19,6 +19,7 @@ import { REQUESTS_CHANGED, syncFormResponses } from "./lib/formSync";
 import { getRequests } from "./lib/database";
 import { announceRestored, DATA_RESTORED } from "./lib/undo";
 import { t } from "./lib/i18n";
+import { ipadSettings, listenIpadImages, pushSnapshot, saveIpadImage, startIpad } from "./lib/ipad";
 import Logo from "./components/Logo";
 import CommandPalette, { ShortcutsHelp } from "./components/CommandPalette";
 import { requestAction } from "./lib/actions";
@@ -123,6 +124,49 @@ function UndoShortcut() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showToast]);
+
+  return null;
+}
+
+let ipadStarted = false;
+
+/** Receives the images sent from the iPad (Settings > iPad) and keeps the list the iPad page shows up to date. */
+function IpadReceiver() {
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    let cancelled = false;
+    let unlisten: (() => void) | undefined;
+
+    listenIpadImages((image) => {
+      saveIpadImage(image)
+        .then((asRequested) => {
+          showToast(asRequested ? "Image received from the iPad." : "That alternative no longer exists: the image was added as a new one.", "success");
+          pushSnapshot().catch(console.error);
+        })
+        .catch((error) => {
+          console.error(error);
+          showToast(t("Could not save the image from the iPad: {error}", { error: String(error) }), "error");
+        });
+    }).then((stop) => (cancelled ? stop() : (unlisten = stop)));
+
+    // Left on in the last session: back on with the app
+    if (!ipadStarted && ipadSettings().enabled) {
+      ipadStarted = true;
+      startIpad().catch((error) => showToast(t("Could not start the iPad receiver: {error}", { error: String(error) }), "error"));
+    }
+
+    // New commissions or stage changes reach the iPad page within seconds
+    const timer = setInterval(() => {
+      if (ipadSettings().enabled) pushSnapshot().catch(console.error);
+    }, 20000);
+
+    return () => {
+      cancelled = true;
+      unlisten?.();
+      clearInterval(timer);
+    };
   }, [showToast]);
 
   return null;
@@ -275,6 +319,7 @@ function App() {
       <Reminders />
       <FormSync />
       <UndoShortcut />
+      <IpadReceiver />
       {paletteOpen && <CommandPalette pages={navigationItems} onGo={go} onClose={closePalette} onShowShortcuts={showShortcuts} />}
       {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
       <div className="h-screen overflow-hidden bg-canvas text-ink">

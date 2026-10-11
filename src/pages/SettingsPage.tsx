@@ -27,6 +27,7 @@ import { cleanUpOrphanedImages, getStorageStats, type StorageStats } from "../li
 import ConfirmModal from "../components/ConfirmModal";
 import { getLanguage, setLanguage, t, type Language } from "../lib/i18n";
 import PaypalImport, { pickPaypalFile, type PaypalPreview } from "../components/PaypalImport";
+import IpadSettings from "../components/IpadSettings";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) {
@@ -628,6 +629,9 @@ function SettingsPage() {
               {exportMessage && <span className="mt-1 block">{exportMessage}</span>}
             </p>
           </div>
+
+          <h3 className={section}>{t("iPad")}</h3>
+          <IpadSettings />
 
           <h3 className={section}>{t("Trash")}</h3>
           <div className={panel}>

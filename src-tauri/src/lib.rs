@@ -2,10 +2,12 @@ mod avatars;
 mod backup;
 mod export;
 mod images;
+mod ipad;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .manage(ipad::IpadState::default())
         // Each plugin is registered once
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_sql::Builder::default().build()) // Local SQLite
@@ -24,6 +26,10 @@ pub fn run() {
             export::read_text_file,
             backup::prepare_backup,
             backup::finish_backup,
+            ipad::ipad_start,
+            ipad::ipad_stop,
+            ipad::ipad_set_snapshot,
+            ipad::ipad_addresses,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

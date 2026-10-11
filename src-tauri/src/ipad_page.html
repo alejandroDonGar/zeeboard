@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ZeeBoard">
+<title>ZeeBoard</title>
+<style>
+  :root { color-scheme: light dark; --bg: #f6f3ee; --card: #fff; --ink: #1f2933; --muted: #7c7163; --line: #e6ded2; --primary: #1f2933; --on: #fff; --ok: #1a7f4b; --bad: #c0392b; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #16181c; --card: #1f2227; --ink: #ece6dc; --muted: #a8a093; --line: #33373e; --primary: #ece6dc; --on: #1f2933; --ok: #4cc38a; --bad: #ff7a6b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; padding: env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom)); }
+  main { max-width: 560px; margin: 0 auto; padding-top: 20px; }
+  h1 { font: 800 28px/1.1 Georgia, serif; margin: 0 0 4px; }
+  h2 { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 24px 0 10px; }
+  p { margin: 0; color: var(--muted); }
+  .item, .btn { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--card); color: var(--ink); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px; font: inherit; }
+  .item b { display: block; }
+  .item span { color: var(--muted); font-size: 15px; }
+  .btn { text-align: center; font-weight: 700; }
+  .btn.primary { background: var(--primary); color: var(--on); border-color: var(--primary); }
+  select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--card); color: var(--ink); font: inherit; }
+  #chosen { font-weight: 700; color: var(--ink); }
+  #targets { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+  .target { border: 2px solid var(--line); background: var(--card); color: var(--ink); border-radius: 16px; padding: 8px; font: inherit; text-align: left; }
+  .target.on { border-color: var(--primary); }
+  .target .thumb { width: 100%; aspect-ratio: 1; border-radius: 10px; background: var(--bg); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 34px; color: var(--muted); }
+  .target b { display: block; margin-top: 6px; font-size: 15px; }
+  .target span { display: block; color: var(--muted); font-size: 13px; line-height: 1.3; }
+  #queue { list-style: none; padding: 0; margin: 14px 0 0; }
+  #queue li { padding: 8px 0; border-bottom: 1px solid var(--line); word-break: break-all; font-size: 15px; }
+  #queue li.ok { color: var(--ok); } #queue li.bad { color: var(--bad); }
+  input[type=file] { display: none; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>ZeeBoard</h1>
+  <p id="status"></p>
+
+  <section id="list">
+    <h2 id="t-commission"></h2>
+    <div id="commissions"></div>
+  </section>
+
+  <section id="send" hidden>
+    <h2 id="t-sending"></h2>
+    <p id="chosen"></p>
+    <h2 id="t-stage"></h2>
+    <select id="stage"></select>
+    <div id="target-box" hidden>
+      <h2 id="t-target"></h2>
+      <div id="targets"></div>
+    </div>
+    <h2 id="t-photos"></h2>
+    <label class="btn primary" id="pick"></label>
+    <input id="files" type="file" accept="image/*" multiple>
+    <button class="btn" id="back"></button>
+    <ul id="queue"></ul>
+  </section>
+</main>
+
+<script>
+const es = { commission: "Elige la comisión", sending: "Enviando a", stage: "Etapa", target: "Añadir como", photos: "Imágenes", pick: "Elegir imágenes", back: "Cambiar de comisión", newAlt: "Nueva alternativa", newAltSub: "otra opción para el cliente", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No hay comisiones abiertas.", offline: "No se pudo conectar con ZeeBoard. ¿Está abierto en el PC y con el interruptor activado?" };
+const en = { commission: "Pick the commission", sending: "Sending to", stage: "Stage", target: "Add as", photos: "Images", pick: "Choose images", back: "Change commission", newAlt: "New alternative", newAltSub: "another option for the client", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No open commissions.", offline: "Could not reach ZeeBoard. Is it open on the PC with the switch on?" };
+const spanish = navigator.language.toLowerCase().startsWith("es");
+const L = spanish ? es : en;
+document.documentElement.lang = spanish ? "es" : "en";
+
+const $ = (id) => document.getElementById(id);
+const key = new URLSearchParams(location.search).get("k") || "";
+let data = { commissions: [] };
+let chosen = null;
+// null = a new alternative; a number = a new version of that alternative of the stage
+let target = null;
+
+$("t-commission").textContent = L.commission;
+$("t-sending").textContent = L.sending;
+$("t-stage").textContent = L.stage;
+$("t-target").textContent = L.target;
+$("t-photos").textContent = L.photos;
+$("pick").textContent = L.pick;
+$("pick").htmlFor = "files";
+$("back").textContent = L.back;
+
+async function fetchData() {
+  const response = await fetch("/api/commissions?k=" + encodeURIComponent(key), { cache: "no-store" });
+  if (!response.ok) throw new Error(response.status);
+  data = await response.json();
+}
+
+async function load() {
+  try {
+    await fetchData();
+    $("status").textContent = "";
+    renderList();
+  } catch (error) {
+    $("status").textContent = L.offline;
+  }
+}
+
+function renderList() {
+  const box = $("commissions");
+  box.innerHTML = "";
+  if (!data.commissions.length) { box.textContent = L.none; return; }
+  for (const commission of data.commissions) {
+    const button = document.createElement("button");
+    button.className = "item";
+    const title = document.createElement("b");
+    const client = document.createElement("span");
+    title.textContent = commission.title;
+    client.textContent = commission.client || "";
+    button.append(title, client);
+    button.onclick = () => choose(commission);
+    box.appendChild(button);
+  }
+}
+
+function choose(commission) {
+  chosen = commission;
+  target = null;
+  $("list").hidden = true;
+  $("send").hidden = false;
+  $("chosen").textContent = commission.title + (commission.client ? " · " + commission.client : "");
+  const select = $("stage");
+  select.innerHTML = "";
+  for (const stage of commission.stages) {
+    const option = document.createElement("option");
+    option.value = stage.id;
+    option.textContent = stage.name;
+    option.selected = stage.id === commission.currentStageId;
+    select.appendChild(option);
+  }
+  renderTargets();
+}
+
+// What the images of this stage can be added to: a new alternative, or a new version of an existing one
+function renderTargets() {
+  const stage = chosen.stages.find((item) => String(item.id) === $("stage").value);
+  const alts = (stage && stage.alts) || [];
+  const box = $("targets");
+  box.innerHTML = "";
+  $("target-box").hidden = alts.length === 0;
+  if (!alts.some((alt) => alt.alt === target)) target = null;
+
+  const card = (alt, title, subtitle, thumb) => {
+    const button = document.createElement("button");
+    button.className = "target" + (alt === target ? " on" : "");
+    let picture;
+    if (thumb) {
+      picture = document.createElement("img");
+      picture.src = "/thumb?k=" + encodeURIComponent(key) + "&p=" + thumb;
+      picture.alt = "";
+    } else {
+      picture = document.createElement("div");
+      picture.textContent = alt === null ? "+" : "▢";
+    }
+    picture.className = "thumb";
+    const name = document.createElement("b");
+    const sub = document.createElement("span");
+    name.textContent = title;
+    sub.textContent = subtitle;
+    button.append(picture, name, sub);
+    button.onclick = () => { target = alt; renderTargets(); };
+    box.appendChild(button);
+  };
+
+  card(null, L.newAlt, L.newAltSub, null);
+  for (const alt of alts) card(alt.alt, alt.label, L.versionSub(alt.version), alt.thumb);
+}
+
+$("stage").onchange = renderTargets;
+$("back").onclick = () => { $("send").hidden = true; $("list").hidden = false; load(); };
+
+$("files").onchange = async (event) => {
+  const files = [...event.target.files];
+  event.target.value = "";
+  for (const file of files) await upload(file);
+};
+
+// After a send the list changes (new thumbnail and version): read it again, keeping the stage and the choice
+async function refreshAfterSend() {
+  try {
+    await fetchData();
+    const fresh = data.commissions.find((commission) => commission.id === chosen.id);
+    if (fresh) { chosen = fresh; renderTargets(); }
+  } catch (error) { /* the next send shows the problem */ }
+}
+
+// One at a time: a big canvas is already a lot to hold in memory
+function upload(file) {
+  return new Promise((resolve) => {
+    const row = document.createElement("li");
+    row.textContent = file.name + " · 0 %";
+    $("queue").prepend(row);
+
+    const request = new XMLHttpRequest();
+    request.open("POST", "/upload?k=" + encodeURIComponent(key) + "&commission=" + chosen.id + "&stage=" + $("stage").value + (target === null ? "" : "&alt=" + target));
+    request.upload.onprogress = (event) => {
+      if (event.lengthComputable) row.textContent = file.name + " · " + Math.round((event.loaded / event.total) * 100) + " %";
+    };
+    request.onload = () => {
+      const ok = request.status === 200;
+      row.textContent = (ok ? "✓ " : "✗ ") + file.name + (ok ? "" : " · " + (request.responseText || request.status));
+      row.className = ok ? "ok" : "bad";
+      if (ok) setTimeout(refreshAfterSend, 1500);
+      resolve();
+    };
+    request.onerror = () => { row.textContent = "✗ " + file.name + " · " + L.offline; row.className = "bad"; resolve(); };
+    request.send(file);
+  });
+}
+
+load();
+</script>
+</body>
+</html>

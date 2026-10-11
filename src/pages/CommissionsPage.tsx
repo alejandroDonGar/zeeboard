@@ -2,6 +2,7 @@ import { locale, t } from "../lib/i18n";
 import { takeAction } from "../lib/actions";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { imageUrl, thumbUrl, importImage, pickImagePaths } from "../lib/images";
+import { IPAD_IMAGE_ADDED } from "../lib/ipad";
 import { useImageInput } from "../lib/useImageInput";
 import { hide, isPrivate } from "../lib/privacy";
 import { ageInDays, daysToDeadline } from "../lib/reminders";
@@ -274,6 +275,19 @@ function CommissionsPage() {
       localStorage.removeItem("zeeboard-active-commission-id");
     }
   }, [activeCommissionId]);
+
+  // An image arrived from the iPad: re-read the images without remounting the screen (a form may be open)
+  useEffect(() => {
+    const refresh = async () => {
+      const data = await getCommissions();
+
+      setCommissions(data);
+      await loadStageImagesForCommissions(data);
+    };
+
+    window.addEventListener(IPAD_IMAGE_ADDED, refresh);
+    return () => window.removeEventListener(IPAD_IMAGE_ADDED, refresh);
+  }, []);
 
   useEffect(() => {
     async function loadWorkflowStages() {

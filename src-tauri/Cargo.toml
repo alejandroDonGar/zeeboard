@@ -35,6 +35,10 @@ sha2 = "0.10"
 tauri-plugin-notification = "2.2"
 reqwest = { version = "0.13", default-features = false, features = ["native-tls"] }
 
+# Receives images from the iPad (small blocking HTTP server) and finds this PC's addresses
+tiny_http = "0.12"
+if-addrs = "0.13"
+
 # En modo desarrollo, las dependencias se compilan optimizadas: procesar un lienzo
 # enorme sin optimizar tardaría decenas de segundos
 [profile.dev.package."*"]
