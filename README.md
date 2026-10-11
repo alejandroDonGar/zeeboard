@@ -38,10 +38,13 @@ It works in **English and Spanish**, in light, dark or system theme, and it is b
 - [Templates](#templates)
 - [Tags](#tags)
 - [Finished commissions](#finished-commissions)
+- [Statistics](#statistics)
+- [Trash and undo](#trash-and-undo)
 - [Reminders](#reminders)
 - [Importing PayPal payments](#importing-paypal-payments)
 - [Search and shortcuts](#search-and-shortcuts)
 - [Private mode](#private-mode)
+- [Receiving images from the iPad](#receiving-images-from-the-ipad)
 - [Settings](#settings)
   - [Backups](#backups)
   - [Exporting data](#exporting-data)
@@ -68,7 +71,7 @@ Moving to another computer: on the old one use **Settings → Backups → Export
 3. The commission starts in the **queue** and moves through the stages of its **template** (sketch, lineart, colour, delivery…).
 4. At each stage you add images, and the client's corrections are logged as revisions.
 5. Payments are logged as they arrive, with the platform fee already worked out.
-6. On the last stage the commission becomes **finished** and goes to the archive.
+6. You **mark it as finished** (delivery date, hours spent, a final image and notes) and it goes to the archive, where your income and your rate per hour are worked out.
 
 Along the way, **reminders** warn you about deadlines, stalled work and unpaid commissions, and the **dashboard** shows what needs your attention today.
 
@@ -82,6 +85,7 @@ What is on your desk today, at a glance.
 - **Four counters**: commissions in progress, due within 7 days (overdue included), what is still waiting for payment, and what you received this month (with the platform fees).
 - **In progress**: every open commission with its current stage, progress bar and deadline. Click one to open it.
 - **Not paid yet**: what each commission still owes.
+- **Your hourly rate** over the last 90 days: what you kept (after fees) divided by the hours of the commissions you finished.
 - **Most used tags** and **Received per month**, a six-month chart of the money that actually reached you (net of platform fees, by payment date).
 
 ## Commissions
@@ -105,8 +109,9 @@ The **···** menu on a commission lets you **duplicate** it, **copy the invoic
 A strip of columns, one per stage of the template, each with its own images.
 
 - Add images by **dragging them in**, pasting with **Ctrl+V** (they go to the current stage) or clicking the empty slot. The app resizes and compresses them in the background, so even a 60 MB canvas is fine.
-- Each stage can hold several versions (**alts**) with a small carousel, and you can remove any image.
-- **Focus mode** opens an image full screen and lets you move through all the images of all the stages with the arrow keys.
+- A stage can hold several **alternatives** (**Alt 1**, **Alt 2**…): the options you show the client, for example with and without glasses. Hover an image for **+ Alt** (another alternative), **+ v** (a retouched **version** of that image) and **×** (remove it).
+- The strip shows the **latest version of each alternative**, with a `v2` badge, or `final` once the commission has moved past that stage. Older versions are never lost.
+- **Focus mode** opens an image full screen, lets you move through all the images of all the stages with the arrow keys, and has chips to see every version of the alternative and a **+ New version** button.
 - The **Rendering done →** button moves the commission to the next stage, and **Back** returns to the previous one.
 
 ### Corrections and revisions
@@ -119,6 +124,15 @@ Each stage has a **+ correction** button. Corrections are notes of what the clie
 - The counter turns amber when you reach the limit and red (**extra**) when you go over it.
 - Corrections are dated, and you can delete them.
 
+**Pins on the image.** In focus mode press **+ Correction pin**, click where the change goes, write it and press Enter. Pins are numbered per image and belong to that exact version; click one to read it, mark it as done or remove it. **Esc** leaves pin mode first and then closes the image.
+
+<img src="docs/images/correction-pins.png" alt="Focus mode on a retouched version with the pending pins of the previous one shown faded" width="900">
+
+- In the panel, each pinned correction shows its number and version (`2 · v2`); click it to open that image.
+- Tick the **box** of a correction when it is dealt with: it is struck through, and the stage button goes from amber to a ✓ when nothing is pending. The revisions counter still counts all of them.
+- **Upload retouched version** (in the panel, one per alternative) adds the next version. The **pending pins of the earlier versions appear faded** on the new one, so you can check each change and mark it as done.
+- **Copy corrections** copies the pending ones as a numbered list (`1. Make the nose bigger`) to paste to the client.
+
 ### Creating and editing a commission
 
 Press **Ctrl+N** or **+ New commission**.
@@ -126,6 +140,7 @@ Press **Ctrl+N** or **+ New commission**.
 <img src="docs/images/new-commission.png" alt="New commission form" width="900">
 
 - Pick the **client** (type to search, or write a new name), the **characters** (also from other clients, for collaborations) and the **template**.
+- The **Characters** number next to the characters decides the price. It follows the characters you link, but you can raise it when a character has no profile (a collaborator you don't have as a client); it never drops below the ones linked. Requests that came with "2 characters" keep that number.
 - The **price** is calculated for you: the template's base price plus a percentage per extra character (50 % by default, adjustable in Settings). You can still change it by hand.
 - The matching **tags** are added automatically: the most specific commission type for the template and the "N Characters" tag. You can change them before saving.
 - The template is locked once the commission exists, because its stages and images depend on it.
@@ -197,7 +212,30 @@ Everything you have delivered, as a register.
 <img src="docs/images/finished.png" alt="Finished commissions grouped by month" width="900">
 
 - Group by **month** or by **client**, search by title or client, and filter by **date range**.
-- The header shows how many you finished and the total they add up to. Click any row to open it again.
+- The header shows how many you finished, the total they add up to and your **rate per hour**. Click any row to open it again.
+
+**Marking a commission as finished.** On the last working stage, the button reads **Mark as finished**: you set the **delivery date**, the **hours spent** (typed by hand), an optional **final image** and **final notes** (a link to the post, how it went…). **Back** reopens it, and **Edit delivery** changes those details later. Hours and delivery date feed the register and [Statistics](#statistics).
+
+## Statistics
+
+How the business is doing, from your payments and your finished commissions.
+
+<img src="docs/images/statistics.png" alt="Statistics screen" width="900">
+
+- Choose **This year**, **Last 12 months** or **All time**. The four tiles (received, pieces delivered, average per piece, per hour) show the change against the previous period.
+- **Received per month** counts money by the day it reached you, net of platform fees. Pieces, averages and hours count by delivery date.
+- **By type of commission**: pieces, received, average, hours, days from request to delivery and rate per hour for each template.
+- **Requests**: how many came in, were accepted, declined or are waiting, the acceptance rate and a monthly chart.
+- **Top clients** with the share of income that comes from clients who come back, and the **platform fees** you paid.
+- Only commissions in your default currency are counted; currencies are never added together.
+
+## Trash and undo
+
+Nothing is deleted for good at once. Commissions, clients, characters, templates, tags, requests, payments and corrections go to the **trash**.
+
+- The "deleted" message has an **Undo** button, and **Ctrl+Z** (outside a text field) restores the last deleted item.
+- **Settings → Trash** lists everything with its date, to restore it or delete it for good. Items are removed after **30 days**.
+- Image files are kept while an item is in the trash, so restoring brings its images back.
 
 ## Reminders
 
@@ -229,7 +267,7 @@ Press **Ctrl+K** anywhere to search commissions (title, client, stage), clients 
 | Shortcut | What it does |
 |---|---|
 | `Ctrl+K` | Search and actions |
-| `Ctrl+1` … `Ctrl+8` | Go to a screen, in menu order |
+| `Ctrl+1` … `Ctrl+9` | Go to a screen, in menu order |
 | `Ctrl+N` | New commission |
 | `Ctrl+Shift+P` | Toggle private mode |
 | `Ctrl+V` | Paste an image into the current stage (or the open character) |
@@ -244,6 +282,20 @@ For streaming or screen sharing. **Ctrl+Shift+P** (or the button in the menu) hi
 
 <img src="docs/images/private-mode.png" alt="Private mode on" width="900">
 
+## Receiving images from the iPad
+
+Skip the email: draw on the iPad and send the images straight to a commission stage.
+
+<img src="docs/images/ipad-page.png" alt="The iPad page: pick a stage and whether the image is a new alternative or a new version" width="420">
+
+1. In **Settings → iPad** switch **Receive images from the iPad** on. ZeeBoard shows a **QR code** and a link.
+2. Open the link on the iPad (scan the QR with the camera, then add the page to the Home Screen if you like). ZeeBoard must be open on the PC.
+3. Pick the **commission**, the **stage** (the current one by default) and what the image is: a **new alternative** (default) or a **new version** of one of the stage's alternatives, shown with its thumbnail.
+4. Choose the images and send. They go through the same processing as any image and appear in the commission straight away.
+
+- **Same Wi-Fi or not**: on the same network the link works as is. To send from **mobile data** (or any other network), install [Tailscale](https://tailscale.com/download) on the PC and the iPad and sign in with the same account; ZeeBoard detects it and shows the Tailscale address.
+- **Safety**: the server exists only while the switch is on, every request needs the secret key in the link, and it only accepts images (up to 200 MB). **New key** invalidates old links, and the link is hidden in [private mode](#private-mode). The first time, Windows asks to allow ZeeBoard through the firewall: allow it on private networks.
+
 ## Settings
 
 <img src="docs/images/settings-general.png" alt="Settings: appearance and pricing" width="900">
@@ -251,6 +303,7 @@ For streaming or screen sharing. **Ctrl+Shift+P** (or the button in the menu) hi
 - **Appearance**: theme and language.
 - **Pricing**: default currency (EUR, USD or GBP), the extra-character percentage, and your **payment platforms** with their fixed and percentage fees, with a live example (`200 → 193.85`).
 - **Delivery**: the longest time you promise, delivery reminders and stalled alerts, each with its own number of days and an on/off switch.
+- **iPad** and **Trash**: the [iPad receiver](#receiving-images-from-the-ipad) and the list of deleted items.
 
 ### Backups
 
@@ -281,7 +334,8 @@ The whole app is also available in **Spanish**. Switching the language reloads t
 
 - **Everything is stored locally** in `%APPDATA%\com.zeeboard.app\`: `zeeboard.db` (SQLite) and an `images/` folder. Uninstalling does not delete it unless you ask.
 - **Images** are processed on your machine: a lightweight WebP copy for viewing and a thumbnail. Your originals are never touched.
-- **The only network access** is the optional *Fetch photo* feature. It runs in the app's Rust side with a **closed list of servers** (Bluesky and Telegram), only over `https`, with time and size limits. Nothing else is sent anywhere.
+- **The only connection ZeeBoard makes to the internet** is the optional *Fetch photo* feature. It runs in the app's Rust side with a **closed list of servers** (Bluesky and Telegram), only over `https`, with time and size limits. Nothing else is sent anywhere.
+- The **iPad receiver** is off by default. While its switch is on, ZeeBoard listens on one port of your PC; every request needs the secret key of your link and only images are accepted. ZeeBoard never opens it to the internet itself: to reach it from mobile data you use Tailscale, a private network between your own devices.
 - The Google Form connection reads a **local CSV file** (kept up to date by your own Drive for desktop); ZeeBoard never logs in to Google.
 - There are no accounts, analytics or telemetry.
 
@@ -299,7 +353,8 @@ Quick checks of the business logic (no framework, each prints "ok"):
 
 ```bash
 npx tsx scripts/check-payments.ts   # also: check-reminders, check-export, check-form-import,
-                                    # check-avatars, check-paypal, check-search, check-i18n
+                                    # check-avatars, check-paypal, check-search, check-i18n,
+                                    # check-stats, check-trash, check-ipad
 cd src-tauri && cargo test
 ```
 
