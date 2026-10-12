@@ -4,8 +4,7 @@ import { initializeDatabase, migrateLegacyImages, migratePaymentTags, purgeOldTr
 import { initImageUrls } from "./lib/images";
 import CommissionsPage from "./pages/CommissionsPage";
 import ClientsPage from "./pages/ClientsPage";
-import TagsPage from "./pages/TagsPage";
-import TemplatesPage from "./pages/TemplatesPage";
+import CatalogPage from "./pages/CatalogPage";
 import FinishedPage from "./pages/FinishedPage";
 import SettingsPage from "./pages/SettingsPage";
 import StatisticsPage from "./pages/StatisticsPage";
@@ -32,7 +31,6 @@ import {
   IconEyeOff,
   IconInbox,
   IconLayoutDashboard,
-  IconListDetails,
   IconChartBar,
   IconSettings,
   IconTags,
@@ -40,16 +38,15 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 
-type Page = "dashboard" | "commissions" | "requests" | "clients" | "tags" | "templates" | "finished" | "statistics" | "settings";
+type Page = "dashboard" | "commissions" | "requests" | "clients" | "finished" | "catalog" | "statistics" | "settings";
 
 const navigationItems: { id: Page; label: string; icon: Icon }[] = [
   { id: "dashboard", label: "Dashboard", icon: IconLayoutDashboard },
   { id: "commissions", label: "Commissions", icon: IconBrush },
   { id: "requests", label: "Requests", icon: IconInbox },
   { id: "clients", label: "Clients", icon: IconUsers },
-  { id: "tags", label: "Tags", icon: IconTags },
-  { id: "templates", label: "Templates", icon: IconListDetails },
   { id: "finished", label: "Finished", icon: IconCircleCheck },
+  { id: "catalog", label: "Catalog", icon: IconTags },
   { id: "statistics", label: "Statistics", icon: IconChartBar },
   { id: "settings", label: "Settings", icon: IconSettings },
 ];
@@ -401,8 +398,7 @@ function App() {
           {currentPage === "clients" && (
             <ClientsPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />
           )}
-          {currentPage === "tags" && <TagsPage />}
-          {currentPage === "templates" && <TemplatesPage />}
+          {currentPage === "catalog" && <CatalogPage />}
           {currentPage === "finished" && (
             <FinishedPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />
           )}

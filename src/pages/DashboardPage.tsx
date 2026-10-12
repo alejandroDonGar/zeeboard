@@ -16,6 +16,8 @@ import {
   getAllPayments,
   getCommissionTags,
   getTemplateStages,
+  getTemplates,
+  type Template,
   type Commission,
   type CommissionPayment,
   type CommissionStageImage,
@@ -26,6 +28,7 @@ import { locale, t } from "../lib/i18n";
 import { thumbUrl } from "../lib/images";
 import { hide } from "../lib/privacy";
 import TagChip from "../components/TagChip";
+import { TYPE_CATEGORY } from "../lib/catalog";
 import { ATTENTION_STYLE, loadAttention, type Attention } from "../lib/reminders";
 import PageHeader from "../components/PageHeader";
 
@@ -35,6 +38,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [ready, setReady] = useState(false);
   const [commissionTagsById, setCommissionTagsById] = useState<Record<number, Tag[]>>({});
+  const [templates, setTemplates] = useState<Template[]>([]);
   const [templateStagesByTemplateId, setTemplateStagesByTemplateId] = useState<Record<number, TemplateStage[]>>({});
   const [stageImagesByCommissionId, setStageImagesByCommissionId] = useState<Record<number, CommissionStageImage[]>>({});
   const [payments, setPayments] = useState<CommissionPayment[]>([]);
@@ -53,6 +57,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
           data.map(async (commission) => [commission.id, await getCommissionTags(commission.id)] as const),
         );
         setCommissionTagsById(Object.fromEntries(tagEntries));
+        setTemplates(await getTemplates());
 
         const templateIds = [
           ...new Set(data.map((commission) => commission.template_id).filter((id): id is number => id !== null)),
@@ -130,10 +135,14 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
 
   const maxReceived = Math.max(...receivedByMonth.map((entry) => entry.total), 1);
 
+  // Types count from the template (old type tags are skipped so nothing is counted twice); extras from the tags
   const tagCounts = new Map<number, { tag: Tag; count: number }>();
-  Object.values(commissionTagsById)
-    .flat()
-    .filter((tag) => tag.category !== "Characters" && tag.category !== "Payment")
+  const typeTags: Tag[] = commissions.flatMap((commission) => {
+    const template = templates.find((item) => item.id === commission.template_id);
+    return template ? [{ id: -template.id, name: template.name, color: template.color, category: "" }] : [];
+  });
+  [...typeTags, ...Object.values(commissionTagsById).flat()]
+    .filter((tag) => tag.category !== "Characters" && tag.category !== "Payment" && tag.category !== TYPE_CATEGORY)
     .forEach((tag) => {
       const entry = tagCounts.get(tag.id) ?? { tag, count: 0 };
       entry.count += 1;
@@ -307,7 +316,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
             )}
 
             <section className={panel}>
-              <h3 className={heading}>{t("Most used tags")}</h3>
+              <h3 className={heading}>{t("Most used types and tags")}</h3>
 
               {!ready ? null : topTags.length === 0 ? (
                 <p className="text-sm text-muted">{t("No tags in use yet.")}</p>

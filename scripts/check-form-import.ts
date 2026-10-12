@@ -159,12 +159,10 @@ const tags = [
   tag(40, "3 Characters", "Characters"), tag(41, "2 Characters", "Characters"), tag(43, "1 Characters", "Characters"),
   tag(50, "Sketch Characters", "General"),
 ];
-assert.deepStrictEqual(autoTagIds("Rendered Full Body + Complex Background", 3, tags), [29, 40]);
-assert.deepStrictEqual(autoTagIds("Rendered Full Body + Simple Background", 1, tags), [30, 43]);
-assert.deepStrictEqual(autoTagIds("Rendered Half Body + Simple Background", 2, tags), [31, 41]);
-assert.deepStrictEqual(autoTagIds("Sketch + Background", 1, tags), [34, 43]); // not also "Sketch"
-assert.deepStrictEqual(autoTagIds("Sketch", 1, tags), [35, 43]);
-assert.deepStrictEqual(autoTagIds(null, 9, tags), []); // no template and no tag for 9: nothing
+// Only the character tag: the type is the template now (lib/catalog.ts)
+assert.deepStrictEqual(autoTagIds(3, tags), [40]);
+assert.deepStrictEqual(autoTagIds(1, tags), [43]);
+assert.deepStrictEqual(autoTagIds(9, tags), []); // no tag for 9: nothing
 
 console.log("form import ok");
 

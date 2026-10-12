@@ -161,31 +161,17 @@ export function matchTemplate<T extends { id: number; name: string }>(text: stri
   return templates.find((template) => normalize(template.name) === normalize(text)) ?? null;
 }
 
-const tagWords = (text: string) =>
-  new Set(text.toLowerCase().replace(/rendered/g, "render").split(/[^a-z0-9]+/).filter(Boolean));
-
 /**
- * The tags a newly accepted commission gets:
- * - type ("Commission Type"): the most specific one whose words are all in the template name
- *   ("Render + Complex Background" fits "Rendered Full Body + Complex Background"; "Sketch" doesn't if "Sketch + Background" exists)
- * - characters ("Characters"): the one saying "3 Characters" if they asked for 3.
+ * The tags a newly accepted commission gets: the "Characters" one saying "3 Characters" if they asked for 3.
+ * The type is no longer a tag: the template is the type and carries its colour (see lib/catalog.ts).
  */
 export function autoTagIds(
-  templateName: string | null,
   characters: number,
   tags: { id: number; name: string; category: string }[],
 ): number[] {
-  const words = tagWords(templateName ?? "");
-  const types = tags
-    .filter((tag) => tag.category === "Commission Type")
-    .map((tag) => ({ tag, size: tagWords(tag.name).size, fits: [...tagWords(tag.name)].every((word) => words.has(word)) }))
-    .filter((item) => item.fits);
-  const best = Math.max(0, ...types.map((item) => item.size));
-  const count = tags.filter(
-    (tag) => tag.category === "Characters" && Number(tag.name.match(/^\s*(\d+)\s*characters?\s*$/i)?.[1]) === characters,
-  );
-
-  return [...types.filter((item) => item.size === best).map((item) => item.tag), ...count].map((tag) => tag.id);
+  return tags
+    .filter((tag) => tag.category === "Characters" && Number(tag.name.match(/^\s*(\d+)\s*characters?\s*$/i)?.[1]) === characters)
+    .map((tag) => tag.id);
 }
 
 /**

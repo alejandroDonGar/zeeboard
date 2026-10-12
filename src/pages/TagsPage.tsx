@@ -13,22 +13,8 @@ import PageHeader from "../components/PageHeader";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
-
-// Colors that read well under white text and match the app
-const PALETTE = [
-  "#7c3aed",
-  "#4f46e5",
-  "#2563eb",
-  "#0891b2",
-  "#0d9488",
-  "#16a34a",
-  "#d97706",
-  "#ea580c",
-  "#dc2626",
-  "#db2777",
-  "#92400e",
-  "#475569",
-];
+import { PALETTE, TYPE_CATEGORY } from "../lib/catalog";
+import type { ReactNode } from "react";
 
 type Draft = { name: string; color: string };
 
@@ -131,7 +117,7 @@ function TagEditor({
   );
 }
 
-function TagsPage() {
+function TagsPage({ tabs }: { tabs?: ReactNode }) {
   const [tags, setTags] = useState<Tag[]>([]);
   const [ready, setReady] = useState(false);
   const [usageByTagId, setUsageByTagId] = useState<Record<number, number>>({});
@@ -235,12 +221,13 @@ function TagsPage() {
   return (
     <>
       <PageHeader
-        label={t("Label library")}
-        title={t("Tags")}
-        description={t("Classify commissions by type, payment or anything you need.")}
+        title={t("Catalog")}
+        description={t("Extras you mark commissions with: rush, commercial use, number of characters…")}
         action={t("+ New category")}
         onAction={() => setCreatingCategory(true)}
-      />
+      >
+        {tabs}
+      </PageHeader>
 
       <section className="h-[calc(100vh-117px)] min-h-0 p-5 pb-6">
         <div className="h-full overflow-y-auto panel rounded-3xl p-6">
@@ -303,6 +290,11 @@ function TagsPage() {
                   <h3 className="mb-2 text-xs font-bold text-muted">
                     {category} · {categoryTags.length}
                   </h3>
+                  {category === TYPE_CATEGORY && (
+                    <p className="mb-2 max-w-2xl text-xs text-muted">
+                      {t("The type now comes from the commission's template, with its own colour, so these tags are no longer shown on commissions. They are kept so nothing is lost; delete them whenever you like.")}
+                    </p>
+                  )}
 
                   <div className="divide-y divide-line border-y border-line">
                     {categoryTags.map((tag) =>

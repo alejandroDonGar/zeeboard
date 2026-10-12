@@ -1,5 +1,5 @@
 import { t } from "../lib/i18n";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Reorder, useDragControls } from "framer-motion";
 import {
   createTemplate,
@@ -13,6 +13,7 @@ import {
   updateTemplateRevisions,
   appSettings,
   updateTemplateName,
+  updateTemplateColor,
   type StageDraft,
   type Template,
 } from "../lib/database";
@@ -21,6 +22,7 @@ import PageHeader from "../components/PageHeader";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
+import { PALETTE } from "../lib/catalog";
 
 // `key` only serves the draggable list: new stages have no id yet
 type EditableStage = StageDraft & { key: string };
@@ -83,7 +85,7 @@ function StageRow({
   );
 }
 
-function TemplatesPage() {
+function TemplatesPage({ tabs }: { tabs?: ReactNode }) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [ready, setReady] = useState(false);
   const [summaries, setSummaries] = useState<Record<number, TemplateSummary>>({});
@@ -179,6 +181,19 @@ function TemplatesPage() {
     }
   }
 
+  /** The colour is saved straight away: it is what every commission of this type shows */
+  async function handleColor(color: string) {
+    if (!selectedTemplate) return;
+
+    try {
+      await updateTemplateColor(selectedTemplate.id, color);
+      setTemplates((current) => current.map((template) => (template.id === selectedTemplate.id ? { ...template, color } : template)));
+    } catch (error) {
+      console.error(error);
+      showToast(`Save error: ${error}`, "error");
+    }
+  }
+
   async function handleNewTemplate() {
     try {
       await createTemplate("Untitled template", []);
@@ -240,12 +255,13 @@ function TemplatesPage() {
   return (
     <>
       <PageHeader
-        label={t("Workflow library")}
-        title={t("Templates")}
-        description={t("Reusable workflows: the stages a commission goes through.")}
+        title={t("Catalog")}
+        description={t("Each type of commission: its stages, price and colour.")}
         action={t("+ New template")}
         onAction={handleNewTemplate}
-      />
+      >
+        {tabs}
+      </PageHeader>
 
       <section className="grid h-[calc(100vh-117px)] min-h-0 grid-cols-[280px_minmax(0,1fr)] gap-5 overflow-hidden p-5 pb-6">
         <div className="min-h-0 space-y-0.5 overflow-y-auto panel rounded-3xl p-3">
@@ -261,7 +277,10 @@ function TemplatesPage() {
                   template.id === selectedTemplateId ? "bg-highlight" : "hover:bg-paper"
                 }`}
               >
-                <p className="truncate text-sm font-bold">{template.name}</p>
+                <p className="flex items-center gap-2 truncate text-sm font-bold">
+                  <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: template.color }} />
+                  <span className="truncate">{template.name}</span>
+                </p>
                 <p className="text-xs text-faint">{summaryLabel(template.id)}</p>
               </button>
             ))
@@ -323,6 +342,39 @@ function TemplatesPage() {
                   for one character · +{Math.round(appSettings().extra_character_rate * 100)}% per extra character
                 </span>
               </label>
+
+              <div className="mt-2 flex flex-wrap items-center gap-3 px-2 text-sm">
+                <span className="text-muted">{t("Colour")}</span>
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {PALETTE.map((color) => (
+                    <button
+                      key={color}
+                      type="button"
+                      title={color}
+                      aria-label={color}
+                      aria-pressed={selectedTemplate.color === color}
+                      onClick={() => handleColor(color)}
+                      className={`h-6 w-6 rounded-sm transition hover:scale-110 ${
+                        selectedTemplate.color === color ? "ring-2 ring-ink ring-offset-2 ring-offset-paper" : ""
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                  <label
+                    title={t("Custom colour")}
+                    className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-sm border border-dashed border-line-strong text-xs text-muted hover:text-ink"
+                  >
+                    +
+                    <input
+                      type="color"
+                      value={selectedTemplate.color}
+                      onChange={(event) => handleColor(event.target.value)}
+                      className="absolute inset-0 cursor-pointer opacity-0"
+                    />
+                  </label>
+                </div>
+                <span className="text-xs text-faint">{t("the bar and chip of every commission of this type")}</span>
+              </div>
 
               <label className="mt-2 flex items-center gap-3 px-2 text-sm">
                 <span className="text-muted">{t("Revisions included")}</span>

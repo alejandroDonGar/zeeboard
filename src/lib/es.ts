@@ -584,7 +584,7 @@ export const es: Record<string, string> = {
   "Reusable workflows: the stages a commission goes through.": "Flujos reutilizables: las etapas por las que pasa una comisión.",
   "+ New template": "+ Nueva plantilla",
   "No templates yet. Create one on the right.": "Aún no hay plantillas. Crea una a la derecha.",
-  "Create a template first (Templates), then your first commission.": "Crea primero una plantilla (Plantillas) y luego tu primera comisión.",
+  "Create a commission type first (Catalog), then your first commission.": "Crea primero un tipo de comisión (Catálogo) y luego tu primera comisión.",
   "Create your first template": "Crea tu primera plantilla",
   "A template is the list of stages a commission moves through.": "Una plantilla es la lista de etapas por las que avanza una comisión.",
   "New template": "Nueva plantilla",
@@ -645,4 +645,16 @@ export const es: Record<string, string> = {
   Unpaid: "Sin pagar",
   Partial: "Parcial",
   Paid: "Pagado",
+  // Catálogo: tipos de comisión (plantillas con color) y etiquetas
+  Catalog: "Catálogo",
+  "Commission types": "Tipos de comisión",
+  "Commission type": "Tipo de comisión",
+  "Each type of commission: its stages, price and colour.": "Cada tipo de comisión: sus etapas, precio y color.",
+  "Extras you mark commissions with: rush, commercial use, number of characters…": "Extras con los que marcas las comisiones: urgente, uso comercial, número de personajes…",
+  "The type now comes from the commission's template, with its own colour, so these tags are no longer shown on commissions. They are kept so nothing is lost; delete them whenever you like.":
+    "El tipo sale ahora de la plantilla de la comisión, con su propio color, así que estas etiquetas ya no se muestran en las comisiones. Se conservan para no perder nada; bórralas cuando quieras.",
+  Colour: "Color",
+  "the bar and chip of every commission of this type": "la barra y la etiqueta de cada comisión de este tipo",
+  "Most used types and tags": "Tipos y etiquetas más usados",
+  "Edit commission": "Editar comisión",
 };

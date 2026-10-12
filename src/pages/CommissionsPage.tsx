@@ -26,6 +26,7 @@ import {
   invoiceDescription,
 } from "../lib/commissionHelpers";
 import { autoTagIds } from "../lib/formImport";
+import { TYPE_CATEGORY } from "../lib/catalog";
 import {
   getTemplateStages,
   getTemplates,
@@ -144,6 +145,10 @@ function CommissionsPage() {
   const [paymentsByCommissionId, setPaymentsByCommissionId] = useState<Record<number, CommissionPayment[]>>({});
   const { showToast } = useToast();
 
+  // The filter menu also offers the types: each template as a tag with a negative id (no real tag has one)
+  const typeFilterTags: Tag[] = templates.map((template) => ({ id: -template.id, name: template.name, color: template.color, category: t("Commission type") }));
+  const filterableTags = [...typeFilterTags, ...allTags];
+
     const filteredCommissions = commissions.filter((commission) => {
     if (isCommissionCompleted(commission)) {
         return false;
@@ -156,10 +161,10 @@ function CommissionsPage() {
         commission.title.toLowerCase().includes(query) ||
         (commission.client_name ?? "").toLowerCase().includes(query);
 
-    const tags = commissionTagsById[commission.id] ?? [];
+    const tags = [...(commissionTagsById[commission.id] ?? []), ...typeFilterTags.filter((tag) => tag.id === -(commission.template_id ?? 0))];
     // Within a category one tag is enough (Sketch or Full Colour); across categories, all (and Paid)
     const selectedTagsByCategory = Object.values(
-        allTags
+        filterableTags
         .filter((tag) => filterTagIds.includes(tag.id))
         .reduce<Record<string, number[]>>((groups, tag) => {
             (groups[tag.category || "General"] ??= []).push(tag.id);
@@ -330,13 +335,13 @@ function CommissionsPage() {
     }
   }
 
-  /** On create: sets the type and character tags automatically (others are kept) */
-  function applyAutoTags(templateId: number | null, characterCount: number) {
+  /** On create: sets the character tag automatically and drops old type tags (the template is the type now; others are kept) */
+  function applyAutoTags(characterCount: number) {
     if (formMode !== "new") {
       return;
     }
 
-    const auto = autoTagIds(templates.find((template) => template.id === templateId)?.name ?? null, characterCount, allTags);
+    const auto = autoTagIds(characterCount, allTags);
     const own = (id: number) => ["Commission Type", "Characters"].includes(allTags.find((tag) => tag.id === id)?.category ?? "");
 
     setSelectedTagIds((current) => [...current.filter((id) => !own(id)), ...auto]);
@@ -349,7 +354,7 @@ function CommissionsPage() {
     setSelectedCharacterIds(nextIds);
     setCharacterCount(count);
     applyAutoPrice(selectedTemplateId, count);
-    applyAutoTags(selectedTemplateId, count);
+    applyAutoTags(count);
   }
 
   function changeCharacterCount(value: number) {
@@ -358,7 +363,7 @@ function CommissionsPage() {
     setCharacterCount(count);
     setCountIsFixed(true);
     applyAutoPrice(selectedTemplateId, count);
-    applyAutoTags(selectedTemplateId, count);
+    applyAutoTags(count);
   }
 
   const formTemplate = templates.find((template) => template.id === selectedTemplateId) ?? null;
@@ -963,8 +968,13 @@ function CommissionsPage() {
     return tag.category === "Payment";
   }
 
+  // Old type tags stay in the database but aren't shown: the template is the type (chip with its colour)
   function getNormalTags(tags: Tag[]) {
-    return tags.filter((tag) => !isPaymentTag(tag));
+    return tags.filter((tag) => !isPaymentTag(tag) && tag.category !== TYPE_CATEGORY);
+  }
+
+  function typeOf(commission: Commission) {
+    return templates.find((template) => template.id === commission.template_id) ?? null;
   }
 
   function getCommissionCompletionPercentage(commission: Commission) {
@@ -976,6 +986,7 @@ function CommissionsPage() {
   }
 
   const activeNormalTags = getNormalTags(activeCommissionTags);
+  const activeType = activeCommission ? typeOf(activeCommission) : null;
 
   // Colores del fondo: la imagen en foco, la que tiene el cursor encima o la etapa más avanzada de la comisión abierta
   const focusItem = focusIndex >= 0 ? focusImages[focusIndex] : null;
@@ -999,7 +1010,7 @@ function CommissionsPage() {
       <div className="flex items-start gap-3 px-5 pt-5">
         <div className="min-w-0 flex-1">
           <BoardFilters
-            tags={allTags}
+            tags={filterableTags}
             searchQuery={searchQuery}
             onSearchQueryChange={setSearchQuery}
             filterTagIds={filterTagIds}
@@ -1165,6 +1176,7 @@ function CommissionsPage() {
                           {activeClient.tag_platform && activeClient.tag_platform !== "Other" ? ` · ${activeClient.tag_platform}` : ""} ⧉
                         </button>
                       )}
+                      {activeType && <TagChip name={activeType.name} color={activeType.color} />}
                       {activeNormalTags.map((tag) => (
                         <TagChip key={tag.id} name={tag.name} color={tag.color} />
                       ))}
@@ -1643,7 +1655,7 @@ function CommissionsPage() {
                 <div className="max-w-md text-center">
                   <h4 className="text-xl font-black">{t("No commissions yet")}</h4>
                   <p className="mt-2 text-sm leading-relaxed text-muted">
-                    {t("Create a template first (Templates), then your first commission.")}
+                    {t("Create a commission type first (Catalog), then your first commission.")}
                   </p>
                 </div>
               </div>
@@ -1661,6 +1673,7 @@ function CommissionsPage() {
                 {filteredCommissions.map((commission) => {
                   const tags = commissionTagsById[commission.id] ?? [];
                   const normalTags = getNormalTags(tags);
+                  const type = typeOf(commission);
                   const commissionImages = stageImagesByCommissionId[commission.id] ?? [];
                   const latestImage = commissionImages.length > 0 ? commissionImages[commissionImages.length - 1] : null;
                   const altCount = commissionImages.length;
@@ -1730,8 +1743,9 @@ function CommissionsPage() {
                         </div>
                       )}
 
-                      {normalTags.length > 0 && (
+                      {(type || normalTags.length > 0) && (
                         <div className="mt-3 flex flex-wrap gap-2">
+                          {type && <TagChip name={type.name} color={type.color} />}
                           {normalTags.map((tag) => (
                             <TagChip key={tag.id} name={tag.name} color={tag.color} />
                           ))}
@@ -2087,7 +2101,7 @@ function CommissionsPage() {
                         onClick={() => {
                           setSelectedTemplateId(template.id);
                           applyAutoPrice(template.id, characterCount);
-                          applyAutoTags(template.id, characterCount);
+                          applyAutoTags(characterCount);
                         }}
                         className={`rounded-md border px-3 py-2 text-left transition disabled:cursor-default ${
                           selected
@@ -2108,7 +2122,7 @@ function CommissionsPage() {
               <div>
                 <p className={formLabel}>{t("Tags")}</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {allTags.map((tag) => {
+                  {allTags.filter((tag) => tag.category !== TYPE_CATEGORY).map((tag) => {
                     const selected = selectedTagIds.includes(tag.id);
 
                     return (

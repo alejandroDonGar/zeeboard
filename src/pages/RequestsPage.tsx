@@ -185,8 +185,8 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
         request.characters,
       );
 
-      // Type and character-count tags, without touching them by hand
-      await replaceCommissionTags(commissionId, autoTagIds(template?.name ?? null, request.characters, await getTags()));
+      // Character-count tag, without touching it by hand (the template is the type)
+      await replaceCommissionTags(commissionId, autoTagIds(request.characters, await getTags()));
 
       await setRequestStatus(request.id, "accepted", commissionId);
       localStorage.setItem("zeeboard-active-commission-id", String(commissionId));

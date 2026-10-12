@@ -168,19 +168,19 @@ Ajustes del tema claro para que todo pase de 4,5:1 (también sobre las filas te�
 - Búsqueda, rango de fechas y «Borrar filtros» (solo si hay filtros).
 - Pulsar la imagen abre un visor; el fondo toma sus colores mientras está abierto. El texto lleva a la comisión.
 
-### Catálogo (une Plantillas y Etiquetas) — aprobada
+### Catálogo (une Plantillas y Etiquetas) — aprobada · lógica migrada a la app
 Las dos pantallas por separado quedaban vacías. Además, revisando la lógica se vio que **se duplican**: cada plantilla tenía una etiqueta con el mismo nombre en la categoría «Commission Type», y al aceptar una solicitud `autoTagIds` (`src/lib/formImport.ts`) buscaba esa etiqueta por nombre para añadirla. Decisión del usuario: **el tipo da el color**.
 
 **Lógica nueva**
 - **Tipo de comisión = plantilla + color.** Nueva columna `templates.color`. La barra de color de cada comisión, su chip de tipo y el filtro por tipo salen de `commission.template_id`, no de una etiqueta.
 - **Etiquetas solo para extras** (Rush, uso comercial, número de personajes…), con sus categorías como hasta ahora.
-- **Migración** (una vez, al arrancar):
-  1. Por cada etiqueta de la categoría «Commission Type» cuyo nombre coincida (sin mayúsculas ni espacios de más) con una plantilla: copiar su color a `templates.color`.
-  2. Quitar esa etiqueta de las comisiones **solo si** su plantilla es esa misma; si alguna comisión la tiene con otra plantilla, la etiqueta se conserva (no se pierde nada).
-  3. Borrar la etiqueta si ya no la usa ninguna comisión.
-  4. Plantillas sin etiqueta equivalente: color de `PALETTE` por orden.
-- **`autoTagIds`** deja de añadir etiquetas de tipo (la plantilla ya lo es); sigue añadiendo las de «Characters» por número de personajes.
-- Donde se mostraban «etiquetas más usadas» o se filtraba por etiqueta de tipo (Resumen, filtros de Comisiones, estadísticas por plantilla) se usa el tipo. Todo lo demás funciona igual: borrar un tipo en uso sigue bloqueado; borrar una etiqueta la quita de sus comisiones con «Deshacer».
+- **Migración — hecha en la app, sin borrar nada** (petición del usuario: «asegúrate de que no se borre nada»):
+  - Nueva columna `templates.color`. Al arrancar, cada plantilla **sin color** recibe el de su etiqueta de «Commission Type» (la más específica cuyas palabras están en el nombre de la plantilla, la misma regla que usaba `autoTagIds`), o uno de `PALETTE` si no tiene. Solo rellena huecos (`WHERE color IS NULL`): volver a arrancar no cambia nada.
+  - **Las etiquetas de tipo y sus enlaces con las comisiones se conservan tal cual.** Simplemente no se muestran en las comisiones, en el selector de etiquetas del formulario ni en el filtro; en su lugar se muestra el tipo (plantilla) con su color. En Catálogo › Etiquetas, la categoría «Commission Type» lleva un aviso explicándolo; el usuario puede borrarlas a mano (con «Deshacer») cuando quiera.
+  - Código: `src/lib/catalog.ts` (`PALETTE`, `TYPE_CATEGORY`, `typeTagsFor`, `templateColors`; puro, comprobado en `scripts/check-catalog.ts`), migración en `getDatabase` (`src/lib/database.ts`), `updateTemplateColor`; plantillas nuevas y duplicadas ya nacen con color.
+- **`autoTagIds`** ya solo añade la etiqueta de «Characters» (firma nueva: `autoTagIds(personajes, etiquetas)`); `scripts/check-form-import.ts` actualizado.
+- **Pantalla Catálogo (ya en la app):** `src/pages/CatalogPage.tsx` sustituye a Plantillas y Etiquetas en la barra lateral, con pestañas «Tipos de comisión / Etiquetas» que reutilizan `TemplatesPage` y `TagsPage` (sin cambiar su comportamiento). El editor de tipo tiene **selector de color** (12 colores + personalizado), que se guarda al momento. El aspecto final de la maqueta (`catalogo.html`: lista única + editor con datos de uso) queda para la pasada visual por pantallas.
+- **Dónde se ve el tipo:** chip del tipo con su color en el detalle y en la cuadrícula de Comisiones; grupo «Tipo de comisión» en el filtro (las plantillas como opciones); el Resumen cuenta «Tipos y etiquetas más usados» a partir de la plantilla.
 - Pendiente de valorar (no decidido): hacer lo mismo con las etiquetas de «Characters», que también se pueden deducir del número de personajes de la comisión.
 
 **Pantalla**
@@ -285,7 +285,7 @@ Esta sección está pensada para dársela a otra conversación (p. ej. con Sonne
 | `estadisticas.html` | `src/pages/StatisticsPage.tsx` | Mismos cálculos de `stats.ts`; `changePercent` para los ▲▼. |
 | `solicitudes.html` | `src/pages/RequestsPage.tsx`, `ConfirmModal.tsx` | Bandeja lista + detalle. |
 | `terminadas.html` | `src/pages/FinishedPage.tsx` | Galería + visor; el visor llama a `useAmbientImage`. |
-| `catalogo.html` | Nueva `src/pages/CatalogPage.tsx` a partir de `TemplatesPage.tsx` + `TagsPage.tsx`; `database.ts` (columna `templates.color` + migración); `formImport.ts` (`autoTagIds`); `App.tsx` (barra lateral); `CommissionsPage.tsx`, `BoardFilters.tsx`, `DashboardPage.tsx` (color y filtro por tipo) | Ver «Catálogo» en la sección 6. Añadir una comprobación en `scripts/` para la migración (coincide, no coincide, etiqueta compartida con otra plantilla). |
+| `catalogo.html` | `src/pages/CatalogPage.tsx` (**lógica ya migrada**, ver «Catálogo» en la sección 6) | Falta solo el aspecto de la maqueta: lista única de tipos + categorías de etiquetas y editor con «En curso» y «Terminadas». |
 | `ventanas.html` / diálogos y menús | `CommissionsPage.tsx` (formulario), `CommissionPayments.tsx`, `PaypalImport.tsx`, `FinishCommissionModal.tsx`, `CommandPalette.tsx` (`ShortcutsHelp`), `DialogBehavior.tsx`, `ConfirmModal.tsx` | Fondo sólido `--surface`; mantener Esc y foco atrapado (ya los da `useDialog`); mismos cálculos (`calculateCommissionPrice`, `receivedAfterFees`). |
 
 ### Cómo comprobar cada paso
@@ -300,6 +300,9 @@ npx tsx scripts/check-i18n.ts
 ---
 
 ## 10. Plan para pasar a la app
+
+Estado: **hecho** — lógica del Catálogo (commit en `feature/glass-ui`). Siguiente con Opus: seguridad del iPad y partir `CommissionsPage.tsx`; después, Sonnet para el resto de pantallas.
+
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).
 3. Tokens de color nuevos en `App.css` y `@property` para los colores animables; tinte seguro por color en `ambient.ts`.

@@ -2,12 +2,14 @@ import { useState } from "react";
 import type { Tag } from "../lib/database";
 import { t } from "../lib/i18n";
 import TagChip from "./TagChip";
+import { TYPE_CATEGORY } from "../lib/catalog";
 
 export type StatusFilter = "all" | "active" | "overdue";
 export type PaymentFilter = "all" | "unpaid" | "partial" | "paid";
 
 // Characters are filtered from Clients, not here
-const HIDDEN_CATEGORIES = ["Characters"];
+// Old type tags: the type is the template now, offered as its own group (see CommissionsPage)
+const HIDDEN_CATEGORIES = ["Characters", TYPE_CATEGORY];
 
 export function Segmented<T extends string | number>({
   options,

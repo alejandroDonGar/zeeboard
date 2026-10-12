@@ -1,6 +1,7 @@
 import { t } from "./i18n";
 import Database from "@tauri-apps/plugin-sql";
 import { newResponses, type ImportedRequest } from "./formImport";
+import { PALETTE, templateColors } from "./catalog";
 import {
   imagePathsOf,
   insertStatement,
@@ -47,6 +48,8 @@ export type Template = {
   base_price: number | null;
   /** Corrections included in the price; null = unlimited (no counter shown) */
   revisions_included: number | null;
+  /** Colour of the commission type: the bar and chip of every commission with this template */
+  color: string;
 };
 
 export type TemplateStage = {
@@ -265,6 +268,21 @@ export async function initializeDatabase() {
 
   await database.execute(`ALTER TABLE templates ADD COLUMN base_price REAL;`).catch(() => {});
   await database.execute(`ALTER TABLE templates ADD COLUMN revisions_included INTEGER;`).catch(() => {});
+  // The template is the commission type and carries its colour. Templates without one get it once:
+  // the colour of their old "Commission Type" tag, else one from the palette. Only adds data; tags stay as they are.
+  await database.execute(`ALTER TABLE templates ADD COLUMN color TEXT;`).catch(() => {});
+  const uncoloured = await database.select<{ id: number; name: string; color: string | null }[]>(
+    `SELECT id, name, color FROM templates WHERE color IS NULL;`,
+  );
+  if (uncoloured.length > 0) {
+    const all = await database.select<{ id: number; name: string; color: string | null }[]>(`SELECT id, name, color FROM templates;`);
+    const tags = await database.select<{ name: string; color: string; category: string }[]>(
+      `SELECT name, color, COALESCE(category, 'General') AS category FROM tags;`,
+    );
+    for (const [id, color] of Object.entries(templateColors(all, tags))) {
+      await database.execute(`UPDATE templates SET color = ? WHERE id = ? AND color IS NULL;`, [color, Number(id)]);
+    }
+  }
 
   // Client corrections, each tied to a stage; each counts as one revision
   await database.execute(`
@@ -475,7 +493,7 @@ export async function getTemplates(): Promise<Template[]> {
   const database = await getDatabase();
 
   return await database.select<Template[]>(`
-    SELECT id, name, base_price, revisions_included
+    SELECT id, name, base_price, revisions_included, COALESCE(color, '#475569') AS color
     FROM templates
     ORDER BY id DESC;
   `);
@@ -506,12 +524,13 @@ export async function createTemplate(name: string, stages: string[]): Promise<vo
   }
 
   await runSerialized(async (database) => {
+    const [{ count }] = await database.select<{ count: number }[]>(`SELECT COUNT(*) AS count FROM templates;`);
     const result = await database.execute(
       `
-      INSERT INTO templates (name)
-      VALUES (?);
+      INSERT INTO templates (name, color)
+      VALUES (?, ?);
       `,
-      [templateName],
+      [templateName, PALETTE[count % PALETTE.length]],
     );
 
     const templateId = result.lastInsertId;
@@ -567,7 +586,7 @@ export async function duplicateTemplate(templateId: number): Promise<void> {
 
   const templates = await database.select<Template[]>(
     `
-    SELECT id, name, base_price, revisions_included
+    SELECT id, name, base_price, revisions_included, color
     FROM templates
     WHERE id = ?;
     `,
@@ -583,10 +602,10 @@ export async function duplicateTemplate(templateId: number): Promise<void> {
 
   const result = await database.execute(
     `
-    INSERT INTO templates (name, base_price, revisions_included)
-    VALUES (?, ?, ?);
+    INSERT INTO templates (name, base_price, revisions_included, color)
+    VALUES (?, ?, ?, ?);
     `,
-    [`${sourceTemplate.name} Copy`, sourceTemplate.base_price, sourceTemplate.revisions_included],
+    [`${sourceTemplate.name} Copy`, sourceTemplate.base_price, sourceTemplate.revisions_included, sourceTemplate.color],
   );
 
   const newTemplateId = result.lastInsertId;
@@ -604,6 +623,11 @@ export async function duplicateTemplate(templateId: number): Promise<void> {
       [newTemplateId, stage.name, stage.stage_order],
     );
   }
+}
+
+export async function updateTemplateColor(templateId: number, color: string): Promise<void> {
+  const database = await getDatabase();
+  await database.execute(`UPDATE templates SET color = ? WHERE id = ?;`, [color, templateId]);
 }
 
 export async function updateTemplateBasePrice(templateId: number, basePrice: number | null): Promise<void> {

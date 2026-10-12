@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { t } from "../lib/i18n";
 
 function PageHeader({
@@ -5,6 +6,7 @@ function PageHeader({
   description,
   action,
   onAction,
+  children,
 }: {
   /** Se mantiene por compatibilidad con las pantallas; el encabezado ya no lo muestra */
   label?: string;
@@ -12,6 +14,8 @@ function PageHeader({
   description: string;
   action?: string;
   onAction?: () => void;
+  /** Extra controls next to the action (e.g. the Catalog tabs) */
+  children?: ReactNode;
 }) {
   return (
     <header className="px-8 py-5">
@@ -21,6 +25,8 @@ function PageHeader({
           <p className="mt-1 text-sm text-muted">{t(description)}</p>
         </div>
 
+        <div className="flex items-center gap-4">
+        {children}
         {action && (
           <button
             onClick={onAction}
@@ -29,6 +35,7 @@ function PageHeader({
             {t(action)}
           </button>
         )}
+        </div>
       </div>
     </header>
   );
