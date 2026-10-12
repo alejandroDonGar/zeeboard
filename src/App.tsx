@@ -21,6 +21,7 @@ import { announceRestored, DATA_RESTORED } from "./lib/undo";
 import { t } from "./lib/i18n";
 import { ipadSettings, listenIpadImages, pushSnapshot, saveIpadImage, startIpad } from "./lib/ipad";
 import Logo from "./components/Logo";
+import AmbientBackground from "./components/AmbientBackground";
 import CommandPalette, { ShortcutsHelp } from "./components/CommandPalette";
 import { requestAction } from "./lib/actions";
 import {
@@ -322,28 +323,21 @@ function App() {
       <IpadReceiver />
       {paletteOpen && <CommandPalette pages={navigationItems} onGo={go} onClose={closePalette} onShowShortcuts={showShortcuts} />}
       {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
-      <div className="h-screen overflow-hidden bg-canvas text-ink">
-      <div className="flex h-full">
-        <aside className="flex w-72 flex-col border-r border-line bg-paper px-5 py-6">
-          <div className="mb-10">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#1f2933] shadow-md ring-1 ring-white/10">
-                <Logo className="h-7 w-7 bg-[#f6f3ee]" />
-              </div>
-
-              <div>
-                <h1 className="text-2xl tracking-tight">
-                  <b className="font-extrabold">Zee</b>
-                  <span className="font-medium">Board</span>
-                </h1>
-                <p className="text-xs font-medium text-muted">
-                  {t("Commission workspace")}
-                </p>
-              </div>
+      <div className="relative h-screen overflow-hidden bg-canvas text-ink">
+      <AmbientBackground />
+      <div className="relative flex h-full gap-3 p-3">
+        <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-3xl px-3 py-4">
+          <div className="mb-6 flex items-center gap-3 px-2">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1f2933] ring-1 ring-white/10">
+              <Logo className="h-5 w-5 bg-[#f6f3ee]" />
             </div>
+            <h1 className="text-xl tracking-tight">
+              <b className="font-extrabold">Zee</b>
+              <span className="font-medium">Board</span>
+            </h1>
           </div>
 
-          <nav className="space-y-2">
+          <nav className="space-y-0.5">
             {navigationItems.map((item) => {
               const isActive = currentPage === item.id;
 
@@ -351,16 +345,17 @@ function App() {
                 <button
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
+                  aria-current={isActive ? "page" : undefined}
                   className={
                     isActive
-                      ? "flex w-full items-center gap-3 rounded-2xl bg-primary px-4 py-3 text-left text-sm font-bold text-on-primary shadow-md"
-                      : "flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-semibold text-muted transition hover:bg-highlight hover:text-ink"
+                      ? "flex w-full items-center gap-3 rounded-xl bg-primary px-3 py-2 text-left text-sm font-bold text-on-primary"
+                      : "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted transition hover:bg-highlight hover:text-ink"
                   }
                 >
                   <item.icon size={18} stroke={1.75} aria-hidden="true" />
                   {t(item.label)}
                   {item.id === "requests" && newRequests > 0 && (
-                    <span className="ml-2 rounded-sm bg-amber-100 px-1.5 py-0.5 text-[11px] font-bold text-amber-900">
+                    <span className="ml-auto rounded-sm bg-amber-100 px-1.5 py-0.5 text-xs font-bold text-amber-900">
                       {newRequests}
                     </span>
                   )}
@@ -373,33 +368,30 @@ function App() {
             type="button"
             onClick={() => setPrivate(!privateMode)}
             title={t("Hide client names and prices while streaming (Ctrl+Shift+P)")}
-            className={`mt-auto flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm font-bold transition ${
+            className={`mt-auto flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm font-bold transition ${
               privateMode
                 ? "border-amber-400 bg-amber-100 text-amber-900"
-                : "border-line bg-surface text-muted hover:border-ink hover:text-ink"
+                : "border-line bg-transparent text-muted hover:border-ink hover:text-ink"
             }`}
           >
-            <span className="flex items-center gap-3">
-              {privateMode ? <IconEyeOff size={18} stroke={1.75} aria-hidden="true" /> : <IconEye size={18} stroke={1.75} aria-hidden="true" />}
-              {privateMode ? t("Private mode on") : t("Private mode")}
-            </span>
-            <span className="text-[11px] font-semibold opacity-70">Ctrl+Shift+P</span>
+            {privateMode ? <IconEyeOff size={18} stroke={1.75} aria-hidden="true" /> : <IconEye size={18} stroke={1.75} aria-hidden="true" />}
+            {privateMode ? t("Private mode on") : t("Private mode")}
           </button>
 
-          <div className="mt-3 rounded-3xl border border-line bg-surface p-4 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-faint">{t("Shortcuts")}</p>
-            <div className="mt-2 space-y-1.5 text-xs text-muted">
-              {([["Ctrl+K", "Search"], ["Ctrl+1…9", "Screens"], ["Ctrl+N", "New commission"], ["Ctrl+Z", "Undo delete"]] as const).map(([keys, label]) => (
-                <div key={keys} className="flex items-center justify-between">
-                  <span>{t(label)}</span>
-                  <kbd className="rounded-sm border border-line-strong bg-paper px-1.5 py-0.5 text-[11px] font-bold">{keys}</kbd>
-                </div>
-              ))}
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={() => setHelpOpen(true)}
+            className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted transition hover:bg-highlight hover:text-ink"
+          >
+            {t("Shortcuts")}
+            <kbd className="rounded-sm border border-line-strong px-1.5 text-xs font-bold">?</kbd>
+          </button>
         </aside>
 
-        <main key={navKey} className="flex-1 overflow-hidden">
+        <main key={navKey} className="relative min-w-0 flex-1">
+          {/* El cristal va en una capa aparte: un backdrop-filter en el contenedor encerraría los modales "fixed" de las páginas */}
+          <div aria-hidden="true" className="glass absolute inset-0 rounded-3xl" />
+          <div className="relative h-full overflow-hidden rounded-3xl">
           {currentPage === "dashboard" && (
             <DashboardPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />
           )}
@@ -417,6 +409,7 @@ function App() {
           )}
           {currentPage === "statistics" && <StatisticsPage />}
           {currentPage === "settings" && <SettingsPage />}
+          </div>
         </main>
       </div>
     </div>

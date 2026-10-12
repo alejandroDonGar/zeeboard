@@ -65,6 +65,8 @@ import {
   type TemplateStage,
 } from "../lib/database";
 import PageHeader from "../components/PageHeader";
+import AmbientBackground from "../components/AmbientBackground";
+import { useAmbientImage } from "../lib/ambient";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
@@ -112,6 +114,8 @@ function CommissionsPage() {
   const [activeStageImageIndexByStageId, setActiveStageImageIndexByStageId] = useState<Record<number, number>>({});
   // Image open in focus mode (fullscreen, ← → across all stages)
   const [focusImageId, setFocusImageId] = useState<number | null>(null);
+  // Imagen de etapa bajo el cursor: el fondo de la app toma sus colores mientras está encima
+  const [hoveredImagePath, setHoveredImagePath] = useState<string | null>(null);
   const [corrections, setCorrections] = useState<CommissionCorrection[]>([]);
   // Stage whose corrections show under the strip; null = none
   const [correctionsStageId, setCorrectionsStageId] = useState<number | null>(null);
@@ -970,6 +974,15 @@ function CommissionsPage() {
 
   const activeNormalTags = getNormalTags(activeCommissionTags);
 
+  // Colores del fondo: la imagen en foco, la que tiene el cursor encima o la etapa más avanzada de la comisión abierta
+  const focusItem = focusIndex >= 0 ? focusImages[focusIndex] : null;
+  const focusShown = focusItem ? (getVersions(focusItem.image).find((version) => version.id === focusImageId) ?? focusItem.image) : null;
+  useAmbientImage(
+    focusShown?.image_data_url ??
+      hoveredImagePath ??
+      (viewMode === "list" ? focusImages[focusImages.length - 1]?.image.image_data_url : null),
+  );
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
@@ -1267,6 +1280,8 @@ function CommissionsPage() {
                                   type="button"
                                   title={t("Open in focus mode")}
                                   onClick={() => setFocusImageId(image.id)}
+                                  onMouseEnter={() => setHoveredImagePath(image.image_data_url)}
+                                  onMouseLeave={() => setHoveredImagePath(null)}
                                   className="block cursor-zoom-in"
                                 >
                                   <img
@@ -2261,9 +2276,10 @@ function CommissionsPage() {
         )}
       {focusIndex >= 0 && (
         <div
-          className="fixed inset-0 z-[999] flex flex-col items-center justify-center bg-black/90"
+          className="fixed inset-0 z-[999] flex flex-col items-center justify-center overflow-hidden bg-[#0e0e10]"
           onClick={() => setFocusImageId(null)}
         >
+          <AmbientBackground strong />
           {(() => {
             const { image: current, stage } = focusImages[focusIndex];
             const versions = getVersions(current);
