@@ -22,6 +22,7 @@ import { t } from "./lib/i18n";
 import { ipadSettings, listenIpadImages, pushSnapshot, saveIpadImage, startIpad } from "./lib/ipad";
 import Logo from "./components/Logo";
 import AmbientBackground from "./components/AmbientBackground";
+import { setAmbientPage } from "./lib/ambient";
 import CommandPalette, { ShortcutsHelp } from "./components/CommandPalette";
 import { requestAction } from "./lib/actions";
 import {
@@ -203,6 +204,8 @@ function App() {
 
   useEffect(() => {
     sessionStorage.setItem("zeeboard-page", currentPage);
+    // Las manchas del fondo se desplazan despacio a su sitio de esta pantalla
+    setAmbientPage(currentPage);
   }, [currentPage]);
 
   const [paletteOpen, setPaletteOpen] = useState(false);

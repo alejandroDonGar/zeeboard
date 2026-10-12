@@ -12,14 +12,61 @@ export type AmbientColors = [string, string, string];
 // Sin imagen (o un boceto en blanco y negro): tonos cálidos y suaves, los de la app
 const NEUTRAL: AmbientColors = ["#e6d6bd", "#d4dbe0", "#eadfc6"];
 
+/** Centro de cada mancha en %: [ax, ay, bx, by, cx, cy] */
+export type AmbientLayout = [number, number, number, number, number, number];
+
+const HOME: AmbientLayout = [68, 35, 82, 78, 34, 82];
+
 let colors: AmbientColors = NEUTRAL;
+let layout: AmbientLayout = HOME;
+let state = { colors, layout };
+let page = "";
+let image = "";
 let requested = 0;
 const cache = new Map<string, AmbientColors>();
 const listeners = new Set<() => void>();
 
+function emit() {
+  state = { colors, layout };
+  listeners.forEach((listener) => listener());
+}
+
 function publish(next: AmbientColors) {
   colors = next;
-  listeners.forEach((listener) => listener());
+  emit();
+}
+
+function hash(text: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
+  return (h >>> 0) / 4294967295;
+}
+
+const clamp = (value: number) => Math.min(Math.max(value, 6), 94);
+
+/**
+ * Dónde caen las manchas: cada pantalla las desplaza de su sitio base (±22 %) y cada imagen un poco más (±7 %).
+ * Es determinista: la misma pantalla siempre las coloca igual. Con "reducir movimiento" no se mueven.
+ */
+export function layoutFor(pageName: string, imagePath: string): AmbientLayout {
+  if (typeof matchMedia !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches) return HOME;
+
+  return HOME.map((base, index) => {
+    const bySpot = (hash(`${pageName}:${index}`) - 0.5) * 44;
+    const byImage = imagePath ? (hash(`${imagePath}:${index}`) - 0.5) * 14 : 0;
+    return clamp(base + bySpot + byImage);
+  }) as AmbientLayout;
+}
+
+function relayout() {
+  layout = layoutFor(page, image);
+  emit();
+}
+
+/** Pantalla actual: las manchas se desplazan despacio a su nueva posición. */
+export function setAmbientPage(name: string): void {
+  page = name;
+  relayout();
 }
 
 function rgbToHsl(r: number, g: number, b: number): [number, number, number] {
@@ -122,6 +169,9 @@ async function extract(path: string): Promise<AmbientColors | null> {
 export async function setAmbientImage(path: string | null): Promise<void> {
   const mine = ++requested;
 
+  image = path ?? "";
+  layout = layoutFor(page, image);
+
   if (!path) return publish(NEUTRAL);
 
   const known = cache.get(path);
@@ -139,13 +189,13 @@ export async function setAmbientImage(path: string | null): Promise<void> {
   }
 }
 
-export function useAmbientColors(): AmbientColors {
+export function useAmbient(): { colors: AmbientColors; layout: AmbientLayout } {
   return useSyncExternalStore(
     (listener) => {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    () => colors,
+    () => state,
   );
 }
 

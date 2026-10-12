@@ -215,15 +215,29 @@
   initial-value: #eadfc6;
 }
 
+/* Posición de cada mancha (centro del degradado): también animable, para que se desplacen despacio entre pantallas */
+@property --amb-ax { syntax: "<percentage>"; inherits: false; initial-value: 68%; }
+@property --amb-ay { syntax: "<percentage>"; inherits: false; initial-value: 35%; }
+@property --amb-bx { syntax: "<percentage>"; inherits: false; initial-value: 82%; }
+@property --amb-by { syntax: "<percentage>"; inherits: false; initial-value: 78%; }
+@property --amb-cx { syntax: "<percentage>"; inherits: false; initial-value: 34%; }
+@property --amb-cy { syntax: "<percentage>"; inherits: false; initial-value: 82%; }
+
 .ambient {
   background:
-    radial-gradient(ellipse 30% 38% at 68% 35%, var(--amb-a), transparent),
-    radial-gradient(ellipse 26% 32% at 82% 78%, var(--amb-b), transparent),
-    radial-gradient(ellipse 22% 30% at 34% 82%, var(--amb-c), transparent);
+    radial-gradient(ellipse 30% 38% at var(--amb-ax) var(--amb-ay), var(--amb-a), transparent),
+    radial-gradient(ellipse 26% 32% at var(--amb-bx) var(--amb-by), var(--amb-b), transparent),
+    radial-gradient(ellipse 22% 30% at var(--amb-cx) var(--amb-cy), var(--amb-c), transparent);
   transition:
     --amb-a 1.4s ease,
     --amb-b 1.4s ease,
-    --amb-c 1.4s ease;
+    --amb-c 1.4s ease,
+    --amb-ax 3.2s ease-in-out,
+    --amb-ay 3.2s ease-in-out,
+    --amb-bx 3.6s ease-in-out,
+    --amb-by 3.6s ease-in-out,
+    --amb-cx 3s ease-in-out,
+    --amb-cy 3s ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

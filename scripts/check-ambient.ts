@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { dominantColors } from "../src/lib/ambient";
+import { dominantColors, layoutFor } from "../src/lib/ambient";
 
 const fill = (colors: [number, number, number][], n = 400) => {
   const data = new Uint8ClampedArray(n * 4);
@@ -20,5 +20,14 @@ assert.strictEqual(dominantColors(fill([[251, 249, 244], [251, 249, 244], [138, 
 // Un solo tono: completa tres igualmente
 const mono = dominantColors(fill([[200, 60, 60]]));
 assert(mono && mono.length === 3, "un tono: tres colores");
+
+// Colocación de las manchas: determinista, dentro de la ventana y distinta en cada pantalla
+const dash = layoutFor("dashboard", "");
+assert.deepStrictEqual(dash, layoutFor("dashboard", ""), "misma pantalla, mismas posiciones");
+assert.notDeepStrictEqual(dash, layoutFor("clients", ""), "otra pantalla, otras posiciones");
+assert.notDeepStrictEqual(dash, layoutFor("dashboard", "images/ab12.webp"), "otra imagen, ligero cambio");
+for (const page of ["dashboard", "commissions", "clients", "tags", "templates", "settings"]) {
+  assert(layoutFor(page, "images/x.webp").every((n) => n >= 6 && n <= 94), `${page}: dentro de la ventana`);
+}
 
 console.log("check-ambient OK", fox);
