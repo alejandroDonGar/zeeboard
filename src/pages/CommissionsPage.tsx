@@ -65,6 +65,7 @@ import {
   type TemplateStage,
 } from "../lib/database";
 import PageHeader from "../components/PageHeader";
+import GlassPanel from "../components/GlassPanel";
 import AmbientBackground from "../components/AmbientBackground";
 import { useAmbientImage } from "../lib/ambient";
 import ConfirmModal from "../components/ConfirmModal";
@@ -370,7 +371,7 @@ function CommissionsPage() {
       id: character.id,
       label: `${character.name} (${hide(clients.find((client) => client.id === character.client_id)?.name ?? "?")})`,
     }));
-  const formLabel = "mb-1.5 block text-[11px] font-black uppercase tracking-[0.16em] text-faint";
+  const formLabel = "mb-1.5 block text-xs font-bold text-muted";
   const formField =
     "rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
 
@@ -986,6 +987,7 @@ function CommissionsPage() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
+        bare
         label={t("Main workspace")}
         title={t("Commissions")}
         description={t("Organize your drawings by stages, clients, dates and tags.")}
@@ -1024,7 +1026,7 @@ function CommissionsPage() {
         }`}
       >
         {viewMode === "list" && (
-          <nav className="min-h-0 overflow-y-auto rounded-3xl border border-line bg-surface p-3 shadow-sm">
+          <GlassPanel as="nav" className="min-h-0" contentClassName="overflow-y-auto p-3">
             {!ready ? null : inboxGroups.every((group) => group.items.length === 0) ? (
               <p className="p-4 text-center text-sm text-faint">
                 {commissions.length === 0 ? t("No commissions yet") : t("No matches")}
@@ -1034,7 +1036,7 @@ function CommissionsPage() {
                 .filter((group) => group.items.length > 0)
                 .map((group) => (
                   <div key={group.label} className="mb-3 last:mb-0">
-                    <p className="px-2 pb-1 text-[10px] font-black uppercase tracking-[0.16em] text-faint">
+                    <p className="px-2 pb-1 text-xs font-bold text-muted">
                       {group.label} · {group.items.length}
                     </p>
 
@@ -1069,20 +1071,20 @@ function CommissionsPage() {
 
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-bold">{commission.title}</span>
-                            <span className="block truncate text-[11px] text-faint">
+                            <span className="block truncate text-xs text-faint">
                               {[commission.client_name && hide(commission.client_name), stageName].filter(Boolean).join(" · ") || t("No client")}
                             </span>
                           </span>
 
                           {deadlineStatus ? (
-                            <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-[10px] font-bold ${deadlineStatus.className}`}>
+                            <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs font-bold ${deadlineStatus.className}`}>
                               {deadlineStatus.short}
                             </span>
                           ) : (
                             // No deadline: days since acceptance, colored as it nears your promise
                             <span
                               title={t("Days since you accepted it")}
-                              className={`shrink-0 rounded-sm px-1.5 py-0.5 text-[10px] font-bold ${
+                              className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs font-bold ${
                                 daysToDeadline(commission, appSettings().promise_max_days, new Date()).daysLeft < 0
                                   ? "bg-red-50 text-red-600"
                                   : daysToDeadline(commission, appSettings().promise_max_days, new Date()).daysLeft <=
@@ -1100,11 +1102,11 @@ function CommissionsPage() {
                   </div>
                 ))
             )}
-          </nav>
+          </GlassPanel>
         )}
 
 
-        <div className="flex h-full min-h-0 flex-col rounded-3xl border border-line bg-surface p-5 shadow-sm">
+        <GlassPanel className="h-full min-h-0" contentClassName="flex flex-col p-5">
           <div className="min-h-0 flex-1 overflow-y-auto px-1">
             {viewMode === "list" && !activeCommission ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
@@ -1295,13 +1297,13 @@ function CommissionsPage() {
                                 </button>
 
                                 {(getVersions(image).length > 1 || isDone) && (
-                                  <span className="absolute left-2 top-2 rounded-sm bg-black/60 px-1.5 py-0.5 text-[11px] font-bold text-white">
+                                  <span className="absolute left-2 top-2 rounded-sm bg-black/60 px-1.5 py-0.5 text-xs font-bold text-white">
                                     {versionLabel(image, getVersions(image), isDone)}
                                   </span>
                                 )}
 
                                 {stageImages.length > 1 && (
-                                  <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-sm bg-black/60 px-1.5 py-0.5 text-[11px] text-white">
+                                  <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-sm bg-black/60 px-1.5 py-0.5 text-xs text-white">
                                     <button
                                       type="button"
                                       title={t("Previous alt")}
@@ -1334,7 +1336,7 @@ function CommissionsPage() {
                                     title={t("Add an alt")}
                                     disabled={importingStageId !== null}
                                     onClick={() => handleAddStageImages(stage.id)}
-                                    className="flex h-7 items-center justify-center rounded-sm bg-black/60 px-2 text-[11px] font-bold text-white hover:bg-black/80"
+                                    className="flex h-7 items-center justify-center rounded-sm bg-black/60 px-2 text-xs font-bold text-white hover:bg-black/80"
                                   >
                                     + Alt
                                   </button>
@@ -1343,7 +1345,7 @@ function CommissionsPage() {
                                     title={t("New version of this image (retouched)")}
                                     disabled={importingStageId !== null}
                                     onClick={() => handleAddVersion(image)}
-                                    className="flex h-7 items-center justify-center rounded-sm bg-black/60 px-2 text-[11px] font-bold text-white hover:bg-black/80"
+                                    className="flex h-7 items-center justify-center rounded-sm bg-black/60 px-2 text-xs font-bold text-white hover:bg-black/80"
                                   >
                                     + v
                                   </button>
@@ -1376,7 +1378,7 @@ function CommissionsPage() {
 
                             <p className="mt-2 flex items-center gap-2 text-sm">
                               <span
-                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                                   isDone
                                     ? "bg-green-600 text-white"
                                     : isCurrent
@@ -1429,7 +1431,7 @@ function CommissionsPage() {
                     {correctionsStage && (
                       <div className="shrink-0 rounded-md border border-line bg-paper p-3">
                         <div className="mb-2 flex items-center justify-between">
-                          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-faint">
+                          <p className="text-xs font-bold text-muted">
                             Corrections · {correctionsStage.name}
                           </p>
                           <button
@@ -1466,7 +1468,7 @@ function CommissionsPage() {
                                     type="button"
                                     title={t("Show on the image")}
                                     onClick={() => setFocusImageId(pinImage.id)}
-                                    className="flex shrink-0 items-center gap-1 self-center rounded-full bg-amber-400 px-2 py-0.5 text-[11px] font-black text-black"
+                                    className="flex shrink-0 items-center gap-1 self-center rounded-full bg-amber-400 px-2 py-0.5 text-xs font-black text-black"
                                   >
                                     {pinNumber(activeCorrections, correction)}
                                     <span className="font-semibold">· v{pinImage.version}</span>
@@ -1592,13 +1594,13 @@ function CommissionsPage() {
                 {(activeCommission.notes || activeCommission.final_notes || activeCharacters.length > 0) && (
                   <div className="grid shrink-0 grid-cols-2 gap-6 border-t border-line pt-4">
                     <div>
-                      <p className="mb-1 text-[11px] font-black uppercase tracking-[0.16em] text-faint">{t("Notes")}</p>
+                      <p className="mb-1 text-xs font-bold text-muted">{t("Notes")}</p>
                       <p className="line-clamp-4 whitespace-pre-wrap text-sm text-muted">
                         {activeCommission.notes ? <Linkified text={activeCommission.notes} /> : t("No notes.")}
                       </p>
                       {isLastStage && activeCommission.final_notes && (
                         <>
-                          <p className="mb-1 mt-3 text-[11px] font-black uppercase tracking-[0.16em] text-faint">{t("Final notes")}</p>
+                          <p className="mb-1 mt-3 text-xs font-bold text-muted">{t("Final notes")}</p>
                           <p className="line-clamp-4 whitespace-pre-wrap text-sm text-muted">
                             <Linkified text={activeCommission.final_notes} />
                           </p>
@@ -1607,7 +1609,7 @@ function CommissionsPage() {
                     </div>
 
                     <div>
-                      <p className="mb-1 text-[11px] font-black uppercase tracking-[0.16em] text-faint">{t("Characters")}</p>
+                      <p className="mb-1 text-xs font-bold text-muted">{t("Characters")}</p>
                       {activeCharacters.length === 0 ? (
                         <p className="text-sm text-faint">{t("No characters.")}</p>
                       ) : (
@@ -1749,7 +1751,7 @@ function CommissionsPage() {
                       </p>
 
                       <div className="mt-3">
-                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.14em] text-faint">
+                        <div className="flex items-center justify-between text-xs font-bold text-muted">
                           <span>{t("Progress")}</span>
                           <span>{completionPercentage}%</span>
                         </div>
@@ -1803,12 +1805,12 @@ function CommissionsPage() {
               </div>
             )}
           </div>
-        </div>
+        </GlassPanel>
 
         {viewMode === "grid" && (
-        <aside className="h-full min-h-0 overflow-hidden rounded-3xl border border-line bg-surface p-5 shadow-sm">
+        <GlassPanel as="aside" className="h-full min-h-0" contentClassName="overflow-hidden p-5">
           <div className="max-h-full overflow-y-auto rounded-3xl border border-line bg-paper p-4">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-faint">
+            <p className="text-xs font-bold text-muted">
               {t("Calendar")}
             </p>
 
@@ -1818,7 +1820,7 @@ function CommissionsPage() {
 
             {selectedDeadlineCommission && (
               <div className="mt-4 rounded-2xl bg-surface p-4 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-faint">
+                <p className="text-xs font-bold text-muted">
                   {t("Next deadline")}
                 </p>
 
@@ -1895,7 +1897,7 @@ function CommissionsPage() {
 
             {selectedDeadlineCommission?.deadline && (
               <div className="mt-4 rounded-2xl bg-surface p-4 shadow-sm">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-faint">
+                <p className="text-xs font-bold text-muted">
                   {t("Deadline summary")}
                 </p>
 
@@ -1936,7 +1938,7 @@ function CommissionsPage() {
               </div>
             )}
           </div>
-        </aside>
+        </GlassPanel>
         )}
       </section>
       {formMode && (
@@ -2032,7 +2034,7 @@ function CommissionsPage() {
                       >
                         {character.name}
                         {character.client_id !== selectedClientId && (
-                          <span className="ml-1 text-[11px] opacity-70">
+                          <span className="ml-1 text-xs opacity-70">
                             · {hide(clients.find((client) => client.id === character.client_id)?.name ?? "")}
                           </span>
                         )}
