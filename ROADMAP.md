@@ -62,7 +62,7 @@ Dividir cada pantalla en componentes y aplicar el nuevo diseño.
 - [x] Accesibilidad básica: foco visible, diálogos con Esc, movimiento y transparencia reducidos, contraste
 - [x] Capturas, README y página del proyecto rehechos con el nuevo aspecto (datos de ejemplo)
 - [ ] Vídeo de presentación con el nuevo aspecto
-- [ ] Página del iPad con el mismo aspecto que la app
+- [x] Página del iPad con el mismo aspecto que la app
 - [ ] Esc en los formularios y diálogos que faltan, y foco atrapado dentro de los diálogos
 
 ---
