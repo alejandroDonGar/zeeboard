@@ -52,6 +52,11 @@ fn restore(backup_dir: &Path, data_dir: &Path, stamp: &str) -> Result<PathBuf, S
         ));
     }
 
+    // The stamp names a folder: only digits and dashes, so it can never point outside before-restore/
+    if stamp.is_empty() || !stamp.chars().all(|c| c.is_ascii_digit() || c == '-') {
+        return Err(format!("Invalid restore stamp: {stamp}"));
+    }
+
     // 1. Safety copy of the current data, in case the backup wasn't the one you wanted
     let safety_dir = data_dir.join("before-restore").join(stamp);
     fs::create_dir_all(&safety_dir).map_err(|error| error.to_string())?;
@@ -194,7 +199,7 @@ mod tests {
         fs::create_dir_all(data.join("images")).unwrap();
         fs::write(data.join("images/new.webp"), b"new").unwrap();
 
-        let safety = restore(&backup, &data, "test").unwrap();
+        let safety = restore(&backup, &data, "2026-10-13-0930").unwrap();
 
         assert_eq!(fs::read(data.join(DB_FILE)).unwrap(), b"SQLite format 3\0backup");
         assert!(!data.join("zeeboard.db-wal").exists());
@@ -211,9 +216,23 @@ mod tests {
         let data = temp_dir("data-untouched");
         fs::write(data.join(DB_FILE), b"SQLite format 3\0current").unwrap();
 
-        assert!(restore(&backup, &data, "test").is_err());
+        assert!(restore(&backup, &data, "2026-10-13-0930").is_err());
         assert_eq!(fs::read(data.join(DB_FILE)).unwrap(), b"SQLite format 3\0current");
         assert!(!data.join("before-restore").exists(), "nothing is touched when the backup is invalid");
+    }
+
+    #[test]
+    fn refuses_a_stamp_that_could_leave_the_folder() {
+        let backup = temp_dir("stamp-backup");
+        let data = temp_dir("stamp-data");
+        fs::write(backup.join(DB_FILE), b"SQLite format 3\0backup").unwrap();
+        fs::write(data.join(DB_FILE), b"SQLite format 3\0current").unwrap();
+
+        for stamp in ["../evil", r"..\evil", r"C:\x", ""] {
+            assert!(restore(&backup, &data, stamp).is_err(), "{stamp:?}");
+        }
+        assert_eq!(fs::read(data.join(DB_FILE)).unwrap(), b"SQLite format 3\0current");
+        assert!(!data.join("before-restore").exists());
     }
 
     #[test]
@@ -254,7 +273,7 @@ mod tests {
 
         let good = root.join("zeeboard-backup-2026-10-06-0900");
         fs::create_dir_all(&good).unwrap();
-        fs::write(good.join(DB_FILE), b"SQLite format 3 db").unwrap();
+        fs::write(good.join(DB_FILE), b"SQLite format 3\0db").unwrap();
 
         assert_eq!(finish(&data, &good, Some(1)).unwrap(), 1);
         assert!(good.join("images/a.webp").exists() && good.join("images/thumbs/a.webp").exists());

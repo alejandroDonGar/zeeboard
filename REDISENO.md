@@ -26,7 +26,14 @@ Petición: revisarla con criterio de diseño (frontend-design, apple-design) y d
 - **Servidor del iPad** (`ipad.rs`): clave obligatoria en cada petición, clave de ≥ 16 caracteres generada con `crypto.getRandomValues`, `/thumb` limitado a `images/thumbs/`, subidas de hasta 200 MB y validadas decodificando la imagen.
 - **Copias de seguridad**: restaurar guarda antes una copia de lo actual (`before-restore/`) y nunca borra imágenes.
 
-### Cambios recomendados (pendientes de aplicar)
+### Aplicado en la app (`src-tauri/src/ipad.rs`, `backup.rs`, con pruebas en Rust)
+- **Solo desde la red local, Tailscale o el propio PC:** el servidor sigue escuchando en todas las interfaces (si no, Tailscale fallaría al cambiar de red), pero rechaza con 403 **antes de leer nada** cualquier petición que no venga de una dirección privada (10/8, 172.16/12, 192.168/16), de Tailscale (100.64.0.0/10 y `fd7a:…`, IPv6 local), enlace-local o el propio PC. Si el puerto quedara abierto a internet, nadie de fuera llega a la clave.
+- **Clave comparada en tiempo constante.**
+- **Una sola subida a la vez** (respuesta 429 «Ya se está recibiendo otra imagen»); se libera aunque procesar la imagen falle. La página del iPad ya enviaba las fotos una detrás de otra, así que no cambia nada para el usuario.
+- **`restore_backup` solo acepta un sello de dígitos y guiones**: no puede crear la copia de seguridad fuera de `before-restore/`.
+- **Descartado a propósito:** el apagado automático tras 15 min y la clave nueva en cada encendido. Obligarían a volver a activar el servidor o escanear el QR en cada sesión de trabajo, y con la clave + el filtro de red aportan poco. La clave se puede cambiar cuando se quiera con «Nueva clave».
+
+### Cambios recomendados (revisión inicial)
 | Prioridad | Problema | Cambio | Efecto en el uso |
 |---|---|---|---|
 | Alta | El servidor del iPad escucha en **todas las redes** (`0.0.0.0`) y por **HTTP sin cifrar**: alguien en la misma Wi-Fi que vea la clave puede leer la lista de comisiones y subir imágenes. | Escuchar solo en las direcciones que enseña la app: la de la red local **y la de Tailscale** (100.x; la app la usa para que el iPad llegue con datos móviles, así que no se puede quitar); **apagado automático** tras ~15 min sin uso; **clave nueva** cada vez que se enciende. Por Tailscale el tráfico ya va cifrado. | Igual, salvo volver a escanear el QR al encenderlo. |

@@ -9,6 +9,8 @@
 
 use std::collections::HashMap;
 use std::io::Read;
+use std::net::{IpAddr, SocketAddr};
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
@@ -22,6 +24,34 @@ use crate::images::{self, StoredImage};
 const PAGE: &str = include_str!("ipad_page.html");
 /// A 70 MB canvas fits easily; anything bigger is refused
 const MAX_UPLOAD: u64 = 200 * 1024 * 1024;
+/// One upload at a time: several 200 MB uploads at once could exhaust the memory
+static UPLOADING: AtomicBool = AtomicBool::new(false);
+
+/// Only devices that can be the user's iPad: local network, Tailscale (100.64.0.0/10 and fd7a:115c:a1e0::/48)
+/// or this PC. If the port ever ends up open to the internet, everyone else is refused before reading anything.
+fn allowed_peer(peer: Option<&SocketAddr>) -> bool {
+    match peer.map(|address| address.ip()) {
+        Some(IpAddr::V4(ip)) => {
+            let [a, b, ..] = ip.octets();
+            ip.is_private() || ip.is_loopback() || ip.is_link_local() || (a == 100 && (64..128).contains(&b))
+        }
+        Some(IpAddr::V6(ip)) => {
+            let segments = ip.segments();
+            ip.is_loopback()
+                || segments[0] & 0xffc0 == 0xfe80 // link-local
+                || segments[0] & 0xfe00 == 0xfc00 // unique local (Tailscale's fd7a:… is one)
+                || ip.to_ipv4_mapped().is_some_and(|v4| allowed_peer(Some(&SocketAddr::new(IpAddr::V4(v4), 0))))
+        }
+        None => false,
+    }
+}
+
+/// Compares the key without stopping at the first different character (no timing hints)
+fn same_key(given: Option<&&str>, key: &str) -> bool {
+    given.is_some_and(|given| {
+        given.len() == key.len() && given.bytes().zip(key.bytes()).fold(0u8, |diff, (a, b)| diff | (a ^ b)) == 0
+    })
+}
 
 #[derive(Default)]
 pub struct IpadState {
@@ -52,7 +82,24 @@ fn send(request: Request, status: u16, content_type: &str, body: impl Into<Vec<u
     let _ = request.respond(response);
 }
 
-fn upload(app: &AppHandle, mut request: Request, params: &HashMap<&str, &str>) {
+fn upload(app: &AppHandle, request: Request, params: &HashMap<&str, &str>) {
+    if UPLOADING.swap(true, Ordering::AcqRel) {
+        return send(request, 429, "text/plain; charset=utf-8", "Ya se está recibiendo otra imagen. Espera un momento");
+    }
+
+    // Freed when this ends, even if processing the image panics
+    struct Done;
+    impl Drop for Done {
+        fn drop(&mut self) {
+            UPLOADING.store(false, Ordering::Release);
+        }
+    }
+    let _done = Done;
+
+    receive(app, request, params);
+}
+
+fn receive(app: &AppHandle, mut request: Request, params: &HashMap<&str, &str>) {
     let ids = (|| Some((params.get("commission")?.parse::<i64>().ok()?, params.get("stage")?.parse::<i64>().ok()?)))();
     let Some((commission_id, stage_id)) = ids else {
         return send(request, 400, "text/plain; charset=utf-8", "Faltan la comisión o la etapa");
@@ -86,7 +133,11 @@ fn handle(app: AppHandle, request: Request, token: String, snapshot: Arc<Mutex<S
     let (path, query) = url.split_once('?').unwrap_or((url.as_str(), ""));
     let params: HashMap<&str, &str> = query.split('&').filter_map(|pair| pair.split_once('=')).collect();
 
-    if params.get("k") != Some(&token.as_str()) {
+    if !allowed_peer(request.remote_addr()) {
+        return send(request, 403, "text/plain; charset=utf-8", "Solo desde tu red local o Tailscale.");
+    }
+
+    if !same_key(params.get("k"), &token) {
         return send(request, 403, "text/plain; charset=utf-8", "Enlace no valido. Escanea de nuevo el codigo de ZeeBoard.");
     }
 
@@ -181,4 +232,33 @@ pub fn ipad_addresses() -> Vec<String> {
             _ => None,
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn peer(address: &str) -> bool {
+        allowed_peer(Some(&SocketAddr::new(address.parse().unwrap(), 1234)))
+    }
+
+    #[test]
+    fn only_local_network_tailscale_and_this_pc() {
+        for ok in ["192.168.1.34", "10.0.0.5", "172.20.1.1", "100.84.12.7", "127.0.0.1", "169.254.3.3", "fd7a:115c:a1e0::1", "fe80::1", "::1", "::ffff:192.168.1.2"] {
+            assert!(peer(ok), "{ok} should be allowed");
+        }
+        for no in ["8.8.8.8", "100.128.0.1", "100.63.255.255", "2001:4860::8888", "::ffff:8.8.8.8"] {
+            assert!(!peer(no), "{no} should be refused");
+        }
+        assert!(!allowed_peer(None));
+    }
+
+    #[test]
+    fn key_must_match_exactly() {
+        let key = "0123456789abcdef0123456789abcdef";
+        assert!(same_key(Some(&key), key));
+        assert!(!same_key(Some(&"0123456789abcdef0123456789abcdee"), key));
+        assert!(!same_key(Some(&"0123456789abcdef"), key), "a prefix is not the key");
+        assert!(!same_key(None, key));
+    }
 }
