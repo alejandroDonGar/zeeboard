@@ -1,3 +1,4 @@
+import { useDialog } from "../lib/useDialog";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   IconBrush,
@@ -62,15 +63,11 @@ const SHORTCUTS: [string, string][] = [
 ];
 
 export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    const close = (event: KeyboardEvent) => event.key === "Escape" && onClose();
-    window.addEventListener("keydown", close);
-    return () => window.removeEventListener("keydown", close);
-  }, [onClose]);
+  const dialogRef = useDialog(onClose);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={t("Keyboard shortcuts")} className="w-[420px] glass-heavy rounded-3xl p-6" onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Keyboard shortcuts")} className="w-[420px] glass-heavy rounded-3xl p-6" onClick={(event) => event.stopPropagation()}>
         <h3 className="font-display text-2xl font-semibold">{t("Keyboard shortcuts")}</h3>
         <div className="mt-4 divide-y divide-line">
           {SHORTCUTS.map(([keys, description]) => (

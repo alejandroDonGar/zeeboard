@@ -41,6 +41,7 @@ import {
   type TemplateStage,
 } from "../lib/database";
 import PageHeader from "../components/PageHeader";
+import DialogBehavior from "../components/DialogBehavior";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
@@ -1140,6 +1141,7 @@ function ClientsPage({
       {clientForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] glass-heavy rounded-3xl p-6">
+            <DialogBehavior onClose={closeClientForm} />
             <h3 className="text-xl font-black text-ink">
               {clientForm === "new" ? t("New client") : t("Edit client")}
             </h3>

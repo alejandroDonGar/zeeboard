@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { locale, t } from "../lib/i18n";
+import DialogBehavior from "../components/DialogBehavior";
 import {
   addRequest,
   appSettings,
@@ -519,6 +520,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div role="dialog" aria-modal="true" aria-label={t("New request")} className="w-[520px] max-w-[94vw] glass-heavy rounded-3xl p-6">
+            <DialogBehavior onClose={() => setDraft(null)} />
             <h3 className="text-xl font-black">{t("New request")}</h3>
 
             <div className="mt-5 space-y-3">

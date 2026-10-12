@@ -1,4 +1,4 @@
-import { useEscape } from "../lib/useEscape";
+import { useDialog } from "../lib/useDialog";
 import { t } from "../lib/i18n";
 
 function ConfirmModal({
@@ -27,11 +27,11 @@ function ConfirmModal({
   onCancel?: () => void;
 }) {
   // Mientras se confirma (borrando, guardando…) Esc no cancela
-  useEscape(isConfirming ? undefined : onCancel);
+  const dialogRef = useDialog(isConfirming ? undefined : onCancel);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div role="dialog" aria-modal="true" aria-label={title} className="w-[450px] glass-heavy rounded-3xl p-6">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} className="w-[450px] glass-heavy rounded-3xl p-6">
         <p
           className={
             eyebrowTone === "danger"

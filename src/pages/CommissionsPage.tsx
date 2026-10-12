@@ -67,6 +67,7 @@ import {
 import PageHeader from "../components/PageHeader";
 import TagChip from "../components/TagChip";
 import GlassPanel from "../components/GlassPanel";
+import DialogBehavior from "../components/DialogBehavior";
 import AmbientBackground from "../components/AmbientBackground";
 import { useAmbientImage } from "../lib/ambient";
 import ConfirmModal from "../components/ConfirmModal";
@@ -1939,6 +1940,7 @@ function CommissionsPage() {
       {formMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div role="dialog" aria-modal="true" aria-label={formMode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden glass-heavy rounded-3xl">
+            <DialogBehavior onClose={() => setFormMode(null)} />
             {/* Left: pick */}
             <div className="min-h-0 space-y-5 overflow-y-auto p-6">
               <input

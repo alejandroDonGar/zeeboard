@@ -63,7 +63,7 @@ Dividir cada pantalla en componentes y aplicar el nuevo diseño.
 - [x] Capturas, README y página del proyecto rehechos con el nuevo aspecto (datos de ejemplo)
 - [ ] Vídeo de presentación con el nuevo aspecto
 - [x] Página del iPad con el mismo aspecto que la app
-- [ ] Esc en los formularios y diálogos que faltan, y foco atrapado dentro de los diálogos
+- [x] Esc en los formularios y diálogos, foco atrapado dentro de ellos y devuelto al cerrar
 
 ---
 

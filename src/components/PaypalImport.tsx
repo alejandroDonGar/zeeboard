@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { t } from "../lib/i18n";
-import { useEscape } from "../lib/useEscape";
+import { useDialog } from "../lib/useDialog";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { formatMoney } from "../lib/commissionHelpers";
@@ -70,11 +70,11 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
     }
   }
 
-  useEscape(saving ? undefined : onClose);
+  const dialogRef = useDialog(saving ? undefined : onClose);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div role="dialog" aria-modal="true" aria-label={t("PayPal")} className="flex max-h-[80vh] w-[720px] flex-col glass-heavy rounded-3xl p-6">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("PayPal")} className="flex max-h-[80vh] w-[720px] flex-col glass-heavy rounded-3xl p-6">
         <p className="text-xs font-bold text-muted">{t("PayPal")}</p>
         <h3 className="mt-2 text-2xl font-black text-ink">
           {t("{ready} of {total} payments ready", { ready: ready.length, total: matches.length })}
