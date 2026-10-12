@@ -299,6 +299,16 @@ npx tsx scripts/check-i18n.ts
 
 ---
 
+### Limpieza de código (hecha)
+Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
+- 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
+- La propiedad `label` de `PageHeader`, que ya no se mostraba y todas las pantallas seguían pasando.
+- Imágenes de la plantilla inicial sin usar: `public/tauri.svg`, `public/vite.svg`, `src/assets/react.svg`.
+- Dependencia Rust `serde_json` (no la usaba el código; `cargo check` correcto sin ella).
+- Clase CSS `.chip-info` sin uso.
+- `export` innecesarios en funciones que solo se usan en su propio archivo (`setAmbientImage`, `createBackup`, `importImageFromPath`).
+- Se **conservan** a propósito las migraciones antiguas de datos (`migrateLegacyImages`, `migratePaymentTags`): hacen falta si algún día se restaura una copia de seguridad antigua.
+
 ## 10. Plan para pasar a la app
 
 Estado: **hecho** — lógica del Catálogo (commit en `feature/glass-ui`). Siguiente con Opus: seguridad del iPad y partir `CommissionsPage.tsx`; después, Sonnet para el resto de pantallas.

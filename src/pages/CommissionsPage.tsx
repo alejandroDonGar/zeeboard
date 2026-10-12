@@ -342,7 +342,7 @@ function CommissionsPage() {
     }
 
     const auto = autoTagIds(characterCount, allTags);
-    const own = (id: number) => ["Commission Type", "Characters"].includes(allTags.find((tag) => tag.id === id)?.category ?? "");
+    const own = (id: number) => [TYPE_CATEGORY, "Characters"].includes(allTags.find((tag) => tag.id === id)?.category ?? "");
 
     setSelectedTagIds((current) => [...current.filter((id) => !own(id)), ...auto]);
   }
@@ -1000,7 +1000,6 @@ function CommissionsPage() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
-        label={t("Main workspace")}
         title={t("Commissions")}
         description={t("Organize your drawings by stages, clients, dates and tags.")}
         action={t("+ New commission")}

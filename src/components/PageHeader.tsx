@@ -8,8 +8,6 @@ function PageHeader({
   onAction,
   children,
 }: {
-  /** Se mantiene por compatibilidad con las pantallas; el encabezado ya no lo muestra */
-  label?: string;
   title: string;
   description: string;
   action?: string;

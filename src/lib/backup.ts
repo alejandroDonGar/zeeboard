@@ -20,7 +20,7 @@ function getTimestampFolderName(): string {
  * The database is copied with VACUUM INTO (consistent while the app writes);
  * images and rotation happen in Rust, which doesn't depend on folder-picker permissions.
  */
-export async function createBackup(root: string, keep?: number): Promise<string> {
+async function createBackup(root: string, keep?: number): Promise<string> {
   const backupPath = await join(root, getTimestampFolderName());
 
   await invoke("prepare_backup", { dir: backupPath });

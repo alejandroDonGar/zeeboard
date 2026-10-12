@@ -8,16 +8,13 @@ export const es: Record<string, string> = {
   Templates: "Plantillas",
   Finished: "Terminadas",
   Settings: "Ajustes",
-  "Commission workspace": "Espacio de comisiones",
   "Hide client names and prices while streaming (Ctrl+Shift+P)": "Oculta nombres de clientes y precios en directo (Ctrl+Shift+P)",
   "Private mode on": "Modo privado activo",
   "Private mode": "Modo privado",
   Shortcuts: "Atajos",
   Search: "Buscar",
-  Screens: "Pantallas",
 
   // Settings
-  Preferences: "Preferencias",
   "Appearance, pricing, backups and storage.": "Apariencia, precios, copias y almacenamiento.",
   Appearance: "Apariencia",
   Pricing: "Precios",
@@ -126,7 +123,6 @@ export const es: Record<string, string> = {
   "Delete unused images": "Borrar imágenes sin usar",
 
   // Dashboard
-  Overview: "Resumen",
   "What's on your desk today.": "Lo que hay hoy en tu mesa.",
   "In progress": "En curso",
   commissions: "comisiones",
@@ -145,7 +141,6 @@ export const es: Record<string, string> = {
   "No deadline": "Sin fecha límite",
   "Not paid yet · {n}": "Sin cobrar · {n}",
   "All caught up.": "Todo al día.",
-  "Most used tags": "Etiquetas más usadas",
   "No tags in use yet.": "Aún no hay etiquetas en uso.",
   "Received per month · after platform fees": "Recibido por mes · tras las tarifas",
   "{n} day overdue": "{n} día de retraso",
@@ -171,7 +166,6 @@ export const es: Record<string, string> = {
   "{n} commissions need your attention": "{n} comisiones necesitan tu atención",
 
   // Commissions
-  "Main workspace": "Espacio principal",
   "Organize your drawings by stages, clients, dates and tags.": "Organiza tus dibujos por etapas, clientes, fechas y etiquetas.",
   "+ New commission": "+ Nueva comisión",
   List: "Lista",
@@ -315,7 +309,6 @@ export const es: Record<string, string> = {
   "{n} payment without the received amount isn't included.": "{n} pago sin el importe recibido no está incluido.",
   "{n} payments without the received amount aren't included.": "{n} pagos sin el importe recibido no están incluidos.",
   Statistics: "Estadísticas",
-  Business: "Negocio",
   "How your commissions are doing.": "Cómo van tus comisiones.",
   "This year": "Este año",
   "Last 12 months": "Últimos 12 meses",
@@ -380,7 +373,6 @@ export const es: Record<string, string> = {
   "Nothing to undo.": "No hay nada que deshacer.",
   "Could not undo.": "No se pudo deshacer.",
   "Restored “{name}”.": "Restaurada «{name}».",
-  "Undo delete": "Deshacer borrado",
   "Restore what you just deleted": "Restaurar lo que acabas de borrar",
   "Could not delete commission.": "No se pudo borrar la comisión.",
   "Commission error: {error}": "Error en la comisión: {error}",
@@ -412,7 +404,6 @@ export const es: Record<string, string> = {
   "Enter what the client paid": "Escribe lo que pagó el cliente",
 
   // Requests
-  Intake: "Entrada",
   "People who want a commission: accept them, keep them waiting, or decline.": "Gente que quiere una comisión: acéptala, déjala en espera o recházala.",
   "+ New request": "+ Nueva solicitud",
   "Open for commissions": "Abierto a comisiones",
@@ -492,7 +483,6 @@ export const es: Record<string, string> = {
   "Import {n}": "Importar {n}",
 
   // Clients
-  "Client database": "Base de clientes",
   "Your clients, their characters and their commissions.": "Tus clientes, sus personajes y sus comisiones.",
   "+ New client": "+ Nuevo cliente",
   "Search clients…": "Buscar clientes…",
@@ -549,20 +539,16 @@ export const es: Record<string, string> = {
   // Finished
   Archive: "Archivo",
   "Finished commissions": "Comisiones terminadas",
-  "Everything you've delivered, grouped by month or by client.": "Todo lo que has entregado, agrupado por mes o por cliente.",
   "By month": "Por mes",
   "By client": "Por cliente",
   to: "a",
   Clear: "Quitar",
   "{n} finished · {amount}": "{n} terminadas · {amount}",
   "Nothing finished yet": "Aún no hay nada terminado",
-  "Commissions land here when they reach their last stage.": "Las comisiones llegan aquí al alcanzar su última etapa.",
   "Try another search or date range.": "Prueba otra búsqueda o rango de fechas.",
   "View image": "Ver imagen",
 
   // Tags
-  "Label library": "Biblioteca de etiquetas",
-  "Classify commissions by type, payment or anything you need.": "Clasifica las comisiones por tipo, pago o lo que necesites.",
   "+ New category": "+ Nueva categoría",
   "Category name, e.g. Extras": "Nombre de la categoría, p. ej. Extras",
   Create: "Crear",
@@ -580,8 +566,6 @@ export const es: Record<string, string> = {
   "Could not delete tag.": "No se pudo borrar la etiqueta.",
 
   // Templates
-  "Workflow library": "Biblioteca de flujos",
-  "Reusable workflows: the stages a commission goes through.": "Flujos reutilizables: las etapas por las que pasa una comisión.",
   "+ New template": "+ Nueva plantilla",
   "No templates yet. Create one on the right.": "Aún no hay plantillas. Crea una a la derecha.",
   "Create a commission type first (Catalog), then your first commission.": "Crea primero un tipo de comisión (Catálogo) y luego tu primera comisión.",
@@ -592,7 +576,6 @@ export const es: Record<string, string> = {
   "Base price": "Precio base",
   "Revisions included": "Revisiones incluidas",
   "Add a stage and press Enter": "Añade una etapa y pulsa Enter",
-  "The last stage marks the commission as finished.": "La última etapa marca la comisión como terminada.",
   "Drag to reorder": "Arrastra para reordenar",
   "Remove stage": "Quitar etapa",
   "{n} stage": "{n} etapa",
@@ -603,10 +586,7 @@ export const es: Record<string, string> = {
   "Can't delete template": "No se puede borrar la plantilla",
   Understood: "Entendido",
   "Template saved.": "Plantilla guardada.",
-  "Save error: {error}": "Error al guardar: {error}",
   "Untitled template": "Plantilla sin título",
-  "Template error: {error}": "Error de plantilla: {error}",
-  "Duplicate error: {error}": "Error al duplicar: {error}",
   "Could not delete template.": "No se pudo borrar la plantilla.",
 
   // Validation errors

@@ -598,7 +598,6 @@ function ClientsPage({
   return (
     <>
       <PageHeader
-        label={t("Client database")}
         title={t("Clients")}
         description={t("Your clients, their characters and their commissions.")}
         action={t("+ New client")}

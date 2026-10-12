@@ -190,7 +190,6 @@
 .chip-ok { --tone: var(--tone-ok); }
 .chip-warn { --tone: var(--tone-warn); }
 .chip-bad { --tone: var(--tone-bad); }
-.chip-info { --tone: var(--tone-info); }
 /* Lo único que llena de color: lo urgente de verdad (vencido) */
 .chip-solid { background: var(--tone); color: var(--on-tone); }
 .chip-solid::before { display: none; }

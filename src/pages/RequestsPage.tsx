@@ -381,7 +381,6 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   return (
     <>
       <PageHeader
-        label={t("Intake")}
         title={t("Requests")}
         description={t("People who want a commission: accept them, keep them waiting, or decline.")}
         action={t("+ New request")}

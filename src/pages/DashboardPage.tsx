@@ -180,7 +180,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto">
-      <PageHeader label="Overview" title="Dashboard" description="What's on your desk today." />
+      <PageHeader title="Dashboard" description="What's on your desk today." />
 
       <div className="space-y-5 p-5 pb-6">
         {attention.length > 0 && (

@@ -64,7 +64,7 @@ export function avatarSrc(avatar: string): string {
   return isProcessedImage(avatar) ? thumbUrl(avatar) : avatar;
 }
 
-export async function importImageFromPath(path: string): Promise<StoredImage> {
+async function importImageFromPath(path: string): Promise<StoredImage> {
   return await invoke<StoredImage>("import_image_from_path", { path });
 }
 

@@ -97,7 +97,7 @@ function StatisticsPage() {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto">
-      <PageHeader label="Business" title="Statistics" description="How your commissions are doing." />
+      <PageHeader title="Statistics" description="How your commissions are doing." />
 
       <div className="space-y-5 p-5 pb-10">
         <div className="flex items-center gap-3">

@@ -166,7 +166,7 @@ async function extract(path: string): Promise<AmbientColors | null> {
 }
 
 /** Cambia el fondo a los colores de esa imagen; `null` vuelve al fondo neutro. */
-export async function setAmbientImage(path: string | null): Promise<void> {
+async function setAmbientImage(path: string | null): Promise<void> {
   const mine = ++requested;
 
   image = path ?? "";

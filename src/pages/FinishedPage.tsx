@@ -196,7 +196,6 @@ function FinishedPage({
   return (
     <>
       <PageHeader
-        label={t("Archive")}
         title={t("Finished commissions")}
         description={t("Everything you've delivered, grouped by delivery month or by client.")}
       />

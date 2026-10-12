@@ -256,7 +256,7 @@ function SettingsPage() {
 
   return (
     <>
-      <PageHeader label="Preferences" title="Settings" description="Appearance, pricing, backups and storage." />
+      <PageHeader title="Settings" description="Appearance, pricing, backups and storage." />
 
       <section className="h-[calc(100vh-117px)] overflow-y-auto p-5 pb-10">
         <div className="mx-auto max-w-2xl">
