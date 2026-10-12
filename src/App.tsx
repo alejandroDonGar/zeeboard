@@ -348,14 +348,14 @@ function App() {
                   aria-current={isActive ? "page" : undefined}
                   className={
                     isActive
-                      ? "flex w-full items-center gap-3 rounded-xl bg-primary px-3 py-2 text-left text-sm font-bold text-on-primary"
-                      : "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted transition hover:bg-highlight hover:text-ink"
+                      ? "flex w-full items-center gap-3 rounded-xl bg-highlight px-3 py-2 text-left text-sm font-semibold text-ink"
+                      : "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-muted transition hover:bg-highlight/60 hover:text-ink"
                   }
                 >
-                  <item.icon size={18} stroke={1.75} aria-hidden="true" />
+                  <item.icon size={18} stroke={1.5} aria-hidden="true" />
                   {t(item.label)}
                   {item.id === "requests" && newRequests > 0 && (
-                    <span className="ml-auto rounded-sm bg-tone-warn px-1.5 py-0.5 text-xs font-bold text-on-tone">
+                    <span className="ml-auto text-xs font-medium text-faint tabular-nums">
                       {newRequests}
                     </span>
                   )}
@@ -368,23 +368,21 @@ function App() {
             type="button"
             onClick={() => setPrivate(!privateMode)}
             title={t("Hide client names and prices while streaming (Ctrl+Shift+P)")}
-            className={`mt-auto flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm font-bold transition ${
-              privateMode
-                ? "border-tone-warn bg-tone-warn/15 text-ink"
-                : "border-line bg-transparent text-muted hover:border-ink hover:text-ink"
+            className={`mt-auto flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+              privateMode ? "bg-tone-warn/15 text-ink" : "text-muted hover:bg-highlight hover:text-ink"
             }`}
           >
-            {privateMode ? <IconEyeOff size={18} stroke={1.75} aria-hidden="true" /> : <IconEye size={18} stroke={1.75} aria-hidden="true" />}
+            {privateMode ? <IconEyeOff size={18} stroke={1.5} aria-hidden="true" /> : <IconEye size={18} stroke={1.5} aria-hidden="true" />}
             {privateMode ? t("Private mode on") : t("Private mode")}
           </button>
 
           <button
             type="button"
             onClick={() => setHelpOpen(true)}
-            className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-semibold text-muted transition hover:bg-highlight hover:text-ink"
+            className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium text-muted transition hover:bg-highlight hover:text-ink"
           >
             {t("Shortcuts")}
-            <kbd className="rounded-sm border border-line-strong px-1.5 text-xs font-bold">?</kbd>
+            <kbd className="rounded-sm border border-line-strong px-1.5 text-xs font-medium">?</kbd>
           </button>
         </aside>
 
@@ -392,7 +390,13 @@ function App() {
           {/* Cada pantalla dibuja sus propios paneles de cristal sobre el fondo de colores */}
           <div className="relative h-full overflow-hidden rounded-3xl">
           {currentPage === "dashboard" && (
-            <DashboardPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />
+            <DashboardPage
+              onOpenCommissionsPage={() => setCurrentPage("commissions")}
+              onNewCommission={() => {
+                requestAction("new-commission");
+                go("commissions");
+              }}
+            />
           )}
           {currentPage === "commissions" && <CommissionsPage />}
           {currentPage === "clients" && (

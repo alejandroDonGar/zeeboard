@@ -13,6 +13,11 @@ export function getTheme(): ThemeChoice {
 
 /** "system" removes the attribute and lets App.css follow Windows (prefers-color-scheme). */
 export function applyTheme(theme: ThemeChoice): void {
+  // Sin transiciones durante el cambio (ver .theme-switching en App.css): todo cambia en el mismo fotograma
+  const root = document.documentElement;
+  root.classList.add("theme-switching");
+  requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove("theme-switching")));
+
   if (theme === "system") {
     delete document.documentElement.dataset.theme;
   } else {

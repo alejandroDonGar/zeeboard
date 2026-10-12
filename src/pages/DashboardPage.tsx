@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   getCommissionCompletionPercentage,
   deliveryDay,
@@ -30,11 +30,13 @@ import { hide } from "../lib/privacy";
 import TagChip from "../components/TagChip";
 import { TYPE_CATEGORY } from "../lib/catalog";
 import { ATTENTION_STYLE, loadAttention, type Attention } from "../lib/reminders";
-import PageHeader from "../components/PageHeader";
+import TopBar from "../components/TopBar";
+import Money from "../components/Money";
+import LineChart from "../components/LineChart";
 
 const DAY = 24 * 60 * 60 * 1000;
 
-function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => void }) {
+function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommissionsPage: () => void; onNewCommission: () => void }) {
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [ready, setReady] = useState(false);
   const [commissionTagsById, setCommissionTagsById] = useState<Record<number, Tag[]>>({});
@@ -133,8 +135,6 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
   );
   const recentHours = recent.reduce((sum, commission) => sum + (commission.hours ?? 0), 0);
 
-  const maxReceived = Math.max(...receivedByMonth.map((entry) => entry.total), 1);
-
   // Types count from the template (old type tags are skipped so nothing is counted twice); extras from the tags
   const tagCounts = new Map<number, { tag: Tag; count: number }>();
   const typeTags: Tag[] = commissions.flatMap((commission) => {
@@ -150,84 +150,76 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
     });
   const topTags = [...tagCounts.values()].sort((a, b) => b.count - a.count).slice(0, 6);
 
-  const stats = [
-    { label: t("In progress"), value: inProgress.length, detail: t("commissions"), className: "text-ink" },
-    {
-      label: t("Due within 7 days"),
-      value: dueThisWeek,
-      detail: t("including overdue"),
-      className: dueThisWeek > 0 ? "text-tone-warn" : "text-ink",
-    },
-    {
-      label: t("Waiting for payment"),
-      value: formatMoney(unpaid.reduce((sum, entry) => sum + entry.remaining, 0)),
-      detail: t(unpaid.length === 1 ? "{n} commission" : "{n} commissions", { n: unpaid.length }),
-      className: unpaid.length > 0 ? "text-tone-bad" : "text-ink",
-    },
-    {
-      label: t("Received this month"),
-      value: formatMoney(receivedThisMonth.received),
-      detail:
-        receivedThisMonth.pendingReceived > 0
-          ? t("{n} payments not entered yet", { n: receivedThisMonth.pendingReceived })
-          : t("{amount} in platform fees", { amount: formatMoney(receivedThisMonth.fees) }),
-      className: "text-tone-ok",
-    },
-  ];
+  const totalUnpaid = unpaid.reduce((sum, entry) => sum + entry.remaining, 0);
+  const received6 = receivedByMonth.reduce((sum, entry) => sum + entry.total, 0);
+  const typeColor = (commission: Commission) => templates.find((item) => item.id === commission.template_id)?.color ?? "var(--line-strong)";
+  const initials = (name: string | null) => hide(name || "?").slice(0, 2);
 
-  const panel = "panel rounded-3xl p-5";
-  const heading = "mb-3 text-xs font-bold text-muted";
+  // Un trozo de la pantalla: título pequeño, su contador y, si hace falta, un enlace a la derecha
+  const heading = (text: string, count?: number | string, link?: ReactNode) => (
+    <h3 className="mb-2 flex items-baseline gap-2 text-[13px] font-semibold">
+      {text}
+      {count !== undefined && <span className="font-medium text-faint tabular-nums">{count}</span>}
+      {link && <span className="ml-auto font-medium text-faint">{link}</span>}
+    </h3>
+  );
+  const row = "relative grid w-full items-center gap-3 rounded-md py-2 pr-2 pl-3.5 text-left transition hover:bg-highlight/60";
+  const thumb = (commission: Commission, size: string) => {
+    const images = stageImagesByCommissionId[commission.id] ?? [];
+    const latest = images[images.length - 1] ?? null;
+
+    return latest ? (
+      <img src={thumbUrl(latest.image_data_url)} loading="lazy" decoding="async" alt="" className={`${size} rounded-md object-cover`} />
+    ) : (
+      <div className={`${size} flex items-center justify-center rounded-md bg-highlight text-sm font-semibold text-muted`}>{initials(commission.client_name)}</div>
+    );
+  };
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto">
-      <PageHeader title="Dashboard" description="What's on your desk today." />
+    <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+      <TopBar title="Dashboard" action="New commission" shortcut="Ctrl N" onAction={onNewCommission}>
+        <span className="text-sm text-faint">{new Date().toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}</span>
+      </TopBar>
 
-      <div className="space-y-5 p-5 pb-6">
-        {attention.length > 0 && (
-          <section className={panel}>
-            <h3 className={heading}>{t("Needs attention · {n}", { n: attention.length })}</h3>
+      <div className="@container min-h-0 flex-1">
+        <section className="glass grid h-full min-h-0 grid-cols-1 overflow-y-auto rounded-3xl @min-[880px]:grid-cols-[minmax(0,1fr)_clamp(280px,30%,360px)] @min-[880px]:overflow-hidden">
+          <div className="grid min-w-0 content-start gap-7 p-6 @min-[880px]:overflow-y-auto">
+            <section>
+              <h2 className="mb-1 font-display text-3xl leading-tight font-semibold tracking-tight">{t("Today")}</h2>
+              <p className="mb-3.5 text-muted">
+                {attention.length === 0
+                  ? t("Nothing urgent.")
+                  : t(attention.length === 1 ? "{n} thing needs your attention." : "{n} things need your attention.", { n: attention.length })}
+              </p>
 
-            <div className="divide-y divide-line">
               {attention.map((item) => (
                 <button
                   key={item.key}
                   type="button"
                   onClick={() => handleOpenCommission(item.commission)}
-                  className="flex w-full items-center gap-3 py-2 text-left text-sm transition hover:bg-paper"
+                  className={`${row} grid-cols-[40px_minmax(0,1fr)_auto] border-t border-line first:border-t-0`}
                 >
-                  <span className={`w-24 shrink-0 rounded-sm px-2 py-0.5 text-xs font-bold ${ATTENTION_STYLE[item.kind].className}`}>
-                    {t(ATTENTION_STYLE[item.kind].label)}
+                  {thumb(item.commission, "h-10 w-10")}
+                  <span className="min-w-0">
+                    <strong className="block truncate font-semibold">{item.text}</strong>
+                    <small className="block truncate text-[12.5px] text-muted">
+                      {item.commission.client_name ? hide(item.commission.client_name) : t("No client")}
+                    </small>
                   </span>
-                  <span className="truncate">{item.text}</span>
+                  <span className={`chip ${ATTENTION_STYLE[item.kind].className}`}>{t(ATTENTION_STYLE[item.kind].label)}</span>
                 </button>
               ))}
-            </div>
-          </section>
-        )}
+            </section>
 
-        <dl className="grid grid-cols-4 gap-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className={panel}>
-              <dt className="text-xs font-bold text-muted">{stat.label}</dt>
-              <dd className={`mt-1 text-2xl font-black ${stat.className}`}>{stat.value}</dd>
-              <dd className="text-xs text-muted">{stat.detail}</dd>
-            </div>
-          ))}
-        </dl>
+            <section>
+              {heading(t("In progress"), inProgress.length, <button type="button" onClick={onOpenCommissionsPage} className="hover:text-ink">{t("See all")}</button>)}
 
-        <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] gap-5">
-          <section className={panel}>
-            <h3 className={heading}>{t("In progress · {n}", { n: inProgress.length })}</h3>
-
-            {!ready ? null : inProgress.length === 0 ? (
-              <p className="text-sm text-muted">{t("Nothing on the board. Time for a break.")}</p>
-            ) : (
-              <div className="divide-y divide-line">
-                {inProgress.map((commission) => {
+              {!ready ? null : inProgress.length === 0 ? (
+                <p className="text-sm text-muted">{t("Nothing on the board. Time for a break.")}</p>
+              ) : (
+                inProgress.map((commission) => {
                   const stages = commission.template_id ? templateStagesByTemplateId[commission.template_id] ?? [] : [];
                   const stageIndex = stages.findIndex((stage) => stage.id === commission.current_stage_id);
-                  const images = stageImagesByCommissionId[commission.id] ?? [];
-                  const latestImage = images[images.length - 1] ?? null;
                   const deadlineStatus = getDeadlineStatus(commission.deadline);
                   const progress = getCommissionCompletionPercentage(commission, templateStagesByTemplateId);
 
@@ -236,77 +228,105 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
                       key={commission.id}
                       type="button"
                       onClick={() => handleOpenCommission(commission)}
-                      className="grid w-full grid-cols-[40px_minmax(0,1fr)_96px_auto] items-center gap-4 py-2.5 text-left transition hover:bg-paper"
+                      className={`${row} grid-cols-[40px_minmax(0,1fr)_minmax(70px,120px)_88px] border-t border-line first:border-t-0 max-[1100px]:grid-cols-[40px_minmax(0,1fr)_88px]`}
                     >
-                      {latestImage ? (
-                        <img
-                          src={thumbUrl(latestImage.image_data_url)}
-                          loading="lazy" decoding="async"
-                          alt=""
-                          className="h-10 w-10 rounded-md object-cover"
-                        />
-                      ) : (
-                        <div className="h-10 w-10 rounded-md bg-paper" />
-                      )}
+                      {/* Barra con el color del tipo de comisión */}
+                      <span className="absolute top-2.5 bottom-2.5 left-1 w-[3px] rounded-sm" style={{ backgroundColor: typeColor(commission) }} />
+                      {thumb(commission, "h-10 w-10")}
 
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-bold">{commission.title}</p>
-                        <p className="truncate text-xs text-muted">
-                          {stageIndex >= 0
-                            ? `${stages[stageIndex].name} · ${stageIndex + 1}/${stages.length}`
-                            : t("Not started")}
+                        <p className="truncate font-semibold" title={commission.title}>{commission.title}</p>
+                        <p className="truncate text-xs text-faint">
+                          {stageIndex >= 0 ? `${stages[stageIndex].name} · ${stageIndex + 1}/${stages.length}` : t("Not started")}
                           {commission.client_name ? ` · ${hide(commission.client_name)}` : ""}
                         </p>
                       </div>
 
-                      <div className="h-1.5 overflow-hidden rounded-sm bg-paper">
-                        <div className="h-full bg-primary" style={{ width: `${progress}%` }} />
+                      <div className="h-1 overflow-hidden rounded-sm bg-line max-[1100px]:hidden">
+                        <div className="h-full rounded-sm bg-ink" style={{ width: `${progress}%` }} />
                       </div>
 
                       {deadlineStatus ? (
-                        <span className={`rounded-sm px-2 py-0.5 text-xs font-bold ${deadlineStatus.className}`}>
-                          {deadlineStatus.label}
-                        </span>
+                        <span className={`${deadlineStatus.className} justify-self-end`} title={deadlineStatus.label}>{deadlineStatus.short}</span>
                       ) : (
                         <span className="text-xs text-faint">{t("No deadline")}</span>
                       )}
                     </button>
                   );
-                })}
-              </div>
-            )}
-          </section>
+                })
+              )}
+            </section>
 
-          <div className="space-y-5">
-            <section className={panel}>
-              <h3 className={heading}>{t("Not paid yet · {n}", { n: unpaid.length })}</h3>
+            <section>
+              {heading(t("Received per month"), t("after platform fees"))}
+              <p className="mb-1.5 flex items-baseline gap-2.5">
+                <span className="text-[22px] font-semibold"><Money amount={received6} /></span>
+                <span className="text-xs text-faint">
+                  {t("in {n} months · average {amount} a month", { n: receivedByMonth.length, amount: formatMoney(received6 / receivedByMonth.length) })}
+                </span>
+              </p>
+              <LineChart points={receivedByMonth.map((entry) => ({
+                label: entry.label,
+                value: entry.total,
+                note: entry.pending > 0 ? t("{n} not entered", { n: entry.pending }) : undefined,
+              }))} />
+            </section>
+          </div>
+
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] content-start gap-x-8 gap-y-6 border-t border-line px-6 py-6 @min-[880px]:grid-cols-1 @min-[880px]:overflow-y-auto @min-[880px]:border-t-0 @min-[880px]:border-l @min-[880px]:px-5">
+            <section>
+              {heading(t("This month"))}
+              <dl>
+                {[
+                  { label: t("Received"), value: <Money amount={receivedThisMonth.received} />, detail: receivedThisMonth.pendingReceived > 0 ? t("{n} payments not entered yet", { n: receivedThisMonth.pendingReceived }) : t("{amount} in platform fees", { amount: formatMoney(receivedThisMonth.fees) }) },
+                  { label: t("Waiting for payment"), value: <Money amount={totalUnpaid} />, detail: t(unpaid.length === 1 ? "{n} commission" : "{n} commissions", { n: unpaid.length }), tone: unpaid.length > 0 ? "text-tone-warn" : "" },
+                  { label: t("In progress"), value: inProgress.length, detail: "" },
+                  { label: t("Due within 7 days"), value: dueThisWeek, detail: t("including overdue") },
+                ].map((stat) => (
+                  <div key={stat.label} className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-x-3 border-t border-line py-3 first:border-t-0">
+                    <dt className="text-muted">{stat.label}</dt>
+                    <dd className={`text-right text-xl font-semibold tabular-nums ${stat.tone ?? ""}`}>{stat.value}</dd>
+                    {stat.detail && <dd className="col-span-2 text-xs text-faint">{stat.detail}</dd>}
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            <section>
+              {heading(t("Not paid yet"), unpaid.length)}
 
               {!ready ? null : unpaid.length === 0 ? (
                 <p className="text-sm text-muted">{t("All caught up.")}</p>
               ) : (
-                <div className="divide-y divide-line">
+                <>
                   {unpaid.map(({ commission, remaining }) => (
                     <button
                       key={commission.id}
                       type="button"
                       onClick={() => handleOpenCommission(commission)}
-                      className="flex w-full items-center justify-between gap-3 py-2 text-left text-sm transition hover:bg-paper"
+                      className="grid w-full grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md border-t border-line px-1 py-1.5 text-left transition first:border-t-0 hover:bg-highlight/60"
                     >
-                      <span className="truncate">{commission.title}</span>
-                      <span className="shrink-0 font-bold">
-                        {formatMoney(remaining, commission.currency)}
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-highlight text-[11px] font-bold text-muted">{initials(commission.client_name)}</span>
+                      <span className="min-w-0">
+                        <strong className="block truncate font-semibold" title={commission.title}>{commission.title}</strong>
+                        <small className="block truncate text-xs text-faint">{commission.client_name ? hide(commission.client_name) : t("No client")}</small>
                       </span>
+                      <span className="font-semibold whitespace-nowrap"><Money amount={remaining} currency={commission.currency} /></span>
                     </button>
                   ))}
-                </div>
+                  <p className="mt-0.5 flex justify-between border-t border-line-strong px-1 pt-2 font-semibold">
+                    <span>{t("Total")}</span>
+                    <Money amount={totalUnpaid} />
+                  </p>
+                </>
               )}
             </section>
 
             {recentRate !== null && (
-              <section className={panel}>
-                <h3 className={heading}>{t("Your hourly rate · last 90 days")}</h3>
-                <p className="text-3xl font-black text-tone-ok">{formatMoney(recentRate)}/h</p>
-                <p className="mt-1 text-xs text-muted">
+              <section>
+                {heading(t("Your hourly rate"), t("last 90 days"))}
+                <p className="text-[26px] font-semibold"><Money amount={recentRate} />/h</p>
+                <p className="mt-0.5 text-xs text-faint">
                   {t(recent.length === 1 ? "{n} piece · {hours} h" : "{n} pieces · {hours} h", {
                     n: recent.length,
                     hours: Math.round(recentHours * 10) / 10,
@@ -315,13 +335,13 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
               </section>
             )}
 
-            <section className={panel}>
-              <h3 className={heading}>{t("Most used types and tags")}</h3>
+            <section>
+              {heading(t("Most used types and tags"))}
 
               {!ready ? null : topTags.length === 0 ? (
                 <p className="text-sm text-muted">{t("No tags in use yet.")}</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-x-3 gap-y-1.5">
                   {topTags.map(({ tag, count }) => (
                     <span key={tag.id} className="flex items-center gap-1.5 text-xs">
                       <TagChip name={tag.name} color={tag.color} />
@@ -331,37 +351,6 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
                 </div>
               )}
             </section>
-          </div>
-        </div>
-
-        <section className={panel}>
-          <h3 className={heading}>{t("Received per month · after platform fees")}</h3>
-
-          <div className="flex h-36 items-end gap-3 border-b border-line">
-            {receivedByMonth.map((entry) => (
-              // ponytail: native tooltip (title); a custom one if more detail is needed
-              <div
-                key={entry.label}
-                title={`${entry.label}: ${formatMoney(entry.total)}${
-                  entry.pending > 0 ? ` · ${t("{n} not entered", { n: entry.pending })}` : ""
-                }`}
-                className="flex h-full flex-1 flex-col justify-end"
-              >
-                <div
-                  className="min-h-px rounded-t-sm bg-primary transition hover:bg-primary-hover"
-                  style={{ height: `${(entry.total / maxReceived) * 100}%` }}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-1 flex gap-3">
-            {receivedByMonth.map((entry) => (
-              <div key={entry.label} className="flex-1 text-center text-xs text-faint">
-                {entry.label}
-                <span className="block font-semibold text-muted">{formatMoney(entry.total)}</span>
-              </div>
-            ))}
           </div>
         </section>
       </div>

@@ -315,6 +315,26 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - `DeadlineCalendar.tsx` — calendario lateral de la vista en cuadrícula.
 - Queda en la página el detalle de la comisión (etapas, imágenes, correcciones, pagos), que comparte casi todo su estado; se puede seguir partiendo en la pasada visual.
 
+### Pasada visual en la app — registro
+**Cimientos (hechos con el Resumen, valen para todas las pantallas):**
+- `src/App.css`: grises y colores de estado del tema claro más oscuros (`--muted #4f473c`, `--faint #5e564a`, `--tone-ok #1a6f43`, `--tone-warn #7a4800`, `--tone-bad #a52a21`) para llegar a 4,5:1; clase `.theme-switching` (sin transiciones durante el cambio de tema).
+- `src/lib/theme.ts`: `applyTheme` pone `.theme-switching` y la quita dos fotogramas después, así todo cambia a la vez.
+- `src/components/TopBar.tsx`: barra superior de cristal (título pequeño, controles opcionales, acción principal con icono `+` y atajo en gris). **Sustituye a `PageHeader`**, que se borra cuando la use la última pantalla. Las pantallas portadas usan `<div className="flex h-full min-h-0 flex-col gap-3 text-sm">` + `TopBar` + una sección `glass` que ocupa el resto.
+- `src/components/Money.tsx` (céntimos y moneda pequeños, números de ancho fijo) y `src/components/LineChart.tsx` (gráfico de línea; **se reutiliza en Estadísticas**).
+- Barra lateral (`App.tsx`): selección suave (`bg-highlight`) en vez de bloque oscuro, contador de Solicitudes en gris, iconos más finos (trazo 1,5), «Modo privado» sin borde.
+- Traducción de «Dashboard» → **«Resumen»** (antes «Panel»), igual que en las maquetas.
+
+**Resumen (hecho):** `DashboardPage.tsx` reescrito con el diseño aprobado; **la lógica de datos no se ha tocado** (mismos cálculos de antes).
+- «Hoy»: lo que necesita atención, con su miniatura, cliente y estado (se reutilizan los chips `ATTENTION_STYLE`).
+- «En curso»: filas con la **barra del color del tipo** (plantilla), miniatura, etapa n/m, progreso y plazo; columnas de ancho fijo para que todo quede alineado.
+- Gráfico de línea «Recibido por mes» con total y media de 6 meses; el mes en curso con el último tramo discontinuo.
+- Columna derecha: «Este mes» en lista (pendiente de cobro en ámbar solo si hay), «Sin cobrar» con cliente y total, tarifa por hora, tipos y etiquetas más usados.
+- Botón «Nueva comisión · Ctrl N» en la barra superior: hace lo mismo que el atajo (`requestAction("new-commission")` + ir a Comisiones).
+- **Ajuste a la ventana:** como la app tiene barra lateral, el diseño de dos columnas depende del **ancho del contenedor** (`@container` + `@min-[880px]`), no del de la ventana. Por debajo, la columna derecha pasa debajo en una rejilla de 2 columnas.
+- Tamaño de texto base de la pantalla: 14 px (`text-sm`), como en las maquetas.
+
+**Cómo se comprobó (útil para las demás pantallas):** `npm run tauri dev`, ventana a 1216×799 (tamaño por defecto) y a 1066×700 (mínimo), en claro y oscuro, y a 3456 px de ancho. Nada se corta, solapa ni desborda. Las capturas se hicieron con `PrintWindow` desde PowerShell (el capturador de pantalla de la herramienta deslava los colores de WebView2). Cuidado: `open_application "ZeeBoard"` abre la app **instalada** (versión antigua), no la de desarrollo.
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -327,7 +347,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Siguiente: Sonnet**, pantalla por pantalla, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen hecho; siguen Comisiones, Clientes, Solicitudes, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).

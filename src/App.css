@@ -46,16 +46,16 @@
   --paper: #fffaf2;
   --highlight: #f1e8da;
   --ink: #1f2933;
-  --muted: #5f5649;
-  --faint: #6f6558;
+  --muted: #4f473c;
+  --faint: #5e564a;
   --line: #e6ded2;
   --line-strong: #d8cec0;
   --primary: #1f2933;
   --primary-hover: #2c3947;
   --on-primary: #ffffff;
-  --tone-ok: #1d7a4a;
-  --tone-warn: #9a5b00;
-  --tone-bad: #b83228;
+  --tone-ok: #1a6f43;
+  --tone-warn: #7a4800;
+  --tone-bad: #a52a21;
   --tone-info: #1f6f8b;
   --on-tone: #ffffff;
 }
@@ -103,6 +103,14 @@
   --tone-bad: #ef7b73;
   --tone-info: #6fc3df;
   --on-tone: #1a1410;
+}
+
+/* Al cambiar de tema todo cambia en el mismo fotograma: ninguna transición se queda atrás (lo quita applyTheme) */
+.theme-switching,
+.theme-switching *,
+.theme-switching *::before,
+.theme-switching *::after {
+  transition: none !important;
 }
 
 /* Cristal esmerilado casi opaco: paneles que flotan sobre el fondo de colores (AmbientBackground) */
