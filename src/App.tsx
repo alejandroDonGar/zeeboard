@@ -323,7 +323,7 @@ function App() {
       <IpadReceiver />
       {paletteOpen && <CommandPalette pages={navigationItems} onGo={go} onClose={closePalette} onShowShortcuts={showShortcuts} />}
       {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
-      <div className="relative h-screen overflow-hidden bg-canvas text-ink">
+      <div className="relative h-screen overflow-clip bg-canvas text-ink">
       <AmbientBackground />
       <div className="relative flex h-full gap-3 p-3">
         <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-3xl px-3 py-4">

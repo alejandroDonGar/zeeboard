@@ -6,14 +6,16 @@ function AmbientBackground({ strong = false }: { strong?: boolean }) {
   const [a, b, c] = useAmbientColors();
 
   return (
+    // El recorte va aparte: si las manchas (que sobresalen) estuvieran en un contenedor desplazable, scrollIntoView lo movería
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
     <div
-      aria-hidden="true"
-      className="pointer-events-none absolute -inset-[10%]"
+      className="absolute -inset-[10%]"
       style={{ filter: "blur(70px) saturate(140%)", opacity: strong ? 0.55 : "var(--ambient-opacity)" }}
     >
       <i className="ambient-blob absolute rounded-full" style={{ left: "45%", top: "5%", width: "46%", height: "60%", backgroundColor: a }} />
       <i className="ambient-blob absolute rounded-full" style={{ left: "62%", top: "50%", width: "40%", height: "50%", backgroundColor: b }} />
       <i className="ambient-blob absolute rounded-full" style={{ left: "20%", top: "60%", width: "30%", height: "40%", backgroundColor: c }} />
+    </div>
     </div>
   );
 }
