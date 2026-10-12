@@ -1107,7 +1107,7 @@ function CommissionsPage() {
 
 
         <GlassPanel className="h-full min-h-0" contentClassName="flex flex-col p-5">
-          <div className="min-h-0 flex-1 overflow-y-auto px-1">
+          <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
             {viewMode === "list" && !activeCommission ? (
               <div className="flex h-full flex-col items-center justify-center text-center">
                 <p className="text-lg font-black">{t("Pick a commission")}</p>
@@ -1676,6 +1676,16 @@ function CommissionsPage() {
                     >
                       {latestImage && (
                         <div
+                          role="button"
+                          tabIndex={0}
+                          aria-label={t("Open in focus mode")}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              setZoomedImage(imageUrl(latestImage.image_data_url));
+                            }
+                          }}
                           onClick={(event) => {
                             event.stopPropagation();
                             setZoomedImage(imageUrl(latestImage.image_data_url));
@@ -1928,7 +1938,7 @@ function CommissionsPage() {
       </section>
       {formMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden glass-heavy rounded-3xl">
+          <div role="dialog" aria-modal="true" aria-label={formMode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden glass-heavy rounded-3xl">
             {/* Left: pick */}
             <div className="min-h-0 space-y-5 overflow-y-auto p-6">
               <input
@@ -2257,6 +2267,7 @@ function CommissionsPage() {
         )}
       {focusIndex >= 0 && (
         <div
+          role="dialog" aria-modal="true" aria-label={t("Open in focus mode")}
           className="fixed inset-0 z-[999] flex flex-col items-center justify-center overflow-hidden bg-[#0e0e10]"
           onClick={() => setFocusImageId(null)}
         >

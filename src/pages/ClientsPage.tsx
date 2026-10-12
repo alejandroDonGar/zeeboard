@@ -1139,7 +1139,7 @@ function ClientsPage({
       )}
       {clientForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="w-[480px] glass-heavy rounded-3xl p-6">
+          <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] glass-heavy rounded-3xl p-6">
             <h3 className="text-xl font-black text-ink">
               {clientForm === "new" ? t("New client") : t("Edit client")}
             </h3>

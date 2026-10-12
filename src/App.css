@@ -46,8 +46,8 @@
   --paper: #fffaf2;
   --highlight: #f1e8da;
   --ink: #1f2933;
-  --muted: #7c7163;
-  --faint: #9a8f82;
+  --muted: #5f5649;
+  --faint: #6f6558;
   --line: #e6ded2;
   --line-strong: #d8cec0;
   --primary: #1f2933;
@@ -69,8 +69,8 @@
     --paper: #262a30;
     --highlight: #30353c;
     --ink: #ece6dc;
-    --muted: #a8a093;
-    --faint: #847d72;
+    --muted: #b8b0a3;
+    --faint: #a79f93;
     --line: #33373e;
     --line-strong: #464b53;
     --primary: #ece6dc;
@@ -91,8 +91,8 @@
   --paper: #262a30;
   --highlight: #30353c;
   --ink: #ece6dc;
-  --muted: #a8a093;
-  --faint: #847d72;
+  --muted: #b8b0a3;
+  --faint: #a79f93;
   --line: #33373e;
   --line-strong: #464b53;
   --primary: #ece6dc;
@@ -237,10 +237,28 @@ body {
   color: var(--ink);
 }
 
-/* Foco visible para quien navega con teclado */
+/* Foco visible para quien navega con teclado. Dibujado por dentro (offset negativo): así ningún contenedor
+   con scroll u overflow-hidden lo recorta por el borde. */
 :focus-visible {
   outline: 2px solid var(--ink);
-  outline-offset: 2px;
+  outline-offset: -2px;
+}
+
+/* Con "reducir movimiento" no hay desplazamientos ni transiciones largas; el fundido del fondo se queda,
+   corto, porque es un cambio de color y no un movimiento. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .ambient {
+    transition-duration: 0.3s !important;
+  }
 }
 
 /* Sin barras de scroll visibles: se desplaza con la rueda del ratón o el touchpad */

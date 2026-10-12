@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/manrope";
+import { MotionConfig } from "framer-motion";
 import App from "./App";
 import { applyTheme, getTheme } from "./lib/theme";
 
@@ -10,6 +11,8 @@ applyTheme(getTheme());
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <App />
+    <MotionConfig reducedMotion="user">
+      <App />
+    </MotionConfig>
   </React.StrictMode>,
 );

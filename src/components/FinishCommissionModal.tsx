@@ -2,6 +2,7 @@ import { useState } from "react";
 import { isoDay, parsePrice } from "../lib/commissionHelpers";
 import { pickImagePaths } from "../lib/images";
 import { t } from "../lib/i18n";
+import { useEscape } from "../lib/useEscape";
 
 export type FinishDetails = { deliveredAt: string; hours: number | null; notes: string; imagePaths: string[] };
 
@@ -38,9 +39,11 @@ function FinishCommissionModal({
     }
   }
 
+  useEscape(onCancel);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="w-[480px] glass-heavy rounded-3xl p-6">
+      <div role="dialog" aria-modal="true" aria-label={t("Mark as finished")} className="w-[480px] glass-heavy rounded-3xl p-6">
         <p className="text-xs font-bold text-muted">{t("Mark as finished")}</p>
         <h3 className="mt-2 text-2xl font-black text-ink">{title}</h3>
 

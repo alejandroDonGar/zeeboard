@@ -19,12 +19,13 @@ export function Segmented<T extends string | number>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div className="inline-flex shrink-0 rounded-md border border-line bg-paper p-0.5">
+    <div role="group" className="inline-flex shrink-0 rounded-md border border-line bg-paper p-0.5">
       {options.map((option) => (
         <button
           key={option.value}
           type="button"
           onClick={() => onChange(option.value)}
+          aria-pressed={option.value === value}
           className={
             option.value === value
               ? "rounded-sm bg-primary px-3 py-1.5 text-xs font-bold text-on-primary"

@@ -43,6 +43,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
       {toastMessage && (
         <div
+          role={toastType === "success" ? "status" : "alert"}
           className={
             toastType === "success"
               ? "fixed bottom-6 right-6 z-[60] rounded-2xl bg-tone-ok px-5 py-3 text-sm font-bold text-on-tone shadow-xl"
