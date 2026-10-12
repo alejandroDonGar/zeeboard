@@ -1631,7 +1631,7 @@ function CommissionsPage() {
                 <div className="max-w-md text-center">
                   <h4 className="text-xl font-black">{t("No commissions yet")}</h4>
                   <p className="mt-2 text-sm leading-relaxed text-muted">
-                    {t("Create your first commission to start building your workflow.")}
+                    {t("Create a template first (Templates), then your first commission.")}
                   </p>
                 </div>
               </div>

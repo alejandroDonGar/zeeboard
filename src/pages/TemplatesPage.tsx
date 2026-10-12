@@ -250,7 +250,7 @@ function TemplatesPage() {
       <section className="grid h-[calc(100vh-117px)] min-h-0 grid-cols-[280px_minmax(0,1fr)] gap-5 overflow-hidden p-5 pb-6">
         <div className="min-h-0 space-y-0.5 overflow-y-auto rounded-3xl border border-line bg-surface p-3 shadow-sm">
           {!ready ? null : templates.length === 0 ? (
-            <p className="p-4 text-center text-sm text-faint">{t("No templates yet")}</p>
+            <p className="p-4 text-center text-sm text-faint">{t("No templates yet. Create one on the right.")}</p>
           ) : (
             templates.map((template) => (
               <button
