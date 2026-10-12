@@ -267,6 +267,14 @@ body {
   outline-offset: -2px;
 }
 
+/* Los campos de texto ya cambian su borde al enfocarse: aquí el anillo es fino para no cargarlos */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline-width: 1px;
+  outline-offset: -1px;
+}
+
 /* Con "reducir movimiento" no hay desplazamientos ni transiciones largas; el fundido del fondo se queda,
    corto, porque es un cambio de color y no un movimiento. */
 @media (prefers-reduced-motion: reduce) {

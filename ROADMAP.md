@@ -55,6 +55,16 @@ Dividir cada pantalla en componentes y aplicar el nuevo diseño.
 - [x] Enviar imágenes de progreso desde el iPad a una comisión (como alternativa nueva o como nueva versión de una alternativa)
 - [ ] Vista del tablero adaptada al iPad
 
+## Fase 6 · Rediseño de cristal
+- [x] Material de cristal casi opaco, esquinas rectas y paneles flotantes en todas las pantallas
+- [x] Fondo que toma los colores de la imagen en pantalla (etapas, modo foco) y se desplaza distinto en cada pantalla
+- [x] Chips de estado y etiquetas con punto de color, y colores de estado como tokens (claro y oscuro)
+- [x] Accesibilidad básica: foco visible, diálogos con Esc, movimiento y transparencia reducidos, contraste
+- [x] Capturas, README y página del proyecto rehechos con el nuevo aspecto (datos de ejemplo)
+- [ ] Vídeo de presentación con el nuevo aspecto
+- [ ] Página del iPad con el mismo aspecto que la app
+- [ ] Esc en los formularios y diálogos que faltan, y foco atrapado dentro de los diálogos
+
 ---
 
 ## Ideas para ir incorporando

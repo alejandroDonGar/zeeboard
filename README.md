@@ -121,7 +121,7 @@ Each stage has a **+ correction** button. Corrections are notes of what the clie
 <img src="docs/images/corrections.png" alt="Corrections panel under the stage strip" width="900">
 
 - Every correction counts as **one revision**. The header shows `Revisions used / included`, using the limit set in the template.
-- The counter turns amber when you reach the limit and red (**extra**) when you go over it.
+- The counter's dot turns amber when you reach the limit and red (**extra**) when you go over it.
 - Corrections are dated, and you can delete them.
 
 **Pins on the image.** In focus mode press **+ Correction pin**, click where the change goes, write it and press Enter. Pins are numbered per image and belong to that exact version; click one to read it, mark it as done or remove it. **Esc** leaves pin mode first and then closes the image.
@@ -326,6 +326,10 @@ Light, dark, or follow your system:
 
 <img src="docs/images/light-theme.png" alt="Light theme" width="900">
 
+**The look.** Panels are frosted glass over a soft colour background. The colours come from the image you are looking at: the stage image under the cursor, or the one open in focus mode. They fade into the colours of the next image, and the glow drifts to a different place on each screen. Statuses and tags are quiet chips with a coloured dot, so the colour never competes with your artwork.
+
+**Accessibility.** Keyboard focus is always visible, dialogs close with **Esc**, and secondary text keeps at least 4.5:1 contrast. If Windows is set to reduce motion, the background stays still and animations are cut; if it is set to reduce transparency, panels become solid.
+
 The whole app is also available in **Spanish**. Switching the language reloads the app and keeps you on the same screen. Names, notes and anything you type stay as you wrote them.
 
 <img src="docs/images/spanish.png" alt="Spanish interface" width="900">
@@ -355,7 +359,7 @@ Quick checks of the business logic (no framework, each prints "ok"):
 npx tsx scripts/check-payments.ts   # also: check-reminders, check-export, check-form-import,
                                     # check-avatars, check-paypal, check-search, check-i18n,
                                     # check-stats, check-trash, check-ipad, check-fresh-db,
-                                    # check-permissions
+                                    # check-permissions, check-ambient
 cd src-tauri && cargo test
 ```
 
