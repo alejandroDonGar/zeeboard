@@ -306,6 +306,15 @@ npx tsx scripts/check-i18n.ts
 
 ---
 
+### `CommissionsPage.tsx` partido (hecho)
+De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas que no dependen del detalle salen a `src/pages/commissions/`:
+- `CommissionForm.tsx` — formulario de nueva / editar comisión. **Guarda su propio estado** (antes eran 16 `useState` en la página); la página solo sabe si está abierto y, al guardar, recarga la lista y abre la comisión.
+- `FocusViewer.tsx` — modo foco (imagen a pantalla completa, versiones, chinchetas de corrección, ← →). Las chinchetas (`pinMode`, `pinDraft`, `openPinId`) y su teclado viven ahí; al estar montado solo mientras está abierto, se cierran solas al salir.
+- `CommissionGrid.tsx` — vista en cuadrícula.
+- `CommissionList.tsx` — columna de la lista (en curso y cola).
+- `DeadlineCalendar.tsx` — calendario lateral de la vista en cuadrícula.
+- Queda en la página el detalle de la comisión (etapas, imágenes, correcciones, pagos), que comparte casi todo su estado; se puede seguir partiendo en la pasada visual.
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -318,7 +327,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hecho** — lógica del Catálogo (commit en `feature/glass-ui`). Siguiente con Opus: seguridad del iPad y partir `CommissionsPage.tsx`; después, Sonnet para el resto de pantallas.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Siguiente: Sonnet**, pantalla por pantalla, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).

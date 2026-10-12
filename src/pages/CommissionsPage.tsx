@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { imageUrl, thumbUrl, importImage, pickImagePaths } from "../lib/images";
 import { IPAD_IMAGE_ADDED } from "../lib/ipad";
 import { useImageInput } from "../lib/useImageInput";
-import { hide, isPrivate } from "../lib/privacy";
-import { ageInDays, daysToDeadline } from "../lib/reminders";
+import { hide } from "../lib/privacy";
 import Linkified from "../components/Linkified";
 import BoardFilters, { Segmented, type PaymentFilter } from "../components/BoardFilters";
 import CommissionPayments from "../components/CommissionPayments";
@@ -15,36 +14,26 @@ import {
   groupAlternatives,
   isCommissionCompleted as isCommissionCompletedHelper,
   getDeadlineStatus,
-  formatMoney,
-  parsePrice,
   paymentSummary,
-  PAYMENT_STATUS_STYLE,
-  calculateCommissionPrice,
-  effectiveCharacterCount,
   pinNumber,
   pendingCorrectionsText,
   invoiceDescription,
 } from "../lib/commissionHelpers";
-import { autoTagIds } from "../lib/formImport";
 import { TYPE_CATEGORY } from "../lib/catalog";
 import {
   getTemplateStages,
   getTemplates,
-  createCommission,
   getCommissions,
   getAllPayments,
-  appSettings,
   getAllCorrections,
   addCorrection,
   deleteCorrection,
   setCorrectionDone,
   updateCommissionStage,
   finishCommission,
-  updateCommission,
   duplicateCommission,
   deleteCommission,
   getCommissionTags,
-  replaceCommissionTags,
   getClients,
   createCommissionStageImage,
   createImageVersion,
@@ -52,7 +41,6 @@ import {
   getClientCharacters,
   getCharacterReferences,
   getCommissionCharacterIds,
-  replaceCommissionCharacters,
   getTags,
   type ClientCharacter,
   type CharacterReference,
@@ -68,35 +56,24 @@ import {
 import PageHeader from "../components/PageHeader";
 import TagChip from "../components/TagChip";
 import GlassPanel from "../components/GlassPanel";
-import DialogBehavior from "../components/DialogBehavior";
-import AmbientBackground from "../components/AmbientBackground";
 import { useAmbientImage } from "../lib/ambient";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
+import DeadlineCalendar from "./commissions/DeadlineCalendar";
+import FocusViewer from "./commissions/FocusViewer";
+import CommissionForm from "./commissions/CommissionForm";
+import CommissionGrid from "./commissions/CommissionGrid";
+import CommissionList from "./commissions/CommissionList";
 import FinishCommissionModal, { type FinishDetails } from "../components/FinishCommissionModal";
 
 function CommissionsPage() {
   // A single form to create and edit: null = closed
-  const [formMode, setFormMode] = useState<"new" | "edit" | null>(null);
-  const [characterSearch, setCharacterSearch] = useState("");
-  const [commissionTitle, setCommissionTitle] = useState("");
-  const [commissionPrice, setCommissionPrice] = useState("");
-  const [commissionDeadline, setCommissionDeadline] = useState("");
-  const [commissionNotes, setCommissionNotes] = useState("");
-  const [clientName, setClientName] = useState("");
-  const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
+  const [form, setForm] = useState<{ mode: "new" | "edit"; tagIds: number[] } | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
   const [charactersByClientId, setCharactersByClientId] = useState<Record<number, ClientCharacter[]>>({});
-  const [selectedCharacterIds, setSelectedCharacterIds] = useState<number[]>([]);
-  // What the price is for. Follows the linked characters until set by hand or loaded from a saved commission.
-  const [characterCount, setCharacterCount] = useState(1);
-  const [countIsFixed, setCountIsFixed] = useState(false);
   const [commissionCharactersById, setCommissionCharactersById] = useState<Record<number, number[]>>({});
   const [referencesByCharacterId, setReferencesByCharacterId] = useState<Record<number, CharacterReference[]>>({});
-  const [platform, setPlatform] = useState("Discord");
-  const [currency, setCurrency] = useState("EUR");
-  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [commissions, setCommissions] = useState<Commission[]>([]);
   const [ready, setReady] = useState(false);
@@ -105,14 +82,12 @@ function CommissionsPage() {
   const [workflowStages, setWorkflowStages] = useState<TemplateStage[]>([]);
   const [templateStagesByTemplateId, setTemplateStagesByTemplateId] = useState<Record<number, TemplateStage[]>>({});
   const activeCommission = commissions.find((commission) => commission.id === activeCommissionId) ?? null;
-  const [savingCommission, setSavingCommission] = useState(false);
   const [duplicatingCommission, setDuplicatingCommission] = useState(false);
   const [showDeleteCommissionModal, setShowDeleteCommissionModal] = useState(false);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [deletingCommission, setDeletingCommission] = useState(false);
   const [allTags, setAllTags] = useState<Tag[]>([]);
-  const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
   const [commissionTagsById, setCommissionTagsById] = useState<Record<number, Tag[]>>({});
   const [stageImagesByCommissionId, setStageImagesByCommissionId] = useState<Record<number, CommissionStageImage[]>>({});
   const [activeStageImageIndexByStageId, setActiveStageImageIndexByStageId] = useState<Record<number, number>>({});
@@ -124,10 +99,6 @@ function CommissionsPage() {
   // Stage whose corrections show under the strip; null = none
   const [correctionsStageId, setCorrectionsStageId] = useState<number | null>(null);
   const [correctionDraft, setCorrectionDraft] = useState("");
-  // Correction pins in focus mode: placing mode, the pin being written, the pin whose text is open
-  const [pinMode, setPinMode] = useState(false);
-  const [pinDraft, setPinDraft] = useState<{ x: number; y: number; text: string } | null>(null);
-  const [openPinId, setOpenPinId] = useState<number | null>(null);
   // Image height follows the window only, so every commission shows the same size (it used to follow the space left by the content above)
   const [windowHeight, setWindowHeight] = useState(window.innerHeight);
   useEffect(() => {
@@ -245,23 +216,6 @@ function CommissionsPage() {
       .catch(console.error);
   }, []);
 
-  function openNewCommissionForm() {
-    setCommissionTitle("");
-    setSelectedClientId(null);
-    setClientName("");
-    setPlatform("Discord");
-    setSelectedTemplateId(null);
-    setCommissionPrice("");
-    setCurrency(appSettings().default_currency);
-    setCommissionDeadline("");
-    setCommissionNotes("");
-    setSelectedCharacterIds([]);
-    setCharacterCount(1);
-    setCountIsFixed(false);
-    setSelectedTagIds([]);
-    setCharacterSearch("");
-    setFormMode("new");
-  }
 
   useEffect(() => {
     if (takeAction("new-commission")) {
@@ -319,68 +273,15 @@ function CommissionsPage() {
     loadWorkflowStages();
   }, [activeCommission]);
 
+  function openNewCommissionForm() {
+    setForm({ mode: "new", tagIds: [] });
+  }
+
   function handleOpenCommission(commission: Commission) {
     setActiveCommissionId(commission.id);
     setViewMode("list");
   }
 
-  /** Automatic price: called by template and character changes, never when opening a form */
-  function applyAutoPrice(templateId: number | null, characterCount: number) {
-    const basePrice = templates.find((template) => template.id === templateId)?.base_price;
-
-    if (basePrice != null) {
-      setCommissionPrice(
-        String(calculateCommissionPrice(basePrice, characterCount, appSettings().extra_character_rate)).replace(".", ","),
-      );
-    }
-  }
-
-  /** On create: sets the character tag automatically and drops old type tags (the template is the type now; others are kept) */
-  function applyAutoTags(characterCount: number) {
-    if (formMode !== "new") {
-      return;
-    }
-
-    const auto = autoTagIds(characterCount, allTags);
-    const own = (id: number) => [TYPE_CATEGORY, "Characters"].includes(allTags.find((tag) => tag.id === id)?.category ?? "");
-
-    setSelectedTagIds((current) => [...current.filter((id) => !own(id)), ...auto]);
-  }
-
-  /** Linking or unlinking characters: the count only goes up once it is fixed, else it follows them */
-  function changeLinkedCharacters(nextIds: number[]) {
-    const count = effectiveCharacterCount(countIsFixed ? characterCount : 0, nextIds.length);
-
-    setSelectedCharacterIds(nextIds);
-    setCharacterCount(count);
-    applyAutoPrice(selectedTemplateId, count);
-    applyAutoTags(count);
-  }
-
-  function changeCharacterCount(value: number) {
-    const count = effectiveCharacterCount(value, selectedCharacterIds.length);
-
-    setCharacterCount(count);
-    setCountIsFixed(true);
-    applyAutoPrice(selectedTemplateId, count);
-    applyAutoTags(count);
-  }
-
-  const formTemplate = templates.find((template) => template.id === selectedTemplateId) ?? null;
-  const extraCharacters = characterCount - 1;
-  // Chips: the chosen client's characters, plus those of other clients already chosen
-  const formCharacterOptions = Object.values(charactersByClientId)
-    .flat()
-    .filter((character) => character.client_id === selectedClientId || selectedCharacterIds.includes(character.id));
-  const allCharacterOptions = Object.values(charactersByClientId)
-    .flat()
-    .map((character) => ({
-      id: character.id,
-      label: `${character.name} (${hide(clients.find((client) => client.id === character.client_id)?.name ?? "?")})`,
-    }));
-  const formLabel = "mb-1.5 block text-xs font-bold text-muted";
-  const formField =
-    "rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
 
   async function loadPayments() {
     const payments = await getAllPayments();
@@ -488,79 +389,26 @@ function CommissionsPage() {
     }
   }
 
+
   async function handleOpenEditCommission() {
     if (!activeCommission) {
       return;
     }
 
-    setCommissionTitle(activeCommission.title);
-    setClientName(activeCommission.client_name || "");
-    setSelectedClientId(activeCommission.client_id);
-    setPlatform(activeCommission.platform || "Discord");
-    setSelectedTemplateId(activeCommission.template_id);
-    setCommissionPrice(activeCommission.price !== null ? String(activeCommission.price).replace(".", ",") : "");
-    setCurrency(activeCommission.currency || "EUR");
-    setCommissionDeadline(activeCommission.deadline || "");
-    setCommissionNotes(activeCommission.notes || "");
-    const linked = commissionCharactersById[activeCommission.id] ?? [];
-    setSelectedCharacterIds(linked);
-    setCharacterCount(effectiveCharacterCount(activeCommission.character_count ?? 1, linked.length));
-    setCountIsFixed(true);
-    setSelectedTagIds((await getCommissionTags(activeCommission.id)).map((tag) => tag.id));
-    setCharacterSearch("");
-    setFormMode("edit");
+    setForm({ mode: "edit", tagIds: (await getCommissionTags(activeCommission.id)).map((tag) => tag.id) });
   }
 
-  /** Saves the form: creates or updates, and in both cases saves tags and characters */
-  async function handleSaveCommissionForm() {
-    try {
-      setSavingCommission(true);
 
-      const selectedClient = clients.find((client) => client.id === selectedClientId) ?? null;
-      const fields = [
-        commissionTitle,
-        selectedClientId,
-        selectedClient?.name || clientName,
-        selectedClient?.platform || platform,
-      ] as const;
-      const price = parsePrice(commissionPrice);
-      const deadline = commissionDeadline || null;
+  /** After saving the form: the list reloads and the saved commission opens */
+  async function handleFormSaved(commissionId: number) {
+    const data = await getCommissions();
+    setCommissions(data);
+    await loadTagsForCommissions(data);
+    await loadCharactersForCommissions(data);
 
-      let commissionId: number;
-
-      if (formMode === "edit" && activeCommission) {
-        commissionId = activeCommission.id;
-        await updateCommission(commissionId, ...fields, price, currency, deadline, commissionNotes, characterCount);
-      } else {
-        commissionId = await createCommission(
-          ...fields,
-          selectedTemplateId,
-          price,
-          currency,
-          deadline,
-          commissionNotes,
-          characterCount,
-        );
-      }
-
-      await replaceCommissionTags(commissionId, selectedTagIds);
-      await replaceCommissionCharacters(commissionId, selectedCharacterIds);
-
-      const data = await getCommissions();
-      setCommissions(data);
-      await loadTagsForCommissions(data);
-      await loadCharactersForCommissions(data);
-
-      showToast(formMode === "edit" ? "Commission saved." : "Commission created.", "success");
-      setFormMode(null);
-      setActiveCommissionId(commissionId);
-      setViewMode("list");
-    } catch (error) {
-      console.error(error);
-      showToast(error instanceof Error ? error.message : t("Commission error: {error}", { error: String(error) }), "error");
-    } finally {
-      setSavingCommission(false);
-    }
+    setForm(null);
+    setActiveCommissionId(commissionId);
+    setViewMode("list");
   }
 
   async function handleDuplicateCommission() {
@@ -703,7 +551,6 @@ function CommissionsPage() {
   async function toggleCorrectionDone(correction: CommissionCorrection) {
     await setCorrectionDone(correction.id, correction.done_at === null);
     setCorrections(await getAllCorrections());
-    setOpenPinId(null);
   }
 
   function copyPendingCorrections(stageId: number) {
@@ -724,7 +571,6 @@ function CommissionsPage() {
     const trashId = await deleteCorrection(correction.id);
 
     setCorrections(await getAllCorrections());
-    setOpenPinId(null);
     undoToast(showToast, "Correction removed.", trashId);
   }
 
@@ -869,44 +715,6 @@ function CommissionsPage() {
   // focusImageId can be an older version: the item is the one whose alternative contains it
   const focusIndex = focusImages.findIndex((item) => getVersions(item.image).some((version) => version.id === focusImageId));
 
-  useEffect(() => {
-    if (focusIndex < 0) {
-      return;
-    }
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        // First Esc leaves the pin tools; the next one closes the view
-        if (pinMode || pinDraft || openPinId !== null) {
-          setPinMode(false);
-          setPinDraft(null);
-          setOpenPinId(null);
-        } else {
-          setFocusImageId(null);
-        }
-        return;
-      }
-
-      // Arrows move the text cursor while writing a pin
-      if (event.target instanceof HTMLInputElement) return;
-      if (event.key === "ArrowRight") setFocusImageId(focusImages[(focusIndex + 1) % focusImages.length].image.id);
-      if (event.key === "ArrowLeft")
-        setFocusImageId(focusImages[(focusIndex - 1 + focusImages.length) % focusImages.length].image.id);
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  });
-
-  // Another image, or leaving focus mode: nothing of the pin tools stays open
-  useEffect(() => {
-    setPinDraft(null);
-    setOpenPinId(null);
-  }, [focusImageId]);
-
-  useEffect(() => {
-    if (focusIndex < 0) setPinMode(false);
-  }, [focusIndex]);
 
   // On opening a commission, the strip centers on the current stage
   useEffect(() => {
@@ -919,46 +727,6 @@ function CommissionsPage() {
   }, [activeCommissionId]);
 
 
-  const today = new Date();
-  const currentMonth = today.toLocaleString(locale, {
-    month: "long",
-  });
-
-  const currentYear = today.getFullYear();
-
-  const firstDayOfMonth = new Date(
-    currentYear,
-    today.getMonth(),
-    1,
-  );
-
-  let startingWeekDay = firstDayOfMonth.getDay();
-
-  if (startingWeekDay === 0) {
-    startingWeekDay = 7;
-  }
-
-  const daysInMonth = new Date(
-    currentYear,
-    today.getMonth() + 1,
-    0,
-  ).getDate();
-
-  const calendarDays = [
-    ...Array(startingWeekDay - 1).fill(null),
-    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
-  ];
-
-  const selectedDeadlineCommission =
-    activeCommission?.deadline ? activeCommission : null;
-
-  const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
-    ? Math.ceil(
-        (new Date(selectedDeadlineCommission.deadline).getTime() -
-          new Date().getTime()) /
-          (1000 * 60 * 60 * 24),
-      )
-    : null;
 
   const activeCommissionTags = activeCommission
     ? commissionTagsById[activeCommission.id] ?? []
@@ -1037,83 +805,15 @@ function CommissionsPage() {
         }`}
       >
         {viewMode === "list" && (
-          <GlassPanel as="nav" className="min-h-0" contentClassName="overflow-y-auto p-3">
-            {!ready ? null : inboxGroups.every((group) => group.items.length === 0) ? (
-              <p className="p-4 text-center text-sm text-faint">
-                {commissions.length === 0 ? t("No commissions yet") : t("No matches")}
-              </p>
-            ) : (
-              inboxGroups
-                .filter((group) => group.items.length > 0)
-                .map((group) => (
-                  <div key={group.label} className="mb-3 last:mb-0">
-                    <p className="px-2 pb-1 text-xs font-bold text-muted">
-                      {group.label} · {group.items.length}
-                    </p>
-
-                    {group.items.map((commission) => {
-                      const images = stageImagesByCommissionId[commission.id] ?? [];
-                      const latestImage = images[images.length - 1] ?? null;
-                      const stages = commission.template_id
-                        ? templateStagesByTemplateId[commission.template_id] ?? []
-                        : [];
-                      const stageName = stages.find((stage) => stage.id === commission.current_stage_id)?.name;
-                      const deadlineStatus = getDeadlineStatus(commission.deadline);
-
-                      return (
-                        <button
-                          key={commission.id}
-                          type="button"
-                          onClick={() => handleOpenCommission(commission)}
-                          className={`flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition ${
-                            commission.id === activeCommissionId ? "bg-highlight" : "hover:bg-paper"
-                          }`}
-                        >
-                          {latestImage ? (
-                            <img
-                              src={thumbUrl(latestImage.image_data_url)}
-                              loading="lazy" decoding="async"
-                              alt=""
-                              className="h-9 w-9 shrink-0 rounded-sm object-cover"
-                            />
-                          ) : (
-                            <span className="h-9 w-9 shrink-0 rounded-sm bg-paper" />
-                          )}
-
-                          <span className="min-w-0 flex-1">
-                            <span className="block truncate text-sm font-bold">{commission.title}</span>
-                            <span className="block truncate text-xs text-faint">
-                              {[commission.client_name && hide(commission.client_name), stageName].filter(Boolean).join(" · ") || t("No client")}
-                            </span>
-                          </span>
-
-                          {deadlineStatus ? (
-                            <span className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs font-bold ${deadlineStatus.className}`}>
-                              {deadlineStatus.short}
-                            </span>
-                          ) : (
-                            // No deadline: days since acceptance, colored as it nears your promise
-                            <span
-                              title={t("Days since you accepted it")}
-                              className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs font-bold ${
-                                daysToDeadline(commission, appSettings().promise_max_days, new Date()).daysLeft < 0
-                                  ? "chip chip-bad"
-                                  : daysToDeadline(commission, appSettings().promise_max_days, new Date()).daysLeft <=
-                                      appSettings().reminder_days_before
-                                    ? "chip chip-warn"
-                                    : "chip"
-                              }`}
-                            >
-                              {ageInDays(commission, new Date())}d
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))
-            )}
-          </GlassPanel>
+          <CommissionList
+            ready={ready}
+            noCommissions={commissions.length === 0}
+            inboxGroups={inboxGroups}
+            activeCommissionId={activeCommissionId}
+            templateStagesByTemplateId={templateStagesByTemplateId}
+            stageImagesByCommissionId={stageImagesByCommissionId}
+            handleOpenCommission={handleOpenCommission}
+          />
         )}
 
 
@@ -1668,594 +1368,42 @@ function CommissionsPage() {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-                {filteredCommissions.map((commission) => {
-                  const tags = commissionTagsById[commission.id] ?? [];
-                  const normalTags = getNormalTags(tags);
-                  const type = typeOf(commission);
-                  const commissionImages = stageImagesByCommissionId[commission.id] ?? [];
-                  const latestImage = commissionImages.length > 0 ? commissionImages[commissionImages.length - 1] : null;
-                  const altCount = commissionImages.length;
-                  const completionPercentage = getCommissionCompletionPercentage(commission);
-                  const deadlineStatus = getDeadlineStatus(commission.deadline);
-                  const commissionCharacterIds = commissionCharactersById[commission.id] ?? [];
-                  const commissionCharacters = Object.values(charactersByClientId).flat().filter((character) => commissionCharacterIds.includes(character.id), );
-
-                  return (
-                    <button
-                      key={commission.id}
-                      onClick={() => handleOpenCommission(commission)}
-                      className="min-w-0 rounded-3xl border border-line bg-paper p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md"
-                    >
-                      {latestImage && (
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          aria-label={t("Open in focus mode")}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
-                              event.stopPropagation();
-                              setZoomedImage(imageUrl(latestImage.image_data_url));
-                            }
-                          }}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setZoomedImage(imageUrl(latestImage.image_data_url));
-                          }}
-                          className="mb-3 cursor-zoom-in overflow-hidden rounded-2xl bg-surface shadow-sm transition hover:scale-[1.02]"
-                        >
-                          <img
-                            src={thumbUrl(latestImage.image_data_url)}
-                            loading="lazy" decoding="async"
-                            alt={commission.title}
-                            className="h-auto w-full object-contain"
-                          />
-                        </div>
-                      )}
-                      {(() => {
-                        const status = PAYMENT_STATUS_STYLE[
-                          paymentSummary(commission.price, paymentsByCommissionId[commission.id] ?? []).status
-                        ];
-
-                        return (
-                          <span className={`mb-2 inline-flex rounded-sm px-2 py-0.5 text-xs font-bold ${status.className}`}>
-                            {status.label}
-                          </span>
-                        );
-                      })()}
-
-                      <h4 className="break-words font-black leading-tight">
-                        {commission.title}
-                      </h4>
-
-                      {commissionCharacters.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {commissionCharacters.map((character) => (
-                            <span
-                              key={character.id}
-                              className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-black text-muted shadow-sm"
-                            >
-                              {character.name}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {(type || normalTags.length > 0) && (
-                        <div className="mt-3 flex flex-wrap gap-2">
-                          {type && <TagChip name={type.name} color={type.color} />}
-                          {normalTags.map((tag) => (
-                            <TagChip key={tag.id} name={tag.name} color={tag.color} />
-                          ))}
-                        </div>
-                      )}
-
-                      <p className="mt-2 text-sm font-semibold text-muted">
-                        {hide(commission.client_name || t("No client"))}
-                      </p>
-
-                      <p className="mt-1 text-xs text-faint">
-                        {commission.platform || t("No platform")}
-                      </p>
-
-                      <div className="mt-3">
-                        <div className="flex items-center justify-between text-xs font-bold text-muted">
-                          <span>{t("Progress")}</span>
-                          <span>{completionPercentage}%</span>
-                        </div>
-
-                        <div className="mt-2 h-2 overflow-hidden rounded-sm bg-surface">
-                          <div
-                            className={
-                              completionPercentage === 100
-                                ? "h-full rounded-sm bg-tone-ok"
-                                : "h-full rounded-sm bg-primary"
-                            }
-                            style={{ width: `${completionPercentage}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex flex-wrap items-center gap-2">
-                        {altCount > 0 && (
-                          <span className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-black text-muted shadow-sm">
-                            📷 {altCount} {t(altCount === 1 ? "Alt" : "Alts")}
-                          </span>
-                        )}
-
-                        <span className="rounded-sm bg-surface px-3 py-1 text-xs font-bold text-ink shadow-sm">
-                          {commission.price
-                            ? formatMoney(commission.price, commission.currency)
-                            : t("No price")}
-                        </span>
-
-                        {deadlineStatus ? (
-                          <span
-                            className={`rounded-sm px-3 py-1 text-xs font-black shadow-sm ${deadlineStatus.className}`}
-                          >
-                            {deadlineStatus.label}
-                          </span>
-                        ) : (
-                          <span className="rounded-sm bg-surface px-3 py-1 text-xs font-bold text-ink shadow-sm">
-                            {t("No deadline")}
-                          </span>
-                        )}
-                      </div>
-
-                      {commission.notes && (
-                        <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-muted">
-                          {commission.notes}
-                        </p>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+              <CommissionGrid
+                filteredCommissions={filteredCommissions}
+                commissionTagsById={commissionTagsById}
+                getNormalTags={getNormalTags}
+                typeOf={typeOf}
+                stageImagesByCommissionId={stageImagesByCommissionId}
+                getCommissionCompletionPercentage={getCommissionCompletionPercentage}
+                commissionCharactersById={commissionCharactersById}
+                charactersByClientId={charactersByClientId}
+                paymentsByCommissionId={paymentsByCommissionId}
+                handleOpenCommission={handleOpenCommission}
+                setZoomedImage={setZoomedImage}
+              />
             )}
           </div>
         </GlassPanel>
 
         {viewMode === "grid" && (
-        <GlassPanel as="aside" className="h-full min-h-0" contentClassName="overflow-hidden p-5">
-          <div className="max-h-full overflow-y-auto rounded-3xl border border-line bg-paper p-4">
-            <p className="text-xs font-bold text-muted">
-              {t("Calendar")}
-            </p>
-
-            <p className="mt-2 text-lg font-black">
-              {currentMonth} {currentYear}
-            </p>
-
-            {selectedDeadlineCommission && (
-              <div className="mt-4 rounded-2xl bg-surface p-4 shadow-sm">
-                <p className="text-xs font-bold text-muted">
-                  {t("Next deadline")}
-                </p>
-
-                <p className="mt-2 text-sm font-black">
-                  {selectedDeadlineCommission.title}
-                </p>
-
-                <p className="mt-1 text-xs text-muted">
-                  {selectedDeadlineCommission.deadline}
-                </p>
-
-                <p className="mt-3 rounded-sm bg-tone-warn/15 px-3 py-1 text-xs font-bold text-ink">
-                  {daysUntilSelectedDeadline !== null
-                    ? t(daysUntilSelectedDeadline === 1 ? "{n} day left" : "{n} days left", { n: daysUntilSelectedDeadline })
-                    : t("No date")}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-4 grid grid-cols-7 gap-2 text-center text-xs font-bold text-faint">
-              <span>{t("Mon")}</span>
-              <span>{t("Tue")}</span>
-              <span>{t("Wed")}</span>
-              <span>{t("Thu")}</span>
-              <span>{t("Fri")}</span>
-              <span>{t("Sat")}</span>
-              <span>{t("Sun")}</span>
-            </div>
-
-            <div className="mt-3 grid grid-cols-7 gap-2">
-              {calendarDays.map((day, index) => {
-                const deadlineDate = selectedDeadlineCommission?.deadline
-                  ? new Date(selectedDeadlineCommission.deadline)
-                  : null;
-
-                const cellDate =
-                  day !== null
-                    ? new Date(currentYear, today.getMonth(), day)
-                    : null;
-
-                const isToday =
-                  cellDate !== null &&
-                  cellDate.toDateString() === today.toDateString();
-
-                const isInDeadlineRange =
-                  cellDate !== null &&
-                  deadlineDate !== null &&
-                  cellDate >= new Date(today.getFullYear(), today.getMonth(), today.getDate()) &&
-                  cellDate < deadlineDate;
-
-                const isDeadlineDay =
-                  cellDate !== null &&
-                  deadlineDate !== null &&
-                  cellDate.toDateString() === deadlineDate.toDateString();
-
-                return (
-                  <div
-                    key={index}
-                    className={
-                      isDeadlineDay
-                        ? "flex aspect-square items-center justify-center rounded-xl bg-tone-bad text-xs font-black text-on-tone"
-                        : isToday
-                          ? "flex aspect-square items-center justify-center rounded-xl bg-primary-hover text-xs font-black text-on-primary shadow-sm"
-                          : isInDeadlineRange
-                            ? "flex aspect-square items-center justify-center rounded-xl bg-tone-warn/15 text-xs font-bold text-ink"
-                            : "flex aspect-square items-center justify-center rounded-xl bg-surface text-xs font-bold text-faint"
-                    }
-                  >
-                    {day ?? ""}
-                  </div>
-                );
-              })}
-            </div>
-
-            {selectedDeadlineCommission?.deadline && (
-              <div className="mt-4 rounded-2xl bg-surface p-4 shadow-sm">
-                <p className="text-xs font-bold text-muted">
-                  {t("Deadline summary")}
-                </p>
-
-                <div className="mt-3 space-y-3 text-sm">
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold text-muted">{t("Today")}</span>
-                    <span className="font-bold text-ink">
-                      {today.toLocaleDateString(locale, {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold text-muted">{t("Deadline")}</span>
-                    <span className="font-bold text-tone-bad">
-                      {new Date(selectedDeadlineCommission.deadline).toLocaleDateString(
-                        locale,
-                        {
-                          month: "short",
-                          day: "numeric",
-                        },
-                      )}
-                    </span>
-                  </div>
-
-                  <div className="rounded-sm bg-tone-warn/15 px-3 py-2 text-center text-xs font-bold text-ink">
-                    {daysUntilSelectedDeadline !== null
-                      ? daysUntilSelectedDeadline > 0
-                        ? t(daysUntilSelectedDeadline === 1 ? "{n} day left" : "{n} days left", { n: daysUntilSelectedDeadline })
-                        : daysUntilSelectedDeadline === 0
-                          ? t("Due today")
-                          : t(daysUntilSelectedDeadline === -1 ? "{n} day overdue" : "{n} days overdue", { n: Math.abs(daysUntilSelectedDeadline) })
-                      : t("No deadline")}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </GlassPanel>
+        <DeadlineCalendar activeCommission={activeCommission} />
         )}
       </section>
-      {formMode && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div role="dialog" aria-modal="true" aria-label={formMode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden glass-heavy rounded-3xl">
-            <DialogBehavior onClose={() => setFormMode(null)} />
-            {/* Left: pick */}
-            <div className="min-h-0 space-y-5 overflow-y-auto p-6">
-              <input
-                autoFocus
-                value={commissionTitle}
-                onChange={(event) => setCommissionTitle(event.target.value)}
-                placeholder={t("Commission title")}
-                className="w-full rounded-md border border-transparent bg-transparent px-1 text-2xl font-black outline-none hover:border-line focus:border-ink"
-              />
-
-              <div>
-                <p className={formLabel}>{t("Client")}</p>
-                <div className="flex gap-2">
-                  <input
-                    list={isPrivate() ? undefined : "client-options"}
-                    data-private
-                    value={clientName}
-                    onChange={(event) => {
-                      const name = event.target.value;
-                      const match = clients.find((client) => client.name === name);
-                      setClientName(name);
-                      setSelectedClientId(match?.id ?? null);
-                      if (match?.platform) setPlatform(match.platform);
-                    }}
-                    placeholder={t("Search or type a name")}
-                    className={`${formField} flex-1`}
-                  />
-                  <datalist id="client-options">
-                    {clients.map((client) => (
-                      <option key={client.id} value={client.name}>
-                        {client.handle ?? client.platform ?? ""}
-                      </option>
-                    ))}
-                  </datalist>
-
-                  {/* The platform comes from the client; pick it by hand only for someone not saved */}
-                  {!selectedClientId && (
-                    <select value={platform} onChange={(event) => setPlatform(event.target.value)} className={formField}>
-                      <option>Discord</option>
-                      <option>Twitter / X</option>
-                      <option>Bluesky</option>
-                      <option>Telegram</option>
-                      <option>Email</option>
-                      <option>Other</option>
-                    </select>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <p className={formLabel}>
-                  {t("Characters")}
-                  <input
-                    type="number"
-                    min={1}
-                    value={characterCount}
-                    onChange={(event) => {
-                      const value = Number(event.target.value);
-                      if (value >= 1) changeCharacterCount(value);
-                    }}
-                    title={t("How many characters the commission has; the price depends on it")}
-                    className="ml-3 w-14 rounded-sm border border-line-strong bg-surface px-1.5 py-0.5 text-center text-sm normal-case tracking-normal text-ink outline-none focus:border-ink"
-                  />
-                  <span className="ml-2 normal-case tracking-normal text-faint">
-                    {t("the price depends on this number")}
-                  </span>
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {formCharacterOptions.map((character) => {
-                    const selected = selectedCharacterIds.includes(character.id);
-
-                    return (
-                      <button
-                        key={character.id}
-                        type="button"
-                        onClick={() => {
-                          changeLinkedCharacters(
-                            selected
-                              ? selectedCharacterIds.filter((id) => id !== character.id)
-                              : [...selectedCharacterIds, character.id],
-                          );
-                        }}
-                        className={
-                          selected
-                            ? "rounded-sm bg-primary px-2.5 py-1 text-sm font-bold text-on-primary"
-                            : "rounded-sm border border-line-strong px-2.5 py-1 text-sm text-muted hover:border-ink hover:text-ink"
-                        }
-                      >
-                        {character.name}
-                        {character.client_id !== selectedClientId && (
-                          <span className="ml-1 text-xs opacity-70">
-                            · {hide(clients.find((client) => client.id === character.client_id)?.name ?? "")}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-
-                  {/* Characters from any client: collaborations, friends' characters… */}
-                  <input
-                    list={isPrivate() ? undefined : "character-options"}
-                    value={characterSearch}
-                    onChange={(event) => {
-                      const option = allCharacterOptions.find((item) => item.label === event.target.value);
-
-                      if (option) {
-                        changeLinkedCharacters(
-                          selectedCharacterIds.includes(option.id) ? selectedCharacterIds : [...selectedCharacterIds, option.id],
-                        );
-                        setCharacterSearch("");
-                      } else {
-                        setCharacterSearch(event.target.value);
-                      }
-                    }}
-                    placeholder={t("+ from another client")}
-                    className="w-52 rounded-sm border border-dashed border-line-strong bg-transparent px-2 py-1 text-sm outline-none focus:border-ink"
-                  />
-                  <datalist id="character-options">
-                    {allCharacterOptions.map((option) => (
-                      <option key={option.id} value={option.label} />
-                    ))}
-                  </datalist>
-                </div>
-              </div>
-
-              <div>
-                <p className={formLabel}>
-                  Type
-                  {formMode === "edit" && (
-                    <span className="ml-2 normal-case tracking-normal text-faint">
-                      {t("· can't change after creating (stages and images depend on it)")}
-                    </span>
-                  )}
-                </p>
-                <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2">
-                  {templates.map((template) => {
-                    const selected = template.id === selectedTemplateId;
-
-                    return (
-                      <button
-                        key={template.id}
-                        type="button"
-                        disabled={formMode === "edit"}
-                        onClick={() => {
-                          setSelectedTemplateId(template.id);
-                          applyAutoPrice(template.id, characterCount);
-                          applyAutoTags(characterCount);
-                        }}
-                        className={`rounded-md border px-3 py-2 text-left transition disabled:cursor-default ${
-                          selected
-                            ? "border-ink bg-paper ring-1 ring-ink"
-                            : "border-line hover:border-line-strong disabled:opacity-40"
-                        }`}
-                      >
-                        <span className="block truncate text-sm font-bold">{template.name}</span>
-                        <span className="text-xs text-faint">
-                          {template.base_price != null ? formatMoney(template.base_price) : t("No base price")}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <p className={formLabel}>{t("Tags")}</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {allTags.filter((tag) => tag.category !== TYPE_CATEGORY).map((tag) => {
-                    const selected = selectedTagIds.includes(tag.id);
-
-                    return (
-                      <TagChip
-                        key={tag.id}
-                        name={tag.name}
-                        color={tag.color}
-                        selected={selected}
-                        onClick={() =>
-                          setSelectedTagIds((current) => {
-                            if (selected) {
-                              return current.filter((id) => id !== tag.id);
-                            }
-
-                            // Only one "Characters" tag at a time
-                            const sameCategory =
-                              tag.category === "Characters"
-                                ? allTags.filter((other) => other.category === tag.category).map((other) => other.id)
-                                : [];
-
-                            return [...current.filter((id) => !sameCategory.includes(id)), tag.id];
-                          })
-                        }
-                      />
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-
-            {/* Right: live summary, price, delivery and notes */}
-            <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-l border-line bg-paper p-6">
-              <div>
-                <p className={formLabel}>{t("Summary")}</p>
-                <p className="truncate text-lg font-black">{commissionTitle.trim() || "Untitled commission"}</p>
-                <p className="text-sm text-muted">
-                  {[clientName.trim() || t("No client"), platform, formTemplate?.name].filter(Boolean).join(" · ")}
-                </p>
-              </div>
-
-              <div className="space-y-1 border-y border-line py-3 text-sm">
-                {formTemplate?.base_price != null && (
-                  <>
-                    <p className="flex justify-between">
-                      <span>{formTemplate.name}</span>
-                      <span>{formatMoney(formTemplate.base_price, currency)}</span>
-                    </p>
-                    {extraCharacters > 0 && (
-                      <p className="flex justify-between text-muted">
-                        <span>
-                          + {extraCharacters} extra character{extraCharacters === 1 ? "" : "s"} ({Math.round(appSettings().extra_character_rate * 100)}% each)
-                        </span>
-                        <span>
-                          {formatMoney(
-                            calculateCommissionPrice(
-                              formTemplate.base_price,
-                              characterCount,
-                              appSettings().extra_character_rate,
-                            ) -
-                              formTemplate.base_price,
-                            currency,
-                          )}
-                        </span>
-                      </p>
-                    )}
-                  </>
-                )}
-
-                <div className="flex items-center justify-between gap-2 pt-1 font-black">
-                  <span>{t("Price")}</span>
-                  <span className="flex items-center gap-1">
-                    <input
-                      value={commissionPrice}
-                      onChange={(event) => setCommissionPrice(event.target.value)}
-                      placeholder="0"
-                      inputMode="decimal"
-                      data-private
-                      title={t("Calculated from the type and characters; you can change it")}
-                      className="w-24 rounded-md border border-line-strong bg-surface px-2 py-1 text-right font-black outline-none focus:border-ink"
-                    />
-                    <select
-                      value={currency}
-                      onChange={(event) => setCurrency(event.target.value)}
-                      className="rounded-md border border-line-strong bg-surface px-1 py-1 text-sm font-semibold"
-                    >
-                      <option>EUR</option>
-                      <option>USD</option>
-                      <option>GBP</option>
-                    </select>
-                  </span>
-                </div>
-              </div>
-
-              <label className="block">
-                <span className={formLabel}>{t("Deadline · optional")}</span>
-                <input
-                  type="date"
-                  value={commissionDeadline}
-                  onChange={(event) => setCommissionDeadline(event.target.value)}
-                  className={`${formField} w-full`}
-                />
-              </label>
-
-              <label className="flex min-h-24 flex-1 flex-col">
-                <span className={formLabel}>{t("Notes")}</span>
-                <textarea
-                  value={commissionNotes}
-                  onChange={(event) => setCommissionNotes(event.target.value)}
-                  placeholder={t("Background, pose, details to remember…")}
-                  className={`${formField} w-full flex-1 resize-none`}
-                />
-              </label>
-
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setFormMode(null)}
-                  className="rounded-md px-4 py-2 text-sm font-semibold text-muted hover:text-ink"
-                >
-                  {t("Cancel")}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveCommissionForm}
-                  disabled={savingCommission || !commissionTitle.trim()}
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
-                >
-                  {savingCommission ? t("Saving…") : formMode === "new" ? t("Create commission") : t("Save changes")}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {form && (
+        <CommissionForm
+          mode={form.mode}
+          commission={form.mode === "edit" ? activeCommission : null}
+          initialTagIds={form.tagIds}
+          linkedCharacterIds={form.mode === "edit" && activeCommission ? commissionCharactersById[activeCommission.id] ?? [] : []}
+          templates={templates}
+          clients={clients}
+          charactersByClientId={charactersByClientId}
+          allTags={allTags}
+          onClose={() => setForm(null)}
+          onSaved={handleFormSaved}
+        />
       )}
+
 
       {showFinishModal && activeCommission && (
         <FinishCommissionModal
@@ -2281,186 +1429,23 @@ function CommissionsPage() {
         />
         )}
       {focusIndex >= 0 && (
-        <div
-          role="dialog" aria-modal="true" aria-label={t("Open in focus mode")}
-          className="fixed inset-0 z-[999] flex flex-col items-center justify-center overflow-hidden bg-[#0e0e10]"
-          onClick={() => setFocusImageId(null)}
-        >
-          <AmbientBackground strong />
-          {(() => {
-            const { image: current, stage } = focusImages[focusIndex];
-            const versions = getVersions(current);
-            const shown = versions.find((version) => version.id === focusImageId) ?? current;
-            const done = workflowStages.findIndex((item) => item.id === stage.id) < currentStageIndex;
-            const pins = activeCorrections.filter((correction) => correction.image_id === shown.id && correction.x !== null && correction.y !== null);
-            // Pending pins from earlier versions of this alternative show faded on the new one
-            const earlier = versions.filter((version) => version.version < shown.version);
-            const ghosts = activeCorrections.filter(
-              (correction) =>
-                correction.done_at === null &&
-                correction.x !== null &&
-                correction.y !== null &&
-                earlier.some((version) => version.id === correction.image_id),
-            );
-            const openPin = [...pins, ...ghosts].find((correction) => correction.id === openPinId) ?? null;
-            // Keeps the text box inside the image when a pin sits near an edge
-            const boxLeft = (x: number) => `${Math.min(Math.max(x, 0.15), 0.85) * 100}%`;
-
-            return (
-              <>
-                <div
-                  className={`relative ${pinMode ? "cursor-crosshair" : ""}`}
-                  onClick={(event) => {
-                    if (!pinMode) return;
-
-                    event.stopPropagation();
-                    const box = event.currentTarget.getBoundingClientRect();
-                    setOpenPinId(null);
-                    setPinDraft({ x: (event.clientX - box.left) / box.width, y: (event.clientY - box.top) / box.height, text: "" });
-                  }}
-                >
-                  <img
-                    src={imageUrl(shown.image_data_url)}
-                    alt=""
-                    className="block max-h-[88vh] max-w-[94vw] object-contain"
-                  />
-
-                  {ghosts.map((correction) => (
-                    <button
-                      key={correction.id}
-                      type="button"
-                      title={correction.text}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setPinDraft(null);
-                        setOpenPinId(openPinId === correction.id ? null : correction.id);
-                      }}
-                      style={{ left: `${(correction.x ?? 0) * 100}%`, top: `${(correction.y ?? 0) * 100}%` }}
-                      className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-dashed border-white bg-amber-400/50 text-xs font-black text-black"
-                    >
-                      {pinNumber(activeCorrections, correction)}
-                    </button>
-                  ))}
-
-                  {pins.map((correction) => (
-                    <button
-                      key={correction.id}
-                      type="button"
-                      title={correction.text}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setPinDraft(null);
-                        setOpenPinId(openPinId === correction.id ? null : correction.id);
-                      }}
-                      style={{ left: `${(correction.x ?? 0) * 100}%`, top: `${(correction.y ?? 0) * 100}%` }}
-                      className={`absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full text-xs font-black shadow-lg ring-2 ring-white ${
-                        correction.done_at === null ? "bg-amber-400 text-black" : "bg-green-500 text-white"
-                      }`}
-                    >
-                      {correction.done_at === null ? pinNumber(activeCorrections, correction) : "✓"}
-                    </button>
-                  ))}
-
-                  {openPin && (
-                    <div
-                      onClick={(event) => event.stopPropagation()}
-                      style={{ left: boxLeft(openPin.x ?? 0), top: `${(openPin.y ?? 0) * 100}%` }}
-                      className="absolute z-10 mt-4 w-60 -translate-x-1/2 rounded-md bg-surface p-2.5 text-sm text-ink shadow-2xl"
-                    >
-                      {openPin.image_id !== shown.id && (
-                        <p className="mb-1 text-xs text-faint">
-                          {t("From v{n}", { n: versions.find((version) => version.id === openPin.image_id)?.version ?? "" })}
-                        </p>
-                      )}
-                      <p className="whitespace-pre-wrap">{openPin.text}</p>
-                      <div className="mt-1.5 flex gap-3 text-xs">
-                        <button type="button" onClick={() => toggleCorrectionDone(openPin)} className="font-semibold hover:underline">
-                          {openPin.done_at === null ? t("Mark as done") : t("Mark as not done")}
-                        </button>
-                        <button type="button" onClick={() => removeCorrection(openPin)} className="text-faint hover:text-tone-bad">
-                          {t("Remove correction")}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {pinDraft && (
-                    <>
-                      <span
-                        style={{ left: `${pinDraft.x * 100}%`, top: `${pinDraft.y * 100}%` }}
-                        className="absolute flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-amber-400/70 text-xs font-black text-black ring-2 ring-white"
-                      >
-                        {activeCorrections.filter((correction) => correction.image_id === shown.id).length + 1}
-                      </span>
-                      <input
-                        autoFocus
-                        value={pinDraft.text}
-                        onChange={(event) => setPinDraft({ ...pinDraft, text: event.target.value })}
-                        onClick={(event) => event.stopPropagation()}
-                        onKeyDown={async (event) => {
-                          if (event.key !== "Enter" || !pinDraft.text.trim() || !activeCommission) return;
-
-                          try {
-                            await addCorrection(activeCommission.id, stage.id, pinDraft.text, { imageId: shown.id, x: pinDraft.x, y: pinDraft.y });
-                            setPinDraft(null);
-                            setCorrections(await getAllCorrections());
-                          } catch (error) {
-                            showToast(error instanceof Error ? error.message : `${error}`, "error");
-                          }
-                        }}
-                        placeholder={t("What should change here? Enter to add")}
-                        style={{ left: boxLeft(pinDraft.x), top: `${pinDraft.y * 100}%` }}
-                        className="absolute z-10 mt-4 w-64 -translate-x-1/2 rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm text-ink shadow-2xl outline-none focus:border-ink"
-                      />
-                    </>
-                  )}
-                </div>
-                <div className="mt-3 flex items-center gap-3 text-sm text-white/80" onClick={(event) => event.stopPropagation()}>
-                  <span>
-                    {stage.name} · {shown.label}
-                  </span>
-                  {versions.length > 1 &&
-                    versions.map((version) => (
-                      <button
-                        key={version.id}
-                        type="button"
-                        onClick={() => setFocusImageId(version.id)}
-                        className={`rounded-sm px-2 py-0.5 text-xs font-bold ${
-                          version.id === shown.id ? "bg-white text-black" : "bg-white/20 text-white hover:bg-white/30"
-                        }`}
-                      >
-                        {versionLabel(version, versions, done)}
-                      </button>
-                    ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPinMode(!pinMode);
-                      setPinDraft(null);
-                      setOpenPinId(null);
-                    }}
-                    className={`rounded-sm px-2 py-0.5 text-xs font-bold ${
-                      pinMode ? "bg-amber-400 text-black" : "bg-white/20 text-white hover:bg-white/30"
-                    }`}
-                  >
-                    {pinMode ? t("Click the image to add a correction") : t("+ Correction pin")}
-                  </button>
-                  <button
-                    type="button"
-                    disabled={importingStageId !== null}
-                    onClick={() => handleAddVersion(shown)}
-                    className="rounded-sm bg-white/20 px-2 py-0.5 text-xs font-bold text-white hover:bg-white/30 disabled:opacity-50"
-                  >
-                    {t("+ New version")}
-                  </button>
-                  <span className="text-white/50">
-                    {focusIndex + 1} / {focusImages.length} · ← → to move · Esc to close
-                  </span>
-                </div>
-              </>
-            );
-          })()}
-        </div>
+        <FocusViewer
+          commissionId={activeCommission?.id ?? null}
+          focusImages={focusImages}
+          focusIndex={focusIndex}
+          focusImageId={focusImageId}
+          setFocusImageId={setFocusImageId}
+          getVersions={getVersions}
+          versionLabel={versionLabel}
+          workflowStages={workflowStages}
+          currentStageIndex={currentStageIndex}
+          activeCorrections={activeCorrections}
+          setCorrections={setCorrections}
+          toggleCorrectionDone={toggleCorrectionDone}
+          removeCorrection={removeCorrection}
+          importingStageId={importingStageId}
+          handleAddVersion={handleAddVersion}
+        />
       )}
 
       {zoomedImage && (
