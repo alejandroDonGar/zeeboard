@@ -91,7 +91,7 @@
   --glass-top: rgba(255, 255, 255, 0.9);
   --shadow-s: rgba(60, 40, 10, 0.08);
   --shadow-l: rgba(60, 40, 10, 0.22);
-  --ambient-opacity: 0.32;
+  --ambient-opacity: 0.55;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -102,7 +102,7 @@
     --glass-top: rgba(255, 255, 255, 0.12);
     --shadow-s: rgba(0, 0, 0, 0.3);
     --shadow-l: rgba(0, 0, 0, 0.55);
-    --ambient-opacity: 0.3;
+    --ambient-opacity: 0.45;
   }
 }
 
@@ -113,11 +113,12 @@
   --glass-top: rgba(255, 255, 255, 0.12);
   --shadow-s: rgba(0, 0, 0, 0.3);
   --shadow-l: rgba(0, 0, 0, 0.55);
-  --ambient-opacity: 0.3;
+  --ambient-opacity: 0.45;
 }
 
-/* .panel: el mismo material sin desenfoque. Con un 80 % de opacidad apenas se nota y es más barato de pintar;
-   además un backdrop-filter atraparía los modales "fixed" que vivan dentro. */
+/* Cristal esmerilado casi opaco, sin backdrop-filter: con un 80-90 % de opacidad sobre un fondo suave el desenfoque
+   apenas se ve, y cada backdrop-filter obliga a repintar lo que tiene detrás cuando el fondo cambia (mucho más lento).
+   Tampoco atrapa los modales "fixed" que vivan dentro. */
 .panel,
 .glass,
 .glass-heavy {
@@ -127,11 +128,6 @@
     inset 0 1px 0 var(--glass-top),
     0 1px 2px var(--shadow-s),
     0 18px 40px -12px var(--shadow-l);
-}
-
-.glass,
-.glass-heavy {
-  backdrop-filter: blur(26px) saturate(165%);
 }
 
 .glass-heavy {
@@ -144,17 +140,40 @@
   .glass,
   .glass-heavy {
     background: var(--surface);
-    backdrop-filter: none;
   }
 }
 
-/* Los colores del fondo cambian con un fundido; con poco movimiento, más corto */
-.ambient-blob {
-  transition: background-color 1.4s ease;
+/* Fondo de colores: tres degradados radiales. Los colores son propiedades registradas (<color>), así que
+   pueden animarse con un fundido sin repintar nada desenfocado. */
+@property --amb-a {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #e6d6bd;
+}
+@property --amb-b {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #d4dbe0;
+}
+@property --amb-c {
+  syntax: "<color>";
+  inherits: false;
+  initial-value: #eadfc6;
+}
+
+.ambient {
+  background:
+    radial-gradient(ellipse 30% 38% at 68% 35%, var(--amb-a), transparent),
+    radial-gradient(ellipse 26% 32% at 82% 78%, var(--amb-b), transparent),
+    radial-gradient(ellipse 22% 30% at 34% 82%, var(--amb-c), transparent);
+  transition:
+    --amb-a 1.4s ease,
+    --amb-b 1.4s ease,
+    --amb-c 1.4s ease;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ambient-blob {
+  .ambient {
     transition-duration: 0.3s;
   }
 }

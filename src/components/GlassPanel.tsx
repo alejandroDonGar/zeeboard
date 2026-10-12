@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
 /**
- * Panel de cristal. El cristal (backdrop-filter) va en una capa hermana y no en el contenedor:
- * un backdrop-filter convierte al elemento en el origen de sus descendientes "fixed", y los modales
- * que viven dentro de un panel quedarían encerrados en él.
+ * Panel de cristal con su capa de fondo aparte del contenido.
+ * (Ya no usa backdrop-filter, que era lento y encerraba a los descendientes "fixed"; la capa aparte
+ * se mantiene por si algún día vuelve a hacer falta.)
  */
 function GlassPanel({
   as: Tag = "div",

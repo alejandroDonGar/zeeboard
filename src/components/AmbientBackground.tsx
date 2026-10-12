@@ -1,22 +1,16 @@
+import type { CSSProperties } from "react";
 import { useAmbientColors } from "../lib/ambient";
 
-/** Tres manchas de color desenfocadas detrás de toda la app; su color viene de la imagen en pantalla. */
-/** `strong`: sobre fondo oscuro (modo foco) las manchas pueden ser más intensas. */
+/** Fondo de color detrás de toda la app; sus tres tonos salen de la imagen en pantalla (lib/ambient.ts). */
 function AmbientBackground({ strong = false }: { strong?: boolean }) {
   const [a, b, c] = useAmbientColors();
 
   return (
-    // El recorte va aparte: si las manchas (que sobresalen) estuvieran en un contenedor desplazable, scrollIntoView lo movería
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
     <div
-      className="absolute -inset-[10%]"
-      style={{ filter: "blur(70px) saturate(140%)", opacity: strong ? 0.55 : "var(--ambient-opacity)" }}
-    >
-      <i className="ambient-blob absolute rounded-full" style={{ left: "45%", top: "5%", width: "46%", height: "60%", backgroundColor: a }} />
-      <i className="ambient-blob absolute rounded-full" style={{ left: "62%", top: "50%", width: "40%", height: "50%", backgroundColor: b }} />
-      <i className="ambient-blob absolute rounded-full" style={{ left: "20%", top: "60%", width: "30%", height: "40%", backgroundColor: c }} />
-    </div>
-    </div>
+      aria-hidden="true"
+      className="ambient pointer-events-none absolute inset-0"
+      style={{ "--amb-a": a, "--amb-b": b, "--amb-c": c, opacity: strong ? 0.8 : "var(--ambient-opacity)" } as CSSProperties}
+    />
   );
 }
 
