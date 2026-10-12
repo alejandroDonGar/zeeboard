@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZeeBoard · Resumen (maqueta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+.top .date { color: var(--faint); }
+
+/* Una sola superficie con dos columnas: lo de hoy a la izquierda, las cifras a la derecha */
+.board { display: grid; grid-template-columns: minmax(0, 1fr) clamp(280px, 30%, 360px); min-height: 0; overflow: hidden; }
+.col { overflow: auto; padding: 22px 24px 28px; display: grid; align-content: start; gap: 28px; min-width: 0; }
+.col + .col { border-left: 1px solid var(--line); padding-inline: 20px; }
+
+.h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 8px; font-size: 13px; font-weight: 600; }
+.h3 span { color: var(--faint); font-weight: 500; }
+.h3 a { margin-left: auto; color: var(--faint); font-weight: 500; text-decoration: none; }
+.h3 a:hover { color: var(--ink); }
+
+/* Things 3: «Hoy» arriba, grande y tranquilo */
+.today h2 { margin: 0 0 4px; font: 600 30px/1.1 "Fraunces", serif; letter-spacing: -.02em; }
+.today p.lead { margin: 0 0 14px; color: var(--muted); }
+.att { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 12px; width: 100%; padding: 8px; border-radius: 4px; text-align: left; text-decoration: none; color: inherit; }
+.att:hover { background: color-mix(in srgb, var(--highlight) 60%, transparent); }
+.att + .att { box-shadow: 0 -1px 0 var(--line); }
+.att .thumb { width: 40px; height: 40px; }
+.att strong { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.att small { display: block; color: var(--muted); font-size: 12.5px; }
+.kind { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.all-clear { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px dashed var(--line-strong); border-radius: 4px; color: var(--muted); }
+
+/* En curso: mismas filas que Comisiones, con barra de progreso */
+.wrow { position: relative; display: grid; grid-template-columns: 40px minmax(0, 1fr) minmax(70px, 120px) 74px; align-items: center; gap: 12px; padding: 8px 8px 8px 14px; border-radius: 4px; text-decoration: none; color: inherit; }
+.wrow::before { content: ""; position: absolute; left: 4px; top: 10px; bottom: 10px; width: 3px; border-radius: 2px; background: var(--tag); }
+.wrow:hover { background: color-mix(in srgb, var(--highlight) 60%, transparent); }
+.wrow + .wrow { box-shadow: 0 -1px 0 var(--line); }
+.wrow .thumb { width: 40px; height: 40px; }
+.wrow .t { min-width: 0; }
+.wrow strong { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wrow small { display: block; color: var(--faint); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prog { height: 4px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.prog i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
+.wrow .due { text-align: right; }
+
+/* Stripe: cifras en lista, sin cajas */
+.figs { display: grid; }
+.figs > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 2px 12px; padding: 12px 0; }
+.figs > div + div { border-top: 1px solid var(--line); }
+.figs dt { color: var(--muted); }
+.figs dd { margin: 0; text-align: right; }
+.figs .big { font-size: 20px; }
+.figs small.sub { grid-column: 1 / -1; color: var(--faint); font-size: 12px; }
+
+.unpaid { display: grid; }
+.unpaid a { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 7px 4px; border-radius: 4px; color: inherit; text-decoration: none; }
+.unpaid a:hover { background: color-mix(in srgb, var(--highlight) 60%, transparent); }
+.unpaid a + a { box-shadow: 0 -1px 0 var(--line); }
+.unpaid .t { min-width: 0; }
+.unpaid strong { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.unpaid small { display: block; color: var(--faint); font-size: 12px; }
+.unpaid .amt { font-weight: 600; white-space: nowrap; }
+.unpaid .total { display: flex; justify-content: space-between; padding: 8px 4px 0; border-top: 1px solid var(--line-strong); margin-top: 2px; font-weight: 600; }
+
+.rate .big { font-size: 26px; }
+.rate small { display: block; color: var(--faint); font-size: 12px; margin-top: 2px; }
+
+/* Recibido por mes */
+.chart-head { display: flex; align-items: baseline; gap: 8px; margin: 0 0 10px; }
+.chart-head .h3 { margin: 0; }
+.kpi { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+.kpi .big { font-size: 22px; }
+.kpi .delta { font-size: 12px; color: var(--faint); }
+
+
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag b { color: var(--faint); font-weight: 500; margin-left: 2px; }
+
+.thumb { border-radius: 4px; overflow: hidden; display: grid; place-items: center; }
+.thumb svg { width: 100%; height: 100%; display: block; }
+.ph { width: 100%; height: 100%; display: grid; place-items: center; font-weight: 600; font-size: 13px; color: #1f2933; }
+
+@media (max-width: 1180px) {
+  .board { display: block; overflow-y: auto; }
+  .col { overflow: visible; }
+  .col + .col { border-left: 0; border-top: 1px solid var(--line); padding-inline: 24px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px 32px; }
+}
+@media (max-width: 760px) {
+  .wrow { grid-template-columns: 40px minmax(0, 1fr) 64px; }
+  .wrow .prog { display: none; }
+}
+</style>
+</head>
+<body data-page="resumen">
+<div class="ambient" aria-hidden="true"></div>
+
+<div class="app">
+  <aside class="side glass" id="side" data-note="Las filas llevan a Comisiones. Pasa el ratón por los meses de «Recibido por mes»."></aside>
+
+  <main class="main">
+    <header class="top glass">
+      <h1>Resumen</h1>
+      <span class="date" id="date"></span>
+      <div class="spacer"></div>
+      <a class="primary" href="comisiones.html" style="text-decoration:none"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva comisión<kbd>Ctrl N</kbd></a>
+    </header>
+    <section class="board glass" id="board"></section>
+  </main>
+</div>
+
+<script src="shell.js"></script>
+<script src="ambient.js"></script>
+<script src="art.js"></script>
+<script src="chart.js"></script>
+<script>
+const P = {
+  teal:  { fur:"#5b7f8f", muzzle:"#f3efe6", bg:"#f3dca0" },
+  orange:{ fur:"#e07a3c", muzzle:"#fff4e8", bg:"#a7d0e6" },
+  sketch:{ fur:"#fbf8f3", muzzle:"#fbf8f3", bg:"#fbf8f3" },
+};
+
+/* Mismos datos que muestra hoy el Resumen de la app, recolocados */
+const attention = [
+  { kind: "Vence hoy", tone: "bad", title: "Reference Sheet", text: "Kuro · Color plano 3/5. Se entrega hoy.", pal: P.teal },
+  { kind: "Sin avances", tone: "warn", title: "Full Colour", text: "Luna · Boceto. Sin cambios desde hace 9 días.", pal: P.sketch },
+];
+const work = [
+  { title: "Reference Sheet", client: "Kuro", stage: "Color plano", n: 3, of: 5, due: "Hoy", tone: "bad", tag: "#2f9e64", pal: P.teal },
+  { title: "Rendered Full Body + Complex Background", client: "Nova", stage: "Fondo", n: 5, of: 6, due: "21 días", tone: "", tag: "#1f8f86", pal: P.orange },
+  { title: "Full Colour", client: "Tilly", stage: "Boceto", n: 1, of: 5, due: "2 días", tone: "warn", tag: "#3c6bd6", pal: P.sketch },
+  { title: "Full Colour", client: "Luna", stage: "Boceto", n: 1, of: 5, due: "11 días", tone: "", tag: "#3c6bd6", pal: P.sketch },
+  { title: "Flat Colour", client: "Basil", stage: "Sin empezar", n: 0, of: 4, due: "Sin fecha", tone: "", tag: "#5b5bd6", color: "#e0b07a" },
+  { title: "Full Colour", client: "Juniper", stage: "Sin empezar", n: 0, of: 5, due: "Sin fecha", tone: "", tag: "#3c6bd6", color: "#c6b3e8" },
+];
+const unpaid = [
+  ["Full Colour", "Tilly", 240, "#f5b04a"], ["Full Colour", "Juniper", 240, "#c6b3e8"], ["Full Colour", "Luna", 160, "#c9b8ee"],
+  ["Reference Sheet", "Kuro", 150, "#7fb2c2"], ["Flat Colour", "Basil", 110, "#e0b07a"], ["Rendered Full Body + Complex Background", "Nova", 75, "#d9a066"],
+];
+const months = [["may", 155.01], ["jun", 484.80], ["jul", 445.96], ["ago", 376.49], ["sep", 226.31], ["oct", 96.75]];
+const topTags = [["Full Colour", "#3c6bd6", 5], ["Reference Sheet", "#2f9e64", 2], ["Render + Complex Background", "#1f8f86", 2], ["Flat Colour", "#5b5bd6", 2], ["Commercial use", "#1f8f86", 1], ["Rush", "#d64545", 1]];
+
+const fmt = (n) => n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n) => `${fmt(n).split(",")[0]}<small>,${fmt(n).split(",")[1]} €</small>`;
+const thumb = (w) => w.pal ? head(w.pal) : `<span class="ph" style="background:${w.color}">${w.client.slice(0, 2)}</span>`;
+
+const today = new Date(2026, 9, 12);
+document.getElementById("date").textContent = today.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+
+const total6 = months.reduce((s, m) => s + m[1], 0);
+const totalUnpaid = unpaid.reduce((s, u) => s + u[2], 0);
+
+document.getElementById("board").innerHTML = `
+  <div class="col">
+    <section class="today">
+      <h2>Hoy</h2>
+      <p class="lead">${attention.length ? `${attention.length} cosas necesitan tu atención.` : "Nada urgente."}</p>
+      ${attention.length ? attention.map((a) => `
+        <a class="att" href="comisiones.html">
+          <span class="thumb">${head(a.pal)}</span>
+          <span style="min-width:0"><strong>${a.title}</strong><small>${a.text}</small></span>
+          <span class="kind"><i class="dot" style="background:var(--${a.tone})"></i>${a.kind}</span>
+        </a>`).join("") : `<div class="all-clear">Todo al día. Nada vence hoy ni hay pagos atrasados.</div>`}
+    </section>
+
+    <section>
+      <p class="h3">En curso <span class="num">${work.length}</span><a href="comisiones.html">Ver todas</a></p>
+      ${work.map((w) => `
+        <a class="wrow" href="comisiones.html" style="--tag:${w.tag}">
+          <span class="thumb">${thumb(w)}</span>
+          <span class="t"><strong title="${w.title}">${w.title}</strong><small>${w.client} · ${w.stage}${w.n ? ` ${w.n}/${w.of}` : ""}</small></span>
+          <span class="prog" title="${w.n} de ${w.of} etapas"><i style="width:${(w.n / w.of) * 100}%"></i></span>
+          <span class="due num ${w.tone}">${w.due}</span>
+        </a>`).join("")}
+    </section>
+
+    <section>
+      <div class="chart-head"><p class="h3">Recibido por mes <span>tras comisiones</span></p></div>
+      <div class="kpi money"><span class="big">${money(total6)}</span><span class="delta">en 6 meses · media ${fmt(total6 / 6)} € al mes</span></div>
+      ${lineChart(months)}
+    </section>
+  </div>
+
+  <div class="col">
+    <section>
+      <p class="h3">Este mes</p>
+      <dl class="figs">
+        <div><dt>Recibido</dt><dd class="big money">${money(96.75)}</dd><small class="sub">3,25 € en comisiones de la plataforma</small></div>
+        <div><dt>Pendiente de cobro</dt><dd class="big money" style="color:var(--warn)">${money(975)}</dd><small class="sub">6 comisiones sin pagar del todo</small></div>
+        <div><dt>En curso</dt><dd class="big num">6</dd></div>
+        <div><dt>Vencen en 7 días</dt><dd class="big num">1</dd><small class="sub">Incluye las atrasadas</small></div>
+      </dl>
+    </section>
+
+    <section>
+      <p class="h3">Sin cobrar <span class="num">${unpaid.length}</span></p>
+      <div class="unpaid">
+        ${unpaid.map(([t, c, a, col]) => `<a href="comisiones.html"><span class="face" style="width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:${col};font-size:10px;font-weight:700;color:#1f2933">${c.slice(0, 2)}</span>
+          <span class="t"><strong title="${t}">${t}</strong><small>${c}</small></span><span class="amt money">${fmt(a)} €</span></a>`).join("")}
+        <div class="total money"><span>Total</span><span>${fmt(totalUnpaid)} €</span></div>
+      </div>
+    </section>
+
+    <section class="rate">
+      <p class="h3">Tu tarifa por hora <span>últimos 90 días</span></p>
+      <div class="big money">27<small>,53 €/h</small></div>
+      <small>5 piezas · 40,5 h</small>
+    </section>
+
+    <section>
+      <p class="h3">Etiquetas más usadas</p>
+      <div class="tags">${topTags.map(([t, c, n]) => `<span class="tag"><i style="background:${c}"></i>${t}<b class="num">${n}</b></span>`).join("")}</div>
+    </section>
+  </div>`;
+
+/* Sin una imagen concreta: fondo neutro */
+setAmbientFromSvg(null);
+
+</script>
+</body>
+</html>

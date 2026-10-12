@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZeeBoard · Solicitudes (maqueta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+/* Huecos en la barra superior */
+.slots { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.pips { display: flex; gap: 3px; }
+.pips i { width: 10px; height: 14px; border-radius: 2px; border: 1px solid var(--line-strong); }
+.pips i.on { background: var(--ink); border-color: var(--ink); }
+.pips i.over { background: var(--bad); border-color: var(--bad); }
+.slots input { width: 52px; padding: 4px 6px; text-align: right; }
+.slots .over-text { color: var(--bad); font-weight: 600; }
+
+/* Bandeja: lista + solicitud abierta */
+.work { grid-template-columns: minmax(260px, 320px) minmax(0, 1fr); }
+.inbox { display: grid; grid-template-rows: minmax(0, 1fr) auto; padding: 0; overflow: hidden; }
+.inbox .scroll { overflow: auto; padding: 8px; }
+.group button { color: inherit; font: inherit; }
+.hint { margin: 2px 8px 6px; padding: 8px 10px; border-radius: 4px; background: color-mix(in srgb, var(--ok) 12%, transparent); color: var(--ink); font-size: 12.5px; }
+.crow { grid-template-columns: 10px minmax(0, 1fr) auto; }
+.crow .warn { color: var(--warn); font-weight: 600; }
+.form-line { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--muted); }
+.form-line .t { min-width: 0; flex: 1; }
+.form-line small { display: block; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.form-line .menu { top: auto; bottom: calc(100% + 6px); transform-origin: bottom right; }
+
+.req-hero { padding: 22px 24px 16px; display: flex; align-items: flex-start; gap: 16px; }
+.req-hero h2 { margin: 0; font: 600 30px/1.08 "Fraunces", serif; letter-spacing: -.02em; overflow-wrap: anywhere; }
+.req-hero .meta { margin-top: 6px; }
+.req-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(260px, 32%, 320px); min-height: 0; border-top: 1px solid var(--line); }
+.details { overflow: auto; padding: 18px 24px; min-width: 0; }
+.details p { margin: 0 0 12px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; max-width: 68ch; }
+.details a { color: var(--ink); text-decoration-color: var(--muted); text-underline-offset: 3px; }
+.side-props { border-left: 1px solid var(--line); padding: 18px 16px; overflow: auto; }
+.side-props .prop { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+.side-props .prop dd + dt { margin-top: 10px; }
+.need-type { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 10%, var(--paper)); font-weight: 600; }
+.foot .why { color: var(--faint); font-size: 12.5px; }
+.empty { display: grid; place-content: center; gap: 6px; height: 100%; text-align: center; color: var(--faint); }
+
+@media (max-width: 1100px) {
+  .req-body { display: block; overflow-y: auto; }
+  .details { overflow: visible; }
+  .side-props { border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (max-width: 1200px) { .slots .label { display: none; } }
+</style>
+</head>
+<body data-page="solicitudes">
+<div class="ambient" aria-hidden="true"></div>
+<div class="app">
+  <aside class="side glass" id="side" data-note="Acepta, pon en espera o rechaza; prueba la solicitud sin tipo, «Importar», «Nueva solicitud» y el ⋯ del formulario."></aside>
+  <main class="main">
+    <header class="top glass" id="top"></header>
+    <div class="work">
+      <section class="list glass inbox" aria-label="Solicitudes"><div class="scroll" id="list" role="listbox"></div><div class="form-line" id="form"></div></section>
+      <section class="detail glass" id="detail" aria-live="polite"></section>
+    </div>
+  </main>
+</div>
+
+<dialog id="newDlg">
+  <form method="dialog">
+    <h3>Nueva solicitud</h3>
+    <div class="fields">
+      <input class="field" name="name" placeholder="Nombre" required autofocus>
+      <div style="display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px">
+        <select class="field" name="platform"><option>Telegram</option><option>Bluesky</option><option>Discord</option><option>Email</option><option>Otra</option></select>
+        <input class="field" name="contact" placeholder="@usuario o correo">
+      </div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) 110px;gap:10px">
+        <select class="field" name="type" required><option value="">Tipo de comisión</option></select>
+        <input class="field" name="chars" type="number" min="1" value="1" title="Número de personajes">
+      </div>
+      <textarea class="field" name="details" rows="4" placeholder="Qué pide: idea, referencias, enlaces…"></textarea>
+    </div>
+    <div class="actions"><button class="btn" value="cancel" formnovalidate>Cancelar</button><button class="primary" value="ok">Añadir solicitud</button></div>
+  </form>
+</dialog>
+
+<dialog id="fullDlg">
+  <form method="dialog">
+    <h3 id="fullTitle"></h3>
+    <p id="fullText"></p>
+    <div class="actions"><button class="btn" value="wait">Poner en espera</button><button class="btn" value="cancel">Cancelar</button><button class="primary" value="ok">Aceptar igualmente</button></div>
+  </form>
+</dialog>
+
+<script src="shell.js"></script>
+<script>
+const TYPES = [[1, "Sketch", 40], [2, "Flat Colour", 110], [3, "Full Colour", 160], [4, "Reference Sheet", 150], [5, "Rendered Full Body", 350]];
+const RATE = 0.5; // ajuste «personaje extra» de la app
+const reqs = [
+  { id: 1, name: "Ana", platform: "Telegram", contact: "@ana_draws", date: "10 oct", type: 3, chars: 1, email: "ana@example.com", tag: ["Bluesky", "@ana.bsky.social"], status: "new", details: "Mi personaje en una cafetería, luz de tarde.\nReferencias: https://toyhou.se/ana/ref" },
+  { id: 2, name: "Leo", platform: "Bluesky", contact: "@leo.bsky.social", date: "9 oct", type: null, chars: 2, email: "", tag: ["Bluesky", "@leo.bsky.social"], status: "new", details: "Dos personajes abrazados, estilo chibi. ¿Haces descuento por dos?" },
+  { id: 3, name: "Marta", platform: "Discord", contact: "marta#2210", date: "7 oct", type: 4, chars: 1, email: "marta@example.com", tag: null, status: "new", details: "Hoja de referencia completa con vista frontal y trasera." },
+  { id: 4, name: "Iker", platform: "Telegram", contact: "@iker", date: "28 sep", type: 2, chars: 1, email: "", tag: ["X", "@iker_art"], status: "waitlist", details: "Cuando tengas hueco, sin prisa." },
+  { id: 5, name: "Nova", platform: "Telegram", contact: "@nova_deer", date: "2 sep", type: 5, chars: 1, email: "", tag: ["Bluesky", "@nova_deer"], status: "accepted", commission: true, details: "Render completo con fondo de bosque." },
+  { id: 6, name: "Rex", platform: "Email", contact: "rex@example.com", date: "20 ago", type: 1, chars: 3, email: "rex@example.com", tag: null, status: "declined", details: "Tres bocetos para mañana." },
+];
+const S = { open: true, total: 8, taken: 6, sel: 1, archive: false, menu: false };
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+const esc = (t) => t.replace(/[&<>"]/g, (c) => `&${{ "&": "amp", "<": "lt", ">": "gt", '"': "quot" }[c]};`);
+const linkify = (t) => esc(t).replace(/https?:\/\/\S+/g, (u) => `<a href="${u}" target="_blank" rel="noopener">${u}</a>`);
+const type = (r) => TYPES.find((t) => t[0] === r.type);
+const STATE = { new: ["Nueva", "info"], waitlist: ["En espera", "warn"], accepted: ["Aceptada", "ok"], declined: ["Rechazada", "faint"] };
+const icon = (d) => `<svg class="i" viewBox="0 0 24 24">${d}</svg>`;
+const MORE = icon('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>');
+
+function renderTop() {
+  const free = S.total - S.taken;
+  $("top").innerHTML = `<h1>Solicitudes</h1>
+    <div class="seg" role="group" aria-label="Comisiones abiertas"><button data-open="0" aria-pressed="${!S.open}">Cerradas</button><button data-open="1" aria-pressed="${S.open}">Abiertas</button></div>
+    <div class="slots"><span class="pips" aria-hidden="true">${Array.from({ length: Math.max(S.total, S.taken) }, (_, i) => `<i class="${i >= S.total ? "over" : i < S.taken ? "on" : ""}"></i>`).join("")}</span>
+      <span class="num"><span class="label">${S.taken} de ${S.total} huecos · </span>${free > 0 ? `${free} ${free === 1 ? "libre" : "libres"}` : free === 0 ? "lleno" : `<span class="over-text">${-free} de más</span>`}</span>
+      <input class="field num" id="total" type="number" min="1" value="${S.total}" aria-label="Huecos totales" title="Cada comisión sin terminar ocupa un hueco, también las de la cola"></div>
+    <div class="spacer"></div>
+    <label class="btn" style="cursor:pointer">${icon('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>')}Importar CSV<input type="file" accept=".csv,text/csv" hidden id="import"></label>
+    <button class="primary" id="new">${icon('<path d="M12 5v14M5 12h14"/>')}Nueva solicitud</button>`;
+}
+
+function renderList() {
+  const by = (st) => reqs.filter((r) => st.includes(r.status));
+  const row = (r) => `<button class="crow" role="option" aria-selected="${r.id === S.sel}" data-id="${r.id}">
+    <i class="dot" style="background:var(--${STATE[r.status][1]})"></i>
+    <span class="t"><strong>${esc(r.name)}</strong><small>${r.type ? `${type(r)[1]} · ${r.chars} ${r.chars === 1 ? "personaje" : "personajes"}` : `<span class="warn">Falta elegir el tipo</span>`}</small></span>
+    <span class="n num">${r.date}</span></button>`;
+  const nw = by(["new"]), wl = by(["waitlist"]), ar = by(["accepted", "declined"]), free = S.total - S.taken;
+  $("list").innerHTML = `<div class="group">Nuevas<span class="num">${nw.length}</span></div>${nw.map(row).join("") || `<p class="hint" style="background:none;color:var(--faint)">No hay solicitudes nuevas.</p>`}
+    ${wl.length ? `<div class="group">En espera<span class="num">${wl.length}</span></div>${free > 0 ? `<p class="hint">Tienes ${free} ${free === 1 ? "hueco libre" : "huecos libres"}: puedes sacar a alguien de la espera.</p>` : ""}${wl.map(row).join("")}` : ""}
+    ${ar.length ? `<div class="group"><button id="arch" aria-expanded="${S.archive}">Archivo <span class="num" style="color:var(--faint)">${ar.length}</span> ${S.archive ? "▴" : "▾"}</button></div>${S.archive ? ar.map(row).join("") : ""}` : ""}`;
+  $("form").innerHTML = `<i class="dot" style="background:var(--ok)"></i><span class="t">Formulario conectado<small title="C:\\Users\\Ana\\Drive\\respuestas.csv">Revisado hace 5 min · cada 30 min</small></span>
+    <div class="menu-anchor"><button class="icon-btn" id="formBtn" aria-label="Opciones del formulario" aria-expanded="${S.menu}">${MORE}</button>
+      <div class="menu glass" ${S.menu ? "" : "hidden"} role="menu"><button role="menuitem">Revisar ahora</button><button role="menuitem">Cambiar archivo…</button></div></div>`;
+}
+
+function renderDetail() {
+  const r = reqs.find((x) => x.id === S.sel);
+  if (!r) return ($("detail").innerHTML = `<div class="empty"><b style="color:var(--ink)">Nada seleccionado</b>Elige una solicitud de la lista.</div>`);
+  const t = type(r), [label, tone] = STATE[r.status], live = r.status === "new" || r.status === "waitlist";
+  const actions = live
+    ? `<button class="primary" data-act="accept" ${t ? "" : "disabled"}>${icon('<path d="m5 12 5 5 9-10"/>')}Aceptar</button>
+       ${r.status === "new" ? `<button class="btn" data-act="waitlist">Poner en espera</button>` : ""}
+       <button class="btn" data-act="declined">Rechazar</button>${t ? "" : `<span class="why">Elige el tipo antes de aceptar</span>`}`
+    : `${r.status === "accepted" && r.commission ? `<a class="btn" href="comisiones.html" style="text-decoration:none">Abrir comisión</a>` : ""}
+       ${r.status === "declined" ? `<button class="btn" data-act="new">Restaurar</button>` : ""}
+       <button class="btn" data-act="remove">Quitar de la lista</button>`;
+  $("detail").innerHTML = `
+    <div class="req-hero"><div style="min-width:0"><h2>${esc(r.name)}</h2>
+      <div class="meta"><span style="display:inline-flex;align-items:center;gap:6px;color:var(--ink)"><i class="dot" style="background:var(--${tone})"></i>${label}</span><span>Recibida el ${r.date}</span></div></div></div>
+    <div class="req-body">
+      <div class="details"><p class="section-title">Lo que pide</p><p>${linkify(r.details)}</p></div>
+      <div class="side-props"><dl class="prop">
+        <dt>Tipo</dt><dd>${t ? t[1] : `<select class="field need-type" id="setType"><option value="">Elige el tipo…</option>${TYPES.map(([id, n]) => `<option value="${id}">${n}</option>`).join("")}</select>`}</dd>
+        <dt>Personajes</dt><dd class="num">${r.chars}</dd>
+        <dt>Estimado</dt><dd class="num">${t ? `≈ ${fmt(t[2] * (1 + RATE * (r.chars - 1)))}` : `<span style="color:var(--faint)">Al elegir el tipo</span>`}</dd>
+        <dt>Contacto</dt><dd>${r.platform} <a href="#" style="color:var(--ink)">${esc(r.contact)}</a></dd>
+        <dt>Red social</dt><dd>${r.tag ? `${r.tag[0]} <a href="#" style="color:var(--ink)">${esc(r.tag[1])}</a>` : `<span style="color:var(--faint)">No la indicó</span>`}</dd>
+        <dt>Correo</dt><dd>${r.email ? `<a href="#" style="color:var(--ink);overflow-wrap:anywhere">${esc(r.email)}</a>` : `<span style="color:var(--faint)">Sin correo</span>`}</dd>
+      </dl></div>
+    </div>
+    <div class="foot">${actions}</div>`;
+}
+
+function render() { renderTop(); renderList(); renderDetail(); }
+
+function setStatus(r, status) {
+  if (status === "accepted") { S.taken++; r.commission = true; }
+  r.status = status;
+  // Al salir de nuevas/espera, la selección pasa a la siguiente pendiente
+  if (status === "accepted" || status === "declined") S.sel = (reqs.find((x) => x.status === "new" || x.status === "waitlist") || r).id;
+  render();
+}
+
+function accept(r) {
+  if (S.taken < S.total) return setStatus(r, "accepted");
+  $("fullTitle").textContent = `Huecos llenos. ¿Aceptar a ${r.name} igualmente?`;
+  $("fullText").textContent = `Tienes ${S.taken} de ${S.total} huecos ocupados. Aceptar añade uno más; también puedes ponerla en espera.`;
+  $("fullDlg").onclose = () => { const v = $("fullDlg").returnValue; if (v === "ok") setStatus(r, "accepted"); if (v === "wait") setStatus(r, "waitlist"); };
+  $("fullDlg").showModal();
+}
+
+function toast(text, undo) {
+  document.querySelector(".toast")?.remove();
+  const el = Object.assign(document.createElement("div"), { className: "toast", role: "status" });
+  el.innerHTML = `<span>${text}</span><button>Deshacer</button>`;
+  el.querySelector("button").onclick = () => { undo(); el.remove(); };
+  document.body.append(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target;
+  const row = t.closest(".crow");
+  if (row) { S.sel = +row.dataset.id; return render(); }
+  if (t.closest("#arch")) { S.archive = !S.archive; return renderList(); }
+  if (t.closest("#formBtn")) { S.menu = !S.menu; return renderList(); }
+  if (S.menu && !t.closest(".menu")) { S.menu = false; renderList(); }
+  const seg = t.closest("[data-open]");
+  if (seg) { S.open = seg.dataset.open === "1"; return renderTop(); }
+  if (t.closest("#new")) {
+    const sel = $("newDlg").querySelector("[name=type]");
+    sel.length === 1 && TYPES.forEach(([id, n]) => sel.add(new Option(n, id)));
+    $("newDlg").querySelector("form").reset();
+    return $("newDlg").showModal();
+  }
+  const act = t.closest("[data-act]")?.dataset.act, r = reqs.find((x) => x.id === S.sel);
+  if (!act) return;
+  if (act === "accept") return accept(r);
+  if (act === "remove") {
+    const i = reqs.indexOf(r); reqs.splice(i, 1); S.sel = reqs[0]?.id; render();
+    return toast("Quitada de la lista.", () => { reqs.splice(i, 0, r); S.sel = r.id; render(); });
+  }
+  setStatus(r, act);
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id === "setType" && e.target.value) { reqs.find((x) => x.id === S.sel).type = +e.target.value; render(); }
+  if (e.target.id === "total") { S.total = Math.max(1, Math.round(+e.target.value) || 1); render(); }
+  if (e.target.id === "import" && e.target.files[0]) { toast("2 respuestas nuevas importadas.", () => {}); e.target.value = ""; }
+});
+$("newDlg").addEventListener("close", () => {
+  if ($("newDlg").returnValue !== "ok") return;
+  const f = Object.fromEntries(new FormData($("newDlg").querySelector("form")));
+  const id = Math.max(...reqs.map((r) => r.id)) + 1;
+  reqs.unshift({ id, name: f.name, platform: f.platform, contact: f.contact, date: "hoy", type: +f.type, chars: Math.max(1, +f.chars || 1), email: "", tag: null, status: "new", details: f.details || "Sin detalles." });
+  S.sel = id; render();
+});
+
+render();
+</script>
+</body>
+</html>

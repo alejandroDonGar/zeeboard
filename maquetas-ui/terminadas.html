@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZeeBoard · Terminadas (maqueta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<style>
+.top input[type="date"] { width: 128px; padding: 5px 6px; }
+@media (max-width: 1200px) { .top .search { flex-basis: 170px; min-width: 150px; } .top .to { display: none; } }
+.top .to { color: var(--faint); font-size: 12px; }
+
+/* Apple Photos: galería por grupos con cabecera fija */
+.gallery { overflow: auto; padding: 0 22px 28px; min-height: 0; }
+.rates { display: flex; flex-wrap: wrap; gap: 4px 16px; padding: 14px 0 4px; font-size: 12.5px; color: var(--muted); }
+.rates b { color: var(--ink); }
+.rates .total { color: var(--ink); margin-right: 8px; }
+.ghead { position: sticky; top: 0; z-index: 1; display: flex; align-items: baseline; gap: 10px; padding: 18px 0 10px; background: linear-gradient(var(--glass-heavy) 70%, transparent); }
+.ghead h2 { margin: 0; font: 600 22px/1.1 "Fraunces", serif; letter-spacing: -.01em; }
+.ghead span { color: var(--faint); font-size: 12.5px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 18px 14px; }
+.work-tile { min-width: 0; }
+.work-tile .img { display: block; width: 100%; aspect-ratio: 1; border-radius: 4px; overflow: hidden; box-shadow: 0 0 0 1px var(--line), 0 14px 30px -22px var(--shadow-l); cursor: zoom-in; transition: transform 100ms ease-out; }
+.work-tile .img:active { transform: scale(.98); }
+.work-tile .img svg { width: 100%; height: 100%; display: block; }
+.work-tile .cap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 8px; width: 100%; margin-top: 8px; text-align: left; }
+.work-tile .cap strong { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.work-tile .cap b { font-weight: 600; white-space: nowrap; }
+.work-tile .cap small { grid-column: 1 / -1; color: var(--faint); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.work-tile .cap:hover strong { text-decoration: underline; text-underline-offset: 3px; }
+.empty { display: grid; place-content: center; gap: 6px; height: 100%; text-align: center; color: var(--muted); }
+.empty b { font: 600 20px "Fraunces", serif; color: var(--ink); }
+
+/* Visor: la imagen sola; el fondo toma sus colores mientras está abierta */
+dialog.viewer { width: auto; max-width: 92vw; padding: 0; border: 0; background: none; box-shadow: none; }
+dialog.viewer::backdrop { background: rgba(8, 9, 12, .82); backdrop-filter: blur(6px); }
+dialog.viewer .art { width: min(80vh, 88vw); aspect-ratio: 1; border-radius: 6px; overflow: hidden; }
+dialog.viewer .art svg { width: 100%; height: 100%; display: block; }
+dialog.viewer p { margin: 10px 2px 0; display: flex; justify-content: space-between; gap: 12px; color: #ece6dc; }
+dialog.viewer p a { color: #ece6dc; }
+</style>
+</head>
+<body data-page="terminadas">
+<div class="ambient" aria-hidden="true"></div>
+<div class="app">
+  <aside class="side glass" id="side" data-note="Cambia entre «Por mes» y «Por cliente», busca, filtra por fechas y pulsa una imagen para verla en grande."></aside>
+  <main class="main">
+    <header class="top glass">
+      <h1>Terminadas</h1>
+      <div class="seg" role="group" aria-label="Agrupar"><button data-g="month" aria-pressed="true">Por mes</button><button data-g="client" aria-pressed="false">Por cliente</button></div>
+      <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Buscar título o cliente" aria-label="Buscar"></label>
+      <input class="field" type="date" id="from" aria-label="Desde"><span class="to">a</span><input class="field" type="date" id="to" aria-label="Hasta">
+      <button class="btn" id="clear" hidden>Borrar filtros</button>
+    </header>
+    <section class="gallery glass" id="gallery"></section>
+  </main>
+</div>
+<dialog class="viewer" id="viewer"><div class="art" id="vArt"></div><p><span id="vCap"></span><a href="comisiones.html">Abrir comisión</a></p></dialog>
+
+<script src="shell.js"></script>
+<script src="ambient.js"></script>
+<script src="art.js"></script>
+<script>
+const P = [
+  { fur: "#e07a3c", muzzle: "#fff4e8", bg: "#a7d0e6" }, { fur: "#5b7f8f", muzzle: "#f3efe6", bg: "#f3dca0" },
+  { fur: "#cfc6e8", muzzle: "#faf6ff", bg: "#2f3a5c" }, { fur: "#8a6248", muzzle: "#f3e6d8", bg: "#cfe3c4" },
+  { fur: "#c4573a", muzzle: "#fde9dc", bg: "#f6e3b0" }, { fur: "#8f9aa8", muzzle: "#f3efe6", bg: "#f2c7a0" },
+];
+// [título, cliente, entrega (AAAA-MM-DD), precio, horas, plantilla, paleta]
+const done = [
+  ["Flat Colour", "Mochi", "2026-09-30", 110, 4, "Flat Colour", 0], ["Reference Sheet", "Ember", "2026-09-02", 150, 6.5, "Reference Sheet", 4],
+  ["Full Colour", "Kuro", "2026-08-20", 160, 6, "Full Colour", 1], ["Full Colour", "Mochi", "2026-08-01", 160, 5.5, "Full Colour", 0],
+  ["Sketch", "Nova", "2026-07-20", 40, 1.5, "Sketch", 0], ["Full Colour", "Ember", "2026-07-14", 160, 7, "Full Colour", 4],
+  ["Full Colour", "Mochi", "2026-06-15", 160, 6, "Full Colour", 0], ["Sketch", "Juniper", "2026-06-03", 40, null, "Sketch", 2],
+  ["Full Colour", "Pip", "2026-05-03", 160, 5, "Full Colour", 3], ["Flat Colour", "Kuro", "2026-05-02", 110, 4, "Flat Colour", 1],
+  ["Icon", "Luna", "2026-04-09", 45, 1.5, "Icon", 2], ["Icon", "Pip", "2026-04-20", 45, null, "Icon", 3],
+].map(([title, client, day, price, hours, tpl, pal], id) => ({ id, title, client, day, price, hours, tpl, pal: P[pal] }));
+
+const S = { group: "month" };
+const $ = (id) => document.getElementById(id);
+const eur = (n) => n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+const longDate = (d) => new Date(d + "T12:00").toLocaleDateString("es-ES", { day: "numeric", month: "short" });
+const monthOf = (d) => new Date(d + "T12:00").toLocaleDateString("es-ES", { month: "long", year: "numeric" });
+const rate = (list) => { const h = list.filter((c) => c.hours); const hours = h.reduce((s, c) => s + c.hours, 0); return hours ? h.reduce((s, c) => s + c.price, 0) / hours : null; };
+
+function render() {
+  const q = $("q").value.trim().toLowerCase(), from = $("from").value, to = $("to").value;
+  const list = done.filter((c) => (c.title + " " + c.client).toLowerCase().includes(q) && (!from || c.day >= from) && (!to || c.day <= to))
+    .sort((a, b) => b.day.localeCompare(a.day));
+  $("clear").hidden = !(q || from || to);
+  const total = list.reduce((s, c) => s + c.price, 0), r = rate(list);
+
+  if (!list.length) return ($("gallery").innerHTML = done.length
+    ? `<div class="empty"><b>Nada coincide</b>Prueba con otra búsqueda u otras fechas.</div>`
+    : `<div class="empty"><b>Aún no hay nada terminado</b>Las comisiones llegan aquí al marcarlas como terminadas.</div>`);
+
+  const groups = Map.groupBy(list, (c) => (S.group === "month" ? monthOf(c.day) : c.client));
+  const keys = [...groups.keys()];
+  if (S.group === "client") keys.sort((a, b) => a.localeCompare(b));
+  const tpls = Map.groupBy(list, (c) => c.tpl);
+
+  $("gallery").innerHTML = `<p class="rates num"><span class="total"><b>${list.length}</b> terminadas · <b>${eur(total)}</b>${r ? ` · ${eur(r)}/h` : ""}</span><span>Por hora:</span>${[...tpls].map(([t, l]) => rate(l) && `<span>${t} <b class="num">${eur(rate(l))}</b></span>`).filter(Boolean).join("")}</p>` +
+    keys.map((k) => {
+      const g = groups.get(k);
+      return `<section><div class="ghead"><h2>${k[0].toUpperCase() + k.slice(1)}</h2><span class="num">${g.length} · ${eur(g.reduce((s, c) => s + c.price, 0))}</span></div>
+        <div class="grid">${g.map((c) => `<div class="work-tile">
+          <button class="img" data-view="${c.id}" aria-label="Ver ${c.title} en grande">${head(c.pal)}</button>
+          <a class="cap" href="comisiones.html" style="color:inherit;text-decoration:none" title="Abrir comisión">
+            <strong>${c.title}</strong><b class="num">${eur(c.price)}</b>
+            <small class="num">${S.group === "month" ? c.client : longDate(c.day)} · ${c.hours ? `${String(c.hours).replace(".", ",")} h · ${eur(c.price / c.hours)}/h` : "sin horas"}</small></a></div>`).join("")}</div></section>`;
+    }).join("");
+}
+
+document.addEventListener("click", (e) => {
+  const g = e.target.closest("[data-g]");
+  if (g) { S.group = g.dataset.g; document.querySelectorAll("[data-g]").forEach((b) => b.setAttribute("aria-pressed", b === g)); return render(); }
+  if (e.target.closest("#clear")) { $("q").value = $("from").value = $("to").value = ""; return render(); }
+  const v = e.target.closest("[data-view]");
+  if (v) {
+    const c = done[+v.dataset.view], svg = head(c.pal);
+    $("vArt").innerHTML = svg;
+    $("vCap").textContent = `${c.title} · ${c.client} · ${longDate(c.day)}`;
+    setAmbientFromSvg(svg);
+    return $("viewer").showModal();
+  }
+  if (e.target === $("viewer")) $("viewer").close(); // clic fuera de la imagen
+});
+$("viewer").addEventListener("close", () => setAmbientFromSvg(null));
+["q", "from", "to"].forEach((id) => $(id).addEventListener("input", render));
+render();
+</script>
+</body>
+</html>

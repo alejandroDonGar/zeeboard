@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZeeBoard · Comisiones (maqueta)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+</head>
+<body data-page="comisiones">
+<div class="ambient" aria-hidden="true"></div>
+
+<div class="app">
+  <aside class="side glass" id="side" data-note="Pulsa otra comisión, las etapas, «Filtro» y «Ver cobros»."></aside>
+
+  <main class="main">
+    <header class="top glass">
+      <h1>Comisiones</h1>
+      <label class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Buscar por título o cliente" aria-label="Buscar"><kbd>Ctrl K</kbd></label>
+      <div class="pop-anchor">
+        <button class="btn" id="filterBtn" aria-haspopup="true" aria-expanded="false"><svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M7 12h10M10 18h4"/></svg>Filtro</button>
+        <div class="pop glass" id="pop" hidden role="menu"></div>
+      </div>
+      <div class="chips" id="chips"></div>
+      <div class="spacer"></div>
+      <div class="seg" role="group" aria-label="Vista">
+        <button aria-pressed="true" title="Lista"><svg class="i" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
+        <button aria-pressed="false" title="Cuadrícula"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></button>
+      </div>
+      <button class="primary"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Nueva comisión<kbd>Ctrl N</kbd></button>
+    </header>
+
+    <div class="work">
+      <section class="list glass" id="list" aria-label="Comisiones" role="listbox"></section>
+      <section class="detail glass" id="detail" aria-live="polite"></section>
+    </div>
+  </main>
+</div>
+
+
+<script src="shell.js"></script>
+<script src="ambient.js"></script>
+<script>
+/* ---------- Ilustraciones de ejemplo: el personaje se construye por capas, una por etapa ---------- */
+function art(c, stage, alt = 0) {
+  const p = c.pal, s = Math.min(stage, 5);
+  const sketch = s === 0, line = s >= 1;
+  const stroke = sketch ? "#9a9a9a" : "#2a2420";
+  const sw = sketch ? 2 : 3.2;
+  const dash = sketch ? 'stroke-dasharray="6 3"' : "";
+  const fill = (col) => (s >= 2 ? col : "none");
+  const shade = s >= 3;
+  const bg = s >= 4;
+  const tilt = alt ? 'transform="rotate(-6 200 230)"' : "";
+  return `<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="400" height="400" fill="${bg ? p.bg : "#fbf8f3"}"/>
+    ${bg ? `<circle cx="320" cy="90" r="60" fill="${p.bg2}"/><circle cx="70" cy="330" r="90" fill="${p.bg2}" opacity=".7"/>
+      <path d="M0 330 Q120 290 220 320 T400 300 V400 H0Z" fill="${p.bg3}"/>` : ""}
+    <g ${tilt} stroke="${stroke}" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round" ${dash}>
+      <ellipse cx="200" cy="350" rx="105" ry="80" fill="${fill(p.fur)}"/>
+      <path d="M128 150 L112 52 L188 118Z" fill="${fill(p.fur)}"/>
+      <path d="M272 150 L288 52 L212 118Z" fill="${fill(p.fur)}"/>
+      <path d="M134 128 L124 74 L168 112Z" fill="${fill(p.inner)}" stroke-width="${sw * .6}"/>
+      <path d="M266 128 L276 74 L232 112Z" fill="${fill(p.inner)}" stroke-width="${sw * .6}"/>
+      <circle cx="200" cy="200" r="95" fill="${fill(p.fur)}"/>
+      ${shade ? `<path d="M200 105 A95 95 0 0 1 200 295 A80 95 0 0 0 200 105Z" fill="${p.shadow}" stroke="none" opacity=".35"/>` : ""}
+      <ellipse cx="200" cy="238" rx="56" ry="42" fill="${fill(p.muzzle)}"/>
+      <ellipse cx="164" cy="190" rx="13" ry="${alt ? 4 : 16}" fill="${fill("#2a2420")}"/>
+      <ellipse cx="236" cy="190" rx="13" ry="${alt ? 4 : 16}" fill="${fill("#2a2420")}"/>
+      <path d="M190 222 L210 222 L200 234Z" fill="${fill("#2a2420")}"/>
+      <path d="M200 234 Q200 250 186 250 M200 234 Q200 250 214 250" fill="none"/>
+      ${s >= 2 ? `<circle cx="150" cy="226" r="11" fill="${p.inner}" stroke="none" opacity=".7"/><circle cx="250" cy="226" r="11" fill="${p.inner}" stroke="none" opacity=".7"/>` : ""}
+      ${shade ? `<circle cx="169" cy="184" r="4" fill="#fff" stroke="none"/><circle cx="241" cy="184" r="4" fill="#fff" stroke="none"/>` : ""}
+    </g>
+  </svg>`;
+}
+
+const PAL = {
+  kuro:  { fur:"#5b7f8f", inner:"#f2b5a8", muzzle:"#f3efe6", shadow:"#1e3440", bg:"#f3dca0", bg2:"#efc66a", bg3:"#d9a94a", tint:"#e2b55a", amb:["#f0d58f","#9fc0cc","#f2c7a0"] },
+  nova:  { fur:"#e07a3c", inner:"#ffd1b8", muzzle:"#fff4e8", shadow:"#7a2e10", bg:"#a7d0e6", bg2:"#7fb6d6", bg3:"#5d93b8", tint:"#5f9fc8", amb:["#8fc0dd","#f0a46e","#bcd8e8"] },
+  tilly: { fur:"#f2f0ea", inner:"#f6b8c8", muzzle:"#ffffff", shadow:"#7c6e8f", bg:"#d9cdf0", bg2:"#c3b0e6", bg3:"#a58fd2", tint:"#a58fd2", amb:["#cdbdee","#f2c1d0","#e4dcf6"] },
+  luna:  { fur:"#cfc6e8", inner:"#f5c2d6", muzzle:"#faf6ff", shadow:"#5b4f86", bg:"#2f3a5c", bg2:"#46557f", bg3:"#232c47", tint:"#55638f", amb:["#5d6a99","#c8bde6","#3b4670"] },
+};
+
+const STAGES = ["Boceto", "Lineart", "Color plano", "Sombreado", "Fondo", "Render"];
+const data = [
+  { id:1, title:"Reference Sheet", client:"Kuro", color:"#7fb2c2", platform:"Telegram", pal:PAL.kuro, stage:2, total:5, due:0, group:"En curso", price:150, paid:0, received:0, fees:0, tags:[["Reference Sheet","#2f9e64"]], rev:[0,2], payments:[] },
+  { id:2, title:"Rendered Full Body + Complex Background", client:"Nova", color:"#e9a46c", platform:"Telegram", pal:PAL.nova, stage:4, total:6, due:21, group:"En curso", price:350, paid:275, received:265.15, fees:9.85,
+    tags:[["Render + Complex Background","#1f8f86"],["Rush","#d64545"],["1 personaje","#6b7a8c"]], rev:[0,3],
+    payments:[["12 sep","PayPal","150,00"],["2 oct","PayPal","125,00"],["","Comisiones de PayPal","−9,85"]] },
+  { id:3, title:"Full Colour", client:"Tilly", color:"#f5b04a", platform:"Bluesky", pal:PAL.tilly, stage:0, total:5, due:2, group:"En curso", price:240, paid:0, received:0, fees:0, tags:[["Full Colour","#3c6bd6"]], rev:[1,3], payments:[] },
+  { id:4, title:"Full Colour", client:"Luna", color:"#c9b8ee", platform:"Discord", pal:PAL.luna, stage:0, total:5, due:11, group:"En curso", price:160, paid:80, received:76.9, fees:3.1, tags:[["Full Colour","#3c6bd6"]], rev:[0,3], payments:[["1 oct","PayPal","80,00"]] },
+  { id:5, title:"Flat Colour", client:"Basil", color:"#e0b07a", platform:"Email", pal:null, stage:-1, total:4, due:6, group:"En cola", price:110, paid:0, received:0, fees:0, tags:[["Flat Colour","#5b5bd6"]], rev:[0,2], payments:[] },
+  { id:6, title:"Full Colour", client:"Juniper", color:"#c6b3e8", platform:"Bluesky", pal:null, stage:-1, total:5, due:7, group:"En cola", price:240, paid:0, received:0, fees:0, tags:[["Full Colour","#3c6bd6"]], rev:[0,3], payments:[] },
+];
+
+let selected = 2, viewStage = null, alt = 0, ledgerOpen = false;
+const filters = new Set();
+const FILTERS = { "Pago": ["Sin pagar", "Parcial", "Pagado"], "Estado": ["Activas", "Vencen esta semana"] };
+const fmt = (n) => n.toLocaleString("es-ES", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const $ = (id) => document.getElementById(id);
+const icon = (d, cls = "i") => `<svg class="${cls}" viewBox="0 0 24 24">${d}</svg>`;
+
+function payState(c) { return c.paid === 0 ? "Sin pagar" : c.paid >= c.price ? "Pagado" : "Parcial"; }
+function dueText(c) {
+  if (c.due === 0) return ["Hoy", "bad"];
+  if (c.due <= 3) return [`${c.due} d`, "warn"];
+  return [`${c.due} d`, ""];
+}
+function visible() {
+  const q = $("q").value.trim().toLowerCase();
+  return data.filter((c) => {
+    if (q && !(c.title + " " + c.client).toLowerCase().includes(q)) return false;
+    const pay = [...filters].filter((f) => FILTERS.Pago.includes(f));
+    if (pay.length && !pay.includes(payState(c))) return false;
+    if (filters.has("Activas") && c.stage < 0) return false;
+    if (filters.has("Vencen esta semana") && c.due > 7) return false;
+    return true;
+  });
+}
+
+function thumbHTML(c) {
+  return c.pal ? art(c, c.stage) : `<span class="ph" style="background:${c.color};width:100%;height:100%;display:grid;place-items:center;color:#1f2933">${c.client.slice(0, 2)}</span>`;
+}
+
+function renderList() {
+  const rows = visible();
+  const groups = [...new Set(rows.map((c) => c.group))];
+  $("list").innerHTML = groups.map((g) => {
+    const items = rows.filter((c) => c.group === g);
+    return `<div class="group">${g}<span class="num">${items.length}</span></div>` + items.map((c) => {
+      const [d, cls] = dueText(c);
+      const st = c.stage >= 0 ? STAGES[c.stage] : "Sin empezar";
+      return `<button class="row" role="option" aria-selected="${c.id === selected}" data-id="${c.id}" style="--tag:${c.tags[0][1]}">
+        <span class="thumb" data-thumb="${c.id}">${thumbHTML(c)}</span>
+        <span class="t"><strong title="${c.title}">${c.title}</strong><small><i class="dot" style="background:${c.stage >= 0 ? "var(--info)" : "var(--faint)"}"></i>${c.client} · ${st}</small></span>
+        <span class="due num ${cls}">${d}</span></button>`;
+    }).join("");
+  }).join("") || `<p style="padding:16px;color:var(--faint)">Ninguna comisión coincide con el filtro.</p>`;
+}
+
+function renderDetail() {
+  const c = data.find((x) => x.id === selected);
+  const stage = viewStage ?? c.stage;
+  const [d, cls] = dueText(c);
+  const key = `${c.id}-${stage}-${alt}`;
+
+  const frames = Array.from({ length: c.total }, (_, i) => {
+    const done = i < c.stage, cur = i === stage, has = c.pal && i <= c.stage;
+    return `<button class="frame ${has ? "" : "todo"}" data-stage="${i}" ${has ? "" : "disabled"} aria-current="${cur}">
+      <div class="fimg">${has ? art(c, i) : icon('<path d="M12 5v14M5 12h14"/>')}</div>
+      <div class="lbl">${done ? `<span class="check">${icon('<path d="m5 12 5 5 9-10"/>', "")}</span>` : `<em class="num">${i + 1}</em>`}${STAGES[i]}</div>
+      <div class="sub">${i === 0 && c.pal ? "2 correcciones" : i === c.stage ? "En curso" : done ? "Hecha" : "Pendiente"}</div></button>`;
+  }).join("");
+
+  const pend = c.price - c.paid;
+  $("detail").innerHTML = `
+    <div class="hero">
+      <div>
+        <h2>${c.title}</h2>
+        <div class="meta"><span class="avatar" style="background:${c.color}">${c.client.slice(0, 2)}</span>
+          <span><b style="color:var(--ink);font-weight:600">${c.client}</b> · ${c.platform}</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;color:var(--ink)"><i class="dot" style="background:${cls ? `var(--${cls})` : "var(--faint)"}"></i>${c.due === 0 ? "Vence hoy" : `Vence en ${c.due} días`}</span></div>
+      </div>
+      <div class="hero-actions">
+        <button class="btn">${icon('<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/>')}Editar</button>
+        <button class="icon-btn" aria-label="Más acciones">${icon('<circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/>')}</button>
+      </div>
+    </div>
+    <div class="body">
+      <div class="stage-view">
+        <div class="canvas">
+          ${c.pal ? `<div class="art ${key !== lastKey ? "enter" : ""}">${art(c, stage, alt)}<div class="alt-nav"><button id="altPrev" aria-label="Alternativa anterior">‹</button><span class="num">Alternativa ${alt + 1} de 2</span><button id="altNext" aria-label="Alternativa siguiente">›</button></div></div>`
+            : `<div class="empty-art">${icon('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/>')}<div><b style="color:var(--ink)">Aún no hay imágenes</b><br>Arrastra un archivo o pega con Ctrl+V</div></div>`}
+        </div>
+        <div class="strip" role="tablist" aria-label="Etapas">${frames}</div>
+      </div>
+      <div class="props">
+        <dl class="prop">
+          <dt>Tipo</dt><dd><i class="dot" style="background:${c.tags[0][1]};border-radius:2px"></i>${c.tags[0][0]}</dd>
+          <dt>Etapa</dt><dd><i class="dot" style="background:var(--info)"></i>${c.stage >= 0 ? STAGES[c.stage] : "Sin empezar"} <span style="color:var(--faint)" class="num">${Math.max(c.stage, 0) + 1}/${c.total}</span></dd>
+          <dt>Entrega</dt><dd class="${cls ? "due " + cls : ""}">${c.due === 0 ? "Hoy" : `En ${c.due} días`}</dd>
+          <dt>Revisiones</dt><dd class="num">${c.rev[0]} de ${c.rev[1]}</dd>
+        </dl>
+        ${c.tags.length > 1 ? "" : "<!--"}<div><p class="section-title">Etiquetas</p><div class="tags">${c.tags.slice(1).map(([t, col]) => `<span class="tag"><i style="background:${col}"></i>${t}</span>`).join("")}</div></div>${c.tags.length > 1 ? "" : "-->"}
+        <div>
+          <p class="section-title">Pago<button id="ledgerBtn" aria-expanded="${ledgerOpen}">${ledgerOpen ? "Ocultar cobros" : "Ver cobros"}</button></p>
+          <div class="money big">${fmt(c.paid).split(",")[0]}<small>,${fmt(c.paid).split(",")[1]} €</small> <small>de ${fmt(c.price)} €</small></div>
+          <div class="bar"><i style="width:${(c.paid / c.price) * 100}%"></i><i style="width:${(pend / c.price) * 100}%"></i></div>
+          <div class="legend money"><span>Pagado <b>${fmt(c.paid)} €</b></span><span>Pendiente <b style="color:${pend ? "var(--warn)" : "var(--ok)"}">${fmt(pend)} €</b></span></div>
+          <div class="ledger ${ledgerOpen ? "open" : ""}"><div><table class="money">
+            ${c.payments.length ? c.payments.map(([d, w, a]) => `<tr><td>${d} ${w}</td><td>${a} €</td></tr>`).join("") + `<tr><td><b style="color:var(--ink)">Recibido</b></td><td><b>${fmt(c.received)} €</b></td></tr>` : `<tr><td>Todavía no hay cobros</td><td></td></tr>`}
+            <tr><td colspan="2"><button class="btn" style="width:100%;justify-content:center;margin-top:4px">${icon('<path d="M12 5v14M5 12h14"/>')}Añadir cobro</button></td></tr>
+          </table></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="foot">
+      <button class="btn">${icon('<path d="m15 18-6-6 6-6"/>')}Etapa anterior</button>
+      <button class="primary">${icon('<path d="m5 12 5 5 9-10"/>')}Marcar como terminada</button>
+      <span class="hint">Ctrl+V añade la imagen a <b>${STAGES[Math.max(c.stage, 0)]}</b></span>
+    </div>`;
+  if (key !== lastKey) setAmbientFromSvg(c.pal ? art(c, stage, alt) : null);
+  lastKey = key;
+}
+
+let lastKey = "";
+function render() { renderList(); renderDetail(); }
+
+/* Selección con la imagen viajando de la lista al detalle */
+$("list").addEventListener("click", (e) => {
+  const row = e.target.closest(".row"); if (!row) return;
+  const id = +row.dataset.id; if (id === selected) return;
+  selected = id; viewStage = null; alt = 0; ledgerOpen = false; render();
+});
+
+$("detail").addEventListener("click", (e) => {
+  const f = e.target.closest(".frame:not([disabled])");
+  if (f) { viewStage = +f.dataset.stage; alt = 0; return renderDetail(); }
+  if (e.target.closest("#altPrev, #altNext")) { alt = alt ? 0 : 1; return renderDetail(); }
+  if (e.target.closest("#ledgerBtn")) { ledgerOpen = !ledgerOpen; renderDetail(); }
+});
+
+/* Filtro: un botón, opciones dentro, chips quitables fuera */
+function renderFilters() {
+  $("pop").innerHTML = Object.entries(FILTERS).map(([g, opts]) => `<h4>${g}</h4>` + opts.map((o) =>
+    `<button class="opt" role="menuitemcheckbox" aria-checked="${filters.has(o)}" data-f="${o}"><span class="tick">${filters.has(o) ? icon('<path d="m5 12 5 5 9-10"/>', "") : ""}</span>${o}</button>`).join("")).join("");
+  $("chips").innerHTML = [...filters].map((f) => {
+    const g = Object.keys(FILTERS).find((k) => FILTERS[k].includes(f));
+    return `<span class="chip">${g}: <b>${f}</b><button data-rm="${f}" aria-label="Quitar filtro ${f}">✕</button></span>`;
+  }).join("");
+}
+$("filterBtn").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const open = $("pop").hidden; $("pop").hidden = !open; $("filterBtn").setAttribute("aria-expanded", open);
+});
+$("pop").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const o = e.target.closest("[data-f]"); if (!o) return;
+  filters.has(o.dataset.f) ? filters.delete(o.dataset.f) : filters.add(o.dataset.f);
+  renderFilters(); renderList();
+});
+$("chips").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-rm]"); if (!b) return;
+  filters.delete(b.dataset.rm); renderFilters(); renderList();
+});
+document.addEventListener("click", () => { $("pop").hidden = true; $("filterBtn").setAttribute("aria-expanded", false); });
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") $("pop").hidden = true;
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); $("q").focus(); }
+});
+$("q").addEventListener("input", renderList);
+
+
+renderFilters(); render();
+</script>
+</body>
+</html>
