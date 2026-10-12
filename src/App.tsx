@@ -53,9 +53,6 @@ const navigationItems: { id: Page; label: string; icon: Icon }[] = [
   { id: "settings", label: "Settings", icon: IconSettings },
 ];
 
-// Pantallas que dibujan sus propios paneles de cristal: no llevan el panel general detrás
-const PANEL_PAGES: Page[] = ["commissions"];
-
 type Progress = { done: number; total: number };
 
 // Subscribes on mount to show migration progress
@@ -392,8 +389,7 @@ function App() {
         </aside>
 
         <main key={navKey} className="relative min-w-0 flex-1">
-          {/* El cristal va en una capa aparte: un backdrop-filter en el contenedor encerraría los modales "fixed" de las páginas */}
-          {!PANEL_PAGES.includes(currentPage) && <div aria-hidden="true" className="glass absolute inset-0 rounded-3xl" />}
+          {/* Cada pantalla dibuja sus propios paneles de cristal sobre el fondo de colores */}
           <div className="relative h-full overflow-hidden rounded-3xl">
           {currentPage === "dashboard" && (
             <DashboardPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />

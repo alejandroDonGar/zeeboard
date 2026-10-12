@@ -53,7 +53,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           {toastAction && (
             <button
               type="button"
-              className="ml-4 rounded-sm bg-white/20 px-2 py-1 text-xs font-black uppercase tracking-wider hover:bg-white/30"
+              className="ml-4 rounded-sm bg-white/20 px-2 py-1 text-xs font-bold hover:bg-white/30"
               onClick={() => {
                 setToastMessage("");
                 setToastAction(null);

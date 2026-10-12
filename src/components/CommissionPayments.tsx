@@ -121,7 +121,7 @@ function CommissionPayments({
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full z-40 mt-1 w-[440px] rounded-md border border-line bg-surface p-3 shadow-lg">
             <div className="divide-y divide-line border-y border-line text-sm">
-            <div className="grid grid-cols-[minmax(0,1.1fr)_1fr_1fr_24px] gap-2 py-1.5 text-[11px] text-faint">
+            <div className="grid grid-cols-[minmax(0,1.1fr)_1fr_1fr_24px] gap-2 py-1.5 text-xs text-faint">
               <span>{t("Date")}</span>
               <span>{t("Client paid")}</span>
               <span>{t("You received")}</span>

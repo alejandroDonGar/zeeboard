@@ -70,7 +70,7 @@ export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
-      <div className="w-[420px] rounded-3xl border border-line bg-surface p-6 shadow-2xl" onClick={(event) => event.stopPropagation()}>
+      <div className="w-[420px] glass-heavy rounded-3xl p-6" onClick={(event) => event.stopPropagation()}>
         <h3 className="font-display text-2xl font-semibold">{t("Keyboard shortcuts")}</h3>
         <div className="mt-4 divide-y divide-line">
           {SHORTCUTS.map(([keys, description]) => (
@@ -240,7 +240,7 @@ function CommandPalette({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-4 pt-[14vh] backdrop-blur-sm" onClick={onClose}>
-      <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl" onClick={(event) => event.stopPropagation()}>
+      <div className="w-full max-w-xl overflow-hidden glass-heavy rounded-3xl" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-line px-4 py-3">
           <IconSearch size={18} stroke={1.75} className="text-faint" aria-hidden="true" />
           <input
@@ -254,7 +254,7 @@ function CommandPalette({
             placeholder={t("Search commissions, clients, screens and actions…")}
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-faint"
           />
-          <kbd className="rounded-sm border border-line-strong px-1.5 text-[11px] font-semibold text-faint">Esc</kbd>
+          <kbd className="rounded-sm border border-line-strong px-1.5 text-xs font-semibold text-faint">Esc</kbd>
         </div>
 
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-1">
@@ -263,7 +263,7 @@ function CommandPalette({
           {results.map((entry, position) => (
             <div key={entry.key}>
               {(position === 0 || results[position - 1].group !== entry.group) && (
-                <p className="px-4 pb-1 pt-3 text-[11px] font-black uppercase tracking-[0.16em] text-faint">{t(entry.group)}</p>
+                <p className="px-4 pb-1 pt-3 text-xs font-bold text-muted">{t(entry.group)}</p>
               )}
               <button
                 type="button"
@@ -280,7 +280,7 @@ function CommandPalette({
           ))}
         </div>
 
-        <div className="flex gap-4 border-t border-line bg-paper px-4 py-2 text-[11px] text-faint">
+        <div className="flex gap-4 border-t border-line bg-paper px-4 py-2 text-xs text-faint">
           <span>{t("↑ ↓ to move")}</span>
           <span>{t("Enter to open")}</span>
           <span>{t("Esc to close")}</span>

@@ -987,7 +987,6 @@ function CommissionsPage() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <PageHeader
-        bare
         label={t("Main workspace")}
         title={t("Commissions")}
         description={t("Organize your drawings by stages, clients, dates and tags.")}
@@ -1943,7 +1942,7 @@ function CommissionsPage() {
       </section>
       {formMode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden rounded-3xl border border-line bg-surface shadow-2xl">
+          <div className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden glass-heavy rounded-3xl">
             {/* Left: pick */}
             <div className="min-h-0 space-y-5 overflow-y-auto p-6">
               <input

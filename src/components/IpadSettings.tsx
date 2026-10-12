@@ -7,7 +7,7 @@ import { isPrivate } from "../lib/privacy";
 import { useToast } from "../context/ToastContext";
 import { t } from "../lib/i18n";
 
-const panel = "divide-y divide-line rounded-3xl border border-line bg-surface shadow-sm";
+const panel = "panel divide-y divide-line rounded-3xl";
 const row = "flex items-center gap-4 px-5 py-4";
 const ghostButton =
   "rounded-md border border-line-strong px-3 py-1.5 text-sm font-semibold text-ink transition hover:border-ink disabled:cursor-not-allowed disabled:opacity-60";

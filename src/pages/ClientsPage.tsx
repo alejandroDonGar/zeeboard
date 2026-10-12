@@ -605,7 +605,7 @@ function ClientsPage({
       />
 
       <section className="grid h-[calc(100vh-117px)] min-h-0 grid-cols-[280px_minmax(0,1fr)] gap-5 overflow-hidden p-5 pb-6">
-        <div className="flex min-h-0 flex-col rounded-3xl border border-line bg-surface p-3 shadow-sm">
+        <div className="flex min-h-0 flex-col panel rounded-3xl p-3">
           <input
             value={clientSearch}
             onChange={(event) => setClientSearch(event.target.value)}
@@ -656,7 +656,7 @@ function ClientsPage({
           </div>
         </div>
 
-        <div className="min-h-0 overflow-y-auto rounded-3xl border border-line bg-surface p-6 shadow-sm">
+        <div className="min-h-0 overflow-y-auto panel rounded-3xl p-6">
           {!clientsReady ? null : !selectedClient ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <p className="text-lg font-black">
@@ -762,16 +762,16 @@ function ClientsPage({
                   { label: t("Unpaid"), value: unpaidCommissionsCount, detail: t("commissions"), className: "text-red-500" },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-md bg-paper p-3">
-                    <dt className="text-[10px] font-black uppercase tracking-[0.16em] text-faint">
+                    <dt className="text-xs font-bold text-muted">
                       {stat.label}
                     </dt>
                     <dd className={`mt-1 text-xl font-black ${stat.className}`}>{stat.value}</dd>
-                    <dd className="text-[11px] text-muted">{stat.detail}</dd>
+                    <dd className="text-xs text-muted">{stat.detail}</dd>
                   </div>
                 ))}
               </dl>
 
-              <h4 className="mb-2 mt-8 text-[11px] font-black uppercase tracking-[0.16em] text-faint">
+              <h4 className="mb-2 mt-8 text-xs font-bold text-muted">
                 Commissions · {selectedClientCommissions.length}
               </h4>
 
@@ -816,7 +816,7 @@ function ClientsPage({
                         </div>
 
                         <div className="w-32 shrink-0">
-                          <div className="flex justify-between text-[10px] font-bold text-faint">
+                          <div className="flex justify-between text-xs font-bold text-faint">
                             <span>{isCompleted ? t("Done") : t("Progress")}</span>
                             <span>{completionPercentage}%</span>
                           </div>
@@ -833,7 +833,7 @@ function ClientsPage({
                 </div>
               )}
 
-              <h4 className="mb-2 mt-8 text-[11px] font-black uppercase tracking-[0.16em] text-faint">
+              <h4 className="mb-2 mt-8 text-xs font-bold text-muted">
                 Characters · {selectedCharacters.length}
               </h4>
 
@@ -864,7 +864,7 @@ function ClientsPage({
                       }`}
                     >
                       <p className="truncate text-sm font-bold">{character.name}</p>
-                      <p className="text-[11px] text-faint">
+                      <p className="text-xs text-faint">
                         {importingCharacterId === character.id
                           ? t("Optimizing…")
                           : isDropTarget
@@ -890,7 +890,7 @@ function ClientsPage({
                         ))}
 
                         {references.length === 0 && (
-                          <div className="col-span-4 flex aspect-[4/1] items-center justify-center rounded-sm border border-dashed border-line-strong text-[11px] text-faint">
+                          <div className="col-span-4 flex aspect-[4/1] items-center justify-center rounded-sm border border-dashed border-line-strong text-xs text-faint">
                             {t("No references")}
                           </div>
                         )}
@@ -1017,7 +1017,7 @@ function ClientsPage({
                       </div>
                     )}
 
-                    <p className="mb-2 mt-5 text-[10px] font-black uppercase tracking-[0.16em] text-faint">
+                    <p className="mb-2 mt-5 text-xs font-bold text-muted">
                       References · {references.length}
                     </p>
 
@@ -1070,7 +1070,7 @@ function ClientsPage({
 
                     {commissionsUsingCharacter.length > 0 && (
                       <>
-                        <p className="mb-2 mt-5 text-[10px] font-black uppercase tracking-[0.16em] text-faint">
+                        <p className="mb-2 mt-5 text-xs font-bold text-muted">
                           Appears in · {commissionsUsingCharacter.length}
                         </p>
 
@@ -1095,11 +1095,11 @@ function ClientsPage({
                                     className="aspect-square w-full rounded-md object-cover transition hover:opacity-80"
                                   />
                                 ) : (
-                                  <div className="flex aspect-square items-center justify-center rounded-md bg-paper text-[10px] text-faint">
+                                  <div className="flex aspect-square items-center justify-center rounded-md bg-paper text-xs text-faint">
                                     {t("No image")}
                                   </div>
                                 )}
-                                <p className="mt-1 truncate text-[11px] font-semibold text-muted">
+                                <p className="mt-1 truncate text-xs font-semibold text-muted">
                                   {historyCommission.title}
                                 </p>
                               </button>
@@ -1114,7 +1114,7 @@ function ClientsPage({
 
               {selectedClient.notes && (
                 <>
-                  <h4 className="mb-2 mt-8 text-[11px] font-black uppercase tracking-[0.16em] text-faint">
+                  <h4 className="mb-2 mt-8 text-xs font-bold text-muted">
                     {t("Notes")}
                   </h4>
                   <p className="whitespace-pre-wrap text-sm text-muted">{selectedClient.notes}</p>
@@ -1139,7 +1139,7 @@ function ClientsPage({
       )}
       {clientForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="w-[480px] rounded-3xl border border-line bg-surface p-6 shadow-2xl">
+          <div className="w-[480px] glass-heavy rounded-3xl p-6">
             <h3 className="text-xl font-black text-ink">
               {clientForm === "new" ? t("New client") : t("Edit client")}
             </h3>

@@ -247,7 +247,7 @@ function TagsPage() {
       />
 
       <section className="h-[calc(100vh-117px)] min-h-0 p-5 pb-6">
-        <div className="h-full overflow-y-auto rounded-3xl border border-line bg-surface p-6 shadow-sm">
+        <div className="h-full overflow-y-auto panel rounded-3xl p-6">
           {creatingCategory && (
             <div className="mb-6 flex items-center gap-2 rounded-md border border-line-strong bg-paper p-3">
               <input
@@ -304,7 +304,7 @@ function TagsPage() {
               );
               return (
                 <section key={category}>
-                  <h3 className="mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-faint">
+                  <h3 className="mb-2 text-xs font-bold text-muted">
                     {category} · {categoryTags.length}
                   </h3>
 

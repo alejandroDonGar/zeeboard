@@ -250,8 +250,8 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   const archive = requests.filter((request) => request.status === "accepted" || request.status === "declined").reverse();
   const free = settings.slots_total - taken;
 
-  const panel = "divide-y divide-line rounded-3xl border border-line bg-surface shadow-sm";
-  const heading = "mb-2 text-[11px] font-black uppercase tracking-[0.16em] text-faint";
+  const panel = "panel divide-y divide-line rounded-3xl";
+  const heading = "mb-2 text-xs font-bold text-muted";
   const ghost =
     "rounded-md border border-line-strong px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-ink disabled:opacity-50";
   const field = "w-full rounded-md border border-line-strong bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
@@ -464,7 +464,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-[11px] font-black uppercase tracking-[0.16em] text-faint">{t("New · {n}", { n: waiting.length })}</h3>
+              <h3 className="text-xs font-bold text-muted">{t("New · {n}", { n: waiting.length })}</h3>
 
               <label className={`${ghost} cursor-pointer ${busy ? "pointer-events-none opacity-50" : ""}`}>
                 {t("Import responses…")}
@@ -518,7 +518,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="w-[520px] max-w-[94vw] rounded-3xl border border-line bg-surface p-6 shadow-2xl">
+          <div className="w-[520px] max-w-[94vw] glass-heavy rounded-3xl p-6">
             <h3 className="text-xl font-black">{t("New request")}</h3>
 
             <div className="mt-5 space-y-3">

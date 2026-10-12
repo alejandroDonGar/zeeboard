@@ -116,15 +116,22 @@
   --ambient-opacity: 0.3;
 }
 
+/* .panel: el mismo material sin desenfoque. Con un 80 % de opacidad apenas se nota y es más barato de pintar;
+   además un backdrop-filter atraparía los modales "fixed" que vivan dentro. */
+.panel,
 .glass,
 .glass-heavy {
   background: var(--glass);
-  backdrop-filter: blur(26px) saturate(165%);
   border: 1px solid var(--glass-edge);
   box-shadow:
     inset 0 1px 0 var(--glass-top),
     0 1px 2px var(--shadow-s),
     0 18px 40px -12px var(--shadow-l);
+}
+
+.glass,
+.glass-heavy {
+  backdrop-filter: blur(26px) saturate(165%);
 }
 
 .glass-heavy {
@@ -133,6 +140,7 @@
 
 /* Quien pide menos transparencia recibe paneles sólidos */
 @media (prefers-reduced-transparency: reduce) {
+  .panel,
   .glass,
   .glass-heavy {
     background: var(--surface);

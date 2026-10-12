@@ -165,8 +165,8 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
     },
   ];
 
-  const panel = "rounded-3xl border border-line bg-surface p-5 shadow-sm";
-  const heading = "mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-faint";
+  const panel = "panel rounded-3xl p-5";
+  const heading = "mb-3 text-xs font-bold text-muted";
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-y-auto">
@@ -198,7 +198,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
         <dl className="grid grid-cols-4 gap-4">
           {stats.map((stat) => (
             <div key={stat.label} className={panel}>
-              <dt className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">{stat.label}</dt>
+              <dt className="text-xs font-bold text-muted">{stat.label}</dt>
               <dd className={`mt-1 text-2xl font-black ${stat.className}`}>{stat.value}</dd>
               <dd className="text-xs text-muted">{stat.detail}</dd>
             </div>
@@ -349,7 +349,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
 
           <div className="mt-1 flex gap-3">
             {receivedByMonth.map((entry) => (
-              <div key={entry.label} className="flex-1 text-center text-[11px] text-faint">
+              <div key={entry.label} className="flex-1 text-center text-xs text-faint">
                 {entry.label}
                 <span className="block font-semibold text-muted">{formatMoney(entry.total)}</span>
               </div>

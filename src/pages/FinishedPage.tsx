@@ -202,7 +202,7 @@ function FinishedPage({
       />
 
       <section className="h-[calc(100vh-117px)] min-h-0 p-5 pb-6">
-        <div className="flex h-full min-h-0 flex-col rounded-3xl border border-line bg-surface p-5 shadow-sm">
+        <div className="flex h-full min-h-0 flex-col panel rounded-3xl p-5">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <Segmented
               options={[
@@ -256,7 +256,7 @@ function FinishedPage({
 
           {rateByTemplate.length > 0 && (
             <p className="mb-4 text-xs text-muted">
-              <span className="font-black uppercase tracking-[0.16em] text-faint">{t("Per hour")}</span>
+              <span className="font-bold text-muted">{t("Per hour")}</span>
               {rateByTemplate.map((entry) => (
                 <span key={entry.name} className="ml-3">
                   {entry.name} <span className="font-bold text-ink">{formatMoney(entry.rate)}</span>
@@ -288,7 +288,7 @@ function FinishedPage({
                   return (
                     <section key={group.key}>
                       <div className="mb-1 flex items-baseline justify-between px-2">
-                        <h3 className="text-[11px] font-black uppercase tracking-[0.16em] text-faint">
+                        <h3 className="text-xs font-bold text-muted">
                           {groupMode === "client" ? hide(group.label) : group.label}
                         </h3>
                         <span className="text-xs text-faint">

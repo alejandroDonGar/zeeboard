@@ -19,8 +19,8 @@ import { locale, t } from "../lib/i18n";
 import { hide } from "../lib/privacy";
 import { changePercent, computeStats, type Period } from "../lib/stats";
 
-const panel = "rounded-3xl border border-line bg-surface p-5 shadow-sm";
-const heading = "mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-faint";
+const panel = "panel rounded-3xl p-5";
+const heading = "mb-3 text-xs font-bold text-muted";
 
 /** ▲ 12 % / ▼ 5 % against the previous period (nothing when there is nothing to compare) */
 function Change({ now, before }: { now: number | null; before: number | null }) {
@@ -123,7 +123,7 @@ function StatisticsPage() {
           <dl className="grid grid-cols-4 gap-4">
             {tiles.map((tile) => (
               <div key={tile.label} className={panel}>
-                <dt className="text-[11px] font-bold uppercase tracking-[0.14em] text-faint">{tile.label}</dt>
+                <dt className="text-xs font-bold text-muted">{tile.label}</dt>
                 <dd className={`mt-1 text-2xl font-black ${tile.className}`}>{tile.value}</dd>
                 <dd className="text-xs">{tile.change}</dd>
               </div>
@@ -148,7 +148,7 @@ function StatisticsPage() {
 
             <div className="mt-1 flex gap-3">
               {stats.months.map((month) => (
-                <div key={month.key} className="flex-1 text-center text-[11px] text-faint">
+                <div key={month.key} className="flex-1 text-center text-xs text-faint">
                   {monthFormatter.format(new Date(`${month.key}-01T12:00:00`))}
                   <span className="block font-semibold text-muted">{formatMoney(month.total)}</span>
                 </div>
@@ -161,7 +161,7 @@ function StatisticsPage() {
           <section className={panel}>
             <h3 className={heading}>{t("By type of commission")}</h3>
 
-            <div className="grid grid-cols-[minmax(0,1fr)_70px_100px_100px_80px_70px_110px] gap-4 px-2 pb-2 text-[11px] font-bold uppercase tracking-[0.14em] text-faint">
+            <div className="grid grid-cols-[minmax(0,1fr)_70px_100px_100px_80px_70px_110px] gap-4 px-2 pb-2 text-xs font-bold text-muted">
               <span>{t("Template")}</span>
               <span className="text-right">{t("Pieces")}</span>
               <span className="text-right">{t("Received")}</span>
@@ -226,7 +226,7 @@ function StatisticsPage() {
 
             <div className="mt-1 flex gap-3">
               {stats.requests.months.map((month) => (
-                <div key={month.key} className="flex-1 text-center text-[11px] text-faint">
+                <div key={month.key} className="flex-1 text-center text-xs text-faint">
                   {monthFormatter.format(new Date(`${month.key}-01T12:00:00`))}
                   <span className="block font-semibold text-muted">{month.received}</span>
                 </div>

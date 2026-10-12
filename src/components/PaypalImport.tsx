@@ -71,8 +71,8 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="flex max-h-[80vh] w-[720px] flex-col rounded-3xl border border-line bg-surface p-6 shadow-2xl">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-faint">{t("PayPal")}</p>
+      <div className="flex max-h-[80vh] w-[720px] flex-col glass-heavy rounded-3xl p-6">
+        <p className="text-xs font-bold text-muted">{t("PayPal")}</p>
         <h3 className="mt-2 text-2xl font-black text-ink">
           {t("{ready} of {total} payments ready", { ready: ready.length, total: matches.length })}
         </h3>

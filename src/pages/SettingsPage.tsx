@@ -248,8 +248,8 @@ function SettingsPage() {
   const numberField =
     "w-16 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink";
 
-  const section = "mb-2 mt-8 text-[11px] font-black uppercase tracking-[0.16em] text-faint first:mt-0";
-  const panel = "divide-y divide-line rounded-3xl border border-line bg-surface shadow-sm";
+  const section = "mb-2 mt-8 text-xs font-bold text-muted first:mt-0";
+  const panel = "panel divide-y divide-line rounded-3xl";
   const row = "flex items-center gap-4 px-5 py-4";
   const ghostButton =
     "rounded-md border border-line-strong px-3 py-1.5 text-sm font-semibold text-ink transition hover:border-ink disabled:cursor-not-allowed disabled:opacity-60";

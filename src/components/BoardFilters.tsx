@@ -106,7 +106,7 @@ function BoardFilters({
             >
               {t("Tags")}
               {selectedMenuCount > 0 && (
-                <span className="rounded-sm bg-primary px-1.5 text-[11px] font-bold text-on-primary">
+                <span className="rounded-sm bg-primary px-1.5 text-xs font-bold text-on-primary">
                   {selectedMenuCount}
                 </span>
               )}
@@ -121,7 +121,7 @@ function BoardFilters({
                 <div className="absolute left-0 top-full z-40 mt-1 max-h-80 w-64 overflow-y-auto rounded-md border border-line bg-surface p-2 shadow-lg">
                   {menuCategories.map(([category, categoryTags]) => (
                     <div key={category} className="mb-2 last:mb-0">
-                      <p className="px-2 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-faint">
+                      <p className="px-2 py-1 text-xs font-bold text-muted">
                         {category}
                       </p>
 

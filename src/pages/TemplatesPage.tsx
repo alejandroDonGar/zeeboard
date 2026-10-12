@@ -58,7 +58,7 @@ function StageRow({
       </span>
 
       <span
-        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+        className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
           isLast ? "bg-green-600 text-white" : "bg-primary text-on-primary"
         }`}
       >
@@ -248,7 +248,7 @@ function TemplatesPage() {
       />
 
       <section className="grid h-[calc(100vh-117px)] min-h-0 grid-cols-[280px_minmax(0,1fr)] gap-5 overflow-hidden p-5 pb-6">
-        <div className="min-h-0 space-y-0.5 overflow-y-auto rounded-3xl border border-line bg-surface p-3 shadow-sm">
+        <div className="min-h-0 space-y-0.5 overflow-y-auto panel rounded-3xl p-3">
           {!ready ? null : templates.length === 0 ? (
             <p className="p-4 text-center text-sm text-faint">{t("No templates yet. Create one on the right.")}</p>
           ) : (
@@ -268,7 +268,7 @@ function TemplatesPage() {
           )}
         </div>
 
-        <div className="flex min-h-0 flex-col rounded-3xl border border-line bg-surface p-6 shadow-sm">
+        <div className="flex min-h-0 flex-col panel rounded-3xl p-6">
           {!ready ? null : !selectedTemplate ? (
             <div className="flex h-full flex-col items-center justify-center text-center">
               <p className="text-lg font-black">{t("Create your first template")}</p>
@@ -337,7 +337,7 @@ function TemplatesPage() {
                 <span className="text-xs text-faint">each client correction counts as one · empty = no limit</span>
               </label>
 
-              <h4 className="mb-2 mt-6 text-[11px] font-black uppercase tracking-[0.16em] text-faint">
+              <h4 className="mb-2 mt-6 text-xs font-bold text-muted">
                 Stages · {editStages.length}
               </h4>
 

@@ -3,7 +3,6 @@ import { t } from "../lib/i18n";
 function PageHeader({
   title,
   description,
-  bare = false,
   action,
   onAction,
 }: {
@@ -11,13 +10,11 @@ function PageHeader({
   label?: string;
   title: string;
   description: string;
-  /** Sin línea inferior: para pantallas con sus propios paneles de cristal */
-  bare?: boolean;
   action?: string;
   onAction?: () => void;
 }) {
   return (
-    <header className={`px-8 py-5 ${bare ? "" : "border-b border-line"}`}>
+    <header className="px-8 py-5">
       <div className="flex items-center justify-between gap-6">
         <div>
           <h2 className="font-display text-3xl font-semibold tracking-tight">{t(title)}</h2>

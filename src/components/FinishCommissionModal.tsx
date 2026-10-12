@@ -5,7 +5,7 @@ import { t } from "../lib/i18n";
 
 export type FinishDetails = { deliveredAt: string; hours: number | null; notes: string; imagePaths: string[] };
 
-const label = "mb-1.5 block text-[11px] font-black uppercase tracking-[0.16em] text-faint";
+const label = "mb-1.5 block text-xs font-bold text-muted";
 const field = "rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
 
 /** Final details of a piece. Hours and notes come prefilled when a finished commission is finished again. */
@@ -40,8 +40,8 @@ function FinishCommissionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div className="w-[480px] rounded-3xl border border-line bg-surface p-6 shadow-2xl">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-faint">{t("Mark as finished")}</p>
+      <div className="w-[480px] glass-heavy rounded-3xl p-6">
+        <p className="text-xs font-bold text-muted">{t("Mark as finished")}</p>
         <h3 className="mt-2 text-2xl font-black text-ink">{title}</h3>
 
         <div className="mt-5 grid grid-cols-2 gap-4">
