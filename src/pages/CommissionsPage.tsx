@@ -1,6 +1,6 @@
 import { locale, t } from "../lib/i18n";
 import { takeAction } from "../lib/actions";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { imageUrl, thumbUrl, importImage, pickImagePaths } from "../lib/images";
 import { IPAD_IMAGE_ADDED } from "../lib/ipad";
 import { useImageInput } from "../lib/useImageInput";
@@ -120,15 +120,12 @@ function CommissionsPage() {
   const [pinMode, setPinMode] = useState(false);
   const [pinDraft, setPinDraft] = useState<{ x: number; y: number; text: string } | null>(null);
   const [openPinId, setOpenPinId] = useState<number | null>(null);
-  const [stripHeight, setStripHeight] = useState(0);
-  const stripObserver = useRef<ResizeObserver | null>(null);
-  const stripRef = useCallback((node: HTMLDivElement | null) => {
-    stripObserver.current?.disconnect();
-
-    if (node) {
-      stripObserver.current = new ResizeObserver(([entry]) => setStripHeight(entry.contentRect.height));
-      stripObserver.current.observe(node);
-    }
+  // Image height follows the window only, so every commission shows the same size (it used to follow the space left by the content above)
+  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
+  useEffect(() => {
+    const onResize = () => setWindowHeight(window.innerHeight);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
   }, []);
   const [commissionMenuOpen, setCommissionMenuOpen] = useState(false);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
@@ -847,7 +844,9 @@ function CommissionsPage() {
 
   const pasteStage = workflowStages[currentStageIndex] ?? workflowStages[0] ?? null;
   // Strip gap minus each stage's label and corrections button
-  const stageImageHeight = Math.max(stripHeight - 64, 140);
+  // The strip clips what sticks out of it, so each column keeps 4 px around its image for the current stage's ring (ring + offset = 4 px);
+  // the image gives those 8 px back so the column keeps its height
+  const stageImageHeight = Math.max(windowHeight - 580, 180);
 
   // Focus mode: all images from all stages, in order
   const focusImages = activeCommission
@@ -1235,12 +1234,12 @@ function CommissionsPage() {
                   <>
                     {/* Stage strip: same height for all, each image at its real aspect ratio */}
                     <div
-                      ref={stripRef}
                       onWheel={(event) => {
                         // The vertical wheel scrolls the strip horizontally
                         if (event.deltaY !== 0) event.currentTarget.scrollLeft += event.deltaY;
                       }}
                       className="flex min-h-48 flex-1 gap-4 overflow-x-auto"
+                      style={{ minHeight: stageImageHeight + 72 }}
                     >
                       {visibleStages.map((stage, index) => {
                         const stageImages = getStageImages(activeCommission.id, stage.id);
@@ -1256,7 +1255,7 @@ function CommissionsPage() {
                             key={stage.id}
                             id={isCurrent ? "current-stage" : undefined}
                             data-image-drop={dropId}
-                            className="flex shrink-0 flex-col"
+                            className="flex shrink-0 flex-col p-1"
                           >
                             {image ? (
                               <div
@@ -1280,7 +1279,7 @@ function CommissionsPage() {
                                   />
                                 </button>
 
-                                {getVersions(image).length > 1 && (
+                                {(getVersions(image).length > 1 || isDone) && (
                                   <span className="absolute left-2 top-2 rounded-sm bg-black/60 px-1.5 py-0.5 text-[11px] font-bold text-white">
                                     {versionLabel(image, getVersions(image), isDone)}
                                   </span>
@@ -1349,7 +1348,7 @@ function CommissionsPage() {
                                 disabled={importingStageId !== null}
                                 onClick={() => handleAddStageImages(stage.id)}
                                 style={{ height: stageImageHeight, width: stageImageHeight * 0.75 }}
-                                className={`flex flex-col items-center justify-center rounded-md border border-dashed text-center text-xs transition ${
+                                className={`flex shrink-0 flex-col items-center justify-center rounded-md border border-dashed text-center text-xs transition ${
                                   isDropTarget
                                     ? "border-ink bg-highlight text-ink"
                                     : "border-line-strong text-faint hover:border-ink hover:text-ink"
@@ -2043,7 +2042,7 @@ function CommissionsPage() {
                       }
                     }}
                     placeholder={t("+ from another client")}
-                    className="w-40 rounded-sm border border-dashed border-line-strong bg-transparent px-2 py-1 text-sm outline-none focus:border-ink"
+                    className="w-52 rounded-sm border border-dashed border-line-strong bg-transparent px-2 py-1 text-sm outline-none focus:border-ink"
                   />
                   <datalist id="character-options">
                     {allCharacterOptions.map((option) => (

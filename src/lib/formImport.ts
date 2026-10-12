@@ -188,6 +188,24 @@ export function autoTagIds(
   return [...types.filter((item) => item.size === best).map((item) => item.tag), ...count].map((tag) => tag.id);
 }
 
+/**
+ * The responses to save: not in the list, and not removed from it earlier (the CSV still has those,
+ * so without this they came back as new every time it was read). A response repeated in the file counts once.
+ */
+export function newResponses<T extends { externalId: string }>(items: T[], known: Set<string | null>): T[] {
+  const seen = new Set(known);
+  const fresh: T[] = [];
+
+  for (const item of items) {
+    if (!seen.has(item.externalId)) {
+      seen.add(item.externalId);
+      fresh.push(item);
+    }
+  }
+
+  return fresh;
+}
+
 export type ImportedRequest = {
   /** Identifies the response so it isn't imported twice */
   externalId: string;

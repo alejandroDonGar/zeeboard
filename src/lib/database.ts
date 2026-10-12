@@ -1,6 +1,6 @@
 import { t } from "./i18n";
 import Database from "@tauri-apps/plugin-sql";
-import type { ImportedRequest } from "./formImport";
+import { newResponses, type ImportedRequest } from "./formImport";
 import {
   imagePathsOf,
   insertStatement,
@@ -224,32 +224,12 @@ export async function initializeDatabase() {
   `);
   // Where an imported request came from (to avoid importing it twice) and its email
   await database.execute(`ALTER TABLE commission_requests ADD COLUMN external_id TEXT;`).catch(() => {});
+  // Form responses removed from the list: the CSV still has them and they must not come back
+  await database.execute(`CREATE TABLE IF NOT EXISTS ignored_requests (external_id TEXT PRIMARY KEY);`);
   await database.execute(`ALTER TABLE commission_requests ADD COLUMN email TEXT;`).catch(() => {});
   // Whom to tag when posting: on the request, and on the client once accepted
   await database.execute(`ALTER TABLE commission_requests ADD COLUMN tag_platform TEXT;`).catch(() => {});
   await database.execute(`ALTER TABLE commission_requests ADD COLUMN tag_handle TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE clients ADD COLUMN tag_platform TEXT;`).catch(() => {});
-  // PayPal transaction id: prevents importing the same payment twice
-  await database.execute(`ALTER TABLE commission_payments ADD COLUMN external_id TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE clients ADD COLUMN tag_handle TEXT;`).catch(() => {});
-  // When a commission last changed stage: counts as activity for the stalled alert
-  await database.execute(`ALTER TABLE commissions ADD COLUMN stage_changed_at TEXT;`).catch(() => {});
-  // Alternatives and versions of a stage image (older rows: each one is its own alternative, version 1)
-  await database.execute(`ALTER TABLE commission_stage_images ADD COLUMN alt INTEGER;`).catch(() => {});
-  await database.execute(`ALTER TABLE commission_stage_images ADD COLUMN version INTEGER NOT NULL DEFAULT 1;`).catch(() => {});
-  await database.execute(`
-    UPDATE commission_stage_images
-    SET alt = (
-      SELECT COUNT(*) FROM commission_stage_images older
-      WHERE older.commission_id = commission_stage_images.commission_id
-        AND older.stage_id = commission_stage_images.stage_id
-        AND older.id <= commission_stage_images.id
-    )
-    WHERE alt IS NULL;
-  `);
-  await database.execute(`ALTER TABLE commissions ADD COLUMN delivered_at TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE commissions ADD COLUMN hours REAL;`).catch(() => {});
-  await database.execute(`ALTER TABLE commissions ADD COLUMN final_notes TEXT;`).catch(() => {});
   await database.execute(`INSERT OR IGNORE INTO settings (id) VALUES (1);`);
   await loadSettings();
 
@@ -464,6 +444,31 @@ export async function initializeDatabase() {
       deleted_at TEXT NOT NULL
     );
   `);
+
+  // Columns of tables created above. They go after every CREATE TABLE: on a fresh database an ALTER that runs before its
+  // table exists fails silently, and the UPDATE below would stop the whole start-up.
+  await database.execute(`ALTER TABLE clients ADD COLUMN tag_platform TEXT;`).catch(() => {});
+  // PayPal transaction id: prevents importing the same payment twice
+  await database.execute(`ALTER TABLE commission_payments ADD COLUMN external_id TEXT;`).catch(() => {});
+  await database.execute(`ALTER TABLE clients ADD COLUMN tag_handle TEXT;`).catch(() => {});
+  // When a commission last changed stage: counts as activity for the stalled alert
+  await database.execute(`ALTER TABLE commissions ADD COLUMN stage_changed_at TEXT;`).catch(() => {});
+  // Alternatives and versions of a stage image (older rows: each one is its own alternative, version 1)
+  await database.execute(`ALTER TABLE commission_stage_images ADD COLUMN alt INTEGER;`).catch(() => {});
+  await database.execute(`ALTER TABLE commission_stage_images ADD COLUMN version INTEGER NOT NULL DEFAULT 1;`).catch(() => {});
+  await database.execute(`
+    UPDATE commission_stage_images
+    SET alt = (
+      SELECT COUNT(*) FROM commission_stage_images older
+      WHERE older.commission_id = commission_stage_images.commission_id
+        AND older.stage_id = commission_stage_images.stage_id
+        AND older.id <= commission_stage_images.id
+    )
+    WHERE alt IS NULL;
+  `);
+  await database.execute(`ALTER TABLE commissions ADD COLUMN delivered_at TEXT;`).catch(() => {});
+  await database.execute(`ALTER TABLE commissions ADD COLUMN hours REAL;`).catch(() => {});
+  await database.execute(`ALTER TABLE commissions ADD COLUMN final_notes TEXT;`).catch(() => {});
 }
 
 export async function getTemplates(): Promise<Template[]> {
@@ -2098,26 +2103,39 @@ export async function deleteRequest(requestId: number): Promise<number> {
   const trashId = await moveToTrash("request", requestId);
   const database = await getDatabase();
 
+  // Remembered for good, even after the trash is emptied
+  await database.execute(
+    `INSERT OR IGNORE INTO ignored_requests (external_id) SELECT external_id FROM commission_requests WHERE id = ? AND external_id IS NOT NULL;`,
+    [requestId],
+  );
+
   await database.execute(`DELETE FROM commission_requests WHERE id = ?;`, [requestId]);
 
   return trashId;
 }
 
-/** Saves form requests not already stored (recognized by external_id). */
+/** Saves form requests not already stored or removed before (recognized by external_id). */
 export async function importRequests(items: ImportedRequest[]): Promise<{ added: number; skipped: number }> {
   return await runSerialized(async (database) => {
+    // Requests that went to the trash before this was remembered: their ids join the list now
+    for (const { payload } of await database.select<{ payload: string }[]>(`SELECT payload FROM trash WHERE kind = 'request';`)) {
+      for (const row of (JSON.parse(payload) as Snapshot).commission_requests ?? []) {
+        if (row.external_id) {
+          await database.execute(`INSERT OR IGNORE INTO ignored_requests (external_id) VALUES (?);`, [row.external_id]);
+        }
+      }
+    }
+
     const known = new Set(
-      (await database.select<{ external_id: string | null }[]>(`SELECT external_id FROM commission_requests;`)).map(
-        (row) => row.external_id,
-      ),
+      (
+        await database.select<{ external_id: string | null }[]>(
+          `SELECT external_id FROM commission_requests UNION SELECT external_id FROM ignored_requests;`,
+        )
+      ).map((row) => row.external_id),
     );
     let added = 0;
 
-    for (const item of items) {
-      if (known.has(item.externalId)) {
-        continue;
-      }
-
+    for (const item of newResponses(items, known)) {
       await database.execute(
         `INSERT INTO commission_requests
            (name, platform, contact, template_id, characters, details, status, created_at, external_id, email,
@@ -2137,7 +2155,6 @@ export async function importRequests(items: ImportedRequest[]): Promise<{ added:
           item.tag_handle,
         ],
       );
-      known.add(item.externalId);
       added += 1;
     }
 

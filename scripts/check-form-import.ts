@@ -3,7 +3,7 @@
 import assert from "node:assert";
 import { splitLinks } from "../src/lib/links";
 import { parseTagAccount } from "../src/lib/formImport";
-import { autoTagIds, matchTemplate, normalizeHandle, parseContact, parseCsv, parseResponses, parseTimestamp } from "../src/lib/formImport";
+import { autoTagIds, matchTemplate, newResponses, normalizeHandle, parseContact, parseCsv, parseResponses, parseTimestamp } from "../src/lib/formImport";
 
 // Google CSV: quotes, escaped quotes and line breaks inside a cell
 assert.deepStrictEqual(parseCsv('"a","b ""x"" c","line\n2"\n"d","e","f"\n'), [
@@ -167,3 +167,11 @@ assert.deepStrictEqual(autoTagIds("Sketch", 1, tags), [35, 43]);
 assert.deepStrictEqual(autoTagIds(null, 9, tags), []); // no template and no tag for 9: nothing
 
 console.log("form import ok");
+
+// Responses to save: new ones only. One removed from the list earlier (its id is still "known") must not come back,
+// and a response repeated inside the file is saved once.
+const responses = [{ externalId: "a" }, { externalId: "b" }, { externalId: "c" }, { externalId: "c" }];
+assert.deepStrictEqual(newResponses(responses, new Set(["a"])), [{ externalId: "b" }, { externalId: "c" }]);
+assert.deepStrictEqual(newResponses(responses, new Set(["a", "b", "c", null])), []);
+assert.deepStrictEqual(newResponses([], new Set()), []);
+console.log("responses to save ok");
