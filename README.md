@@ -354,7 +354,8 @@ Quick checks of the business logic (no framework, each prints "ok"):
 ```bash
 npx tsx scripts/check-payments.ts   # also: check-reminders, check-export, check-form-import,
                                     # check-avatars, check-paypal, check-search, check-i18n,
-                                    # check-stats, check-trash, check-ipad
+                                    # check-stats, check-trash, check-ipad, check-fresh-db,
+                                    # check-permissions
 cd src-tauri && cargo test
 ```
 
