@@ -8,6 +8,7 @@ import {
   updateTag,
   type Tag,
 } from "../lib/database";
+import TagChip from "../components/TagChip";
 import PageHeader from "../components/PageHeader";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
@@ -69,12 +70,7 @@ function TagEditor({
       }}
     >
       <div className="flex items-center gap-3">
-        <span
-          className="shrink-0 rounded-sm px-3 py-1 text-xs font-bold text-white"
-          style={{ backgroundColor: draft.color }}
-        >
-          {draft.name.trim() || "Preview"}
-        </span>
+        <TagChip name={draft.name.trim() || "Preview"} color={draft.color} />
 
         <input
           autoFocus
@@ -345,7 +341,7 @@ function TagsPage() {
                             <button
                               type="button"
                               onClick={() => setTagToDelete(tag)}
-                              className="rounded-sm px-2 py-1 text-xs font-semibold text-red-500 hover:bg-red-50"
+                              className="rounded-sm px-2 py-1 text-xs font-semibold text-tone-bad hover:bg-tone-bad/10"
                             >
                               {t("Delete")}
                             </button>

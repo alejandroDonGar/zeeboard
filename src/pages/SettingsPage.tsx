@@ -385,7 +385,7 @@ function SettingsPage() {
                           setPlatforms(next);
                           savePaymentPlatforms(next).catch(console.error);
                         }}
-                        className="px-1 text-faint transition hover:text-red-500"
+                        className="px-1 text-faint transition hover:text-tone-bad"
                       >
                         ×
                       </button>

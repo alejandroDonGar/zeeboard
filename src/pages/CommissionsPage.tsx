@@ -65,6 +65,7 @@ import {
   type TemplateStage,
 } from "../lib/database";
 import PageHeader from "../components/PageHeader";
+import TagChip from "../components/TagChip";
 import GlassPanel from "../components/GlassPanel";
 import AmbientBackground from "../components/AmbientBackground";
 import { useAmbientImage } from "../lib/ambient";
@@ -1085,11 +1086,11 @@ function CommissionsPage() {
                               title={t("Days since you accepted it")}
                               className={`shrink-0 rounded-sm px-1.5 py-0.5 text-xs font-bold ${
                                 daysToDeadline(commission, appSettings().promise_max_days, new Date()).daysLeft < 0
-                                  ? "bg-red-50 text-red-600"
+                                  ? "chip chip-bad"
                                   : daysToDeadline(commission, appSettings().promise_max_days, new Date()).daysLeft <=
                                       appSettings().reminder_days_before
-                                    ? "bg-amber-100 text-amber-900"
-                                    : "bg-highlight text-muted"
+                                    ? "chip chip-warn"
+                                    : "chip"
                               }`}
                             >
                               {ageInDays(commission, new Date())}d
@@ -1139,12 +1140,12 @@ function CommissionsPage() {
                           title={t("Each client correction counts as one revision")}
                           className={`rounded-sm px-2 py-0.5 text-xs font-bold ${
                             revisionsIncluded === null
-                              ? "bg-highlight text-muted"
+                              ? "chip"
                               : activeCorrections.length > revisionsIncluded
-                                ? "bg-red-50 text-red-600"
+                                ? "chip chip-bad"
                                 : activeCorrections.length === revisionsIncluded
-                                  ? "bg-amber-100 text-amber-900"
-                                  : "bg-highlight text-muted"
+                                  ? "chip chip-warn"
+                                  : "chip"
                           }`}
                         >
                           {t("Revisions")} {activeCorrections.length}
@@ -1164,13 +1165,7 @@ function CommissionsPage() {
                         </button>
                       )}
                       {activeNormalTags.map((tag) => (
-                        <span
-                          key={tag.id}
-                          className="rounded-sm px-2 py-0.5 text-xs font-bold text-white"
-                          style={{ backgroundColor: tag.color }}
-                        >
-                          {tag.name}
-                        </span>
+                        <TagChip key={tag.id} name={tag.name} color={tag.color} />
                       ))}
                     </div>
                   </div>
@@ -1224,7 +1219,7 @@ function CommissionsPage() {
                               setCommissionMenuOpen(false);
                               setShowDeleteCommissionModal(true);
                             }}
-                            className="block w-full rounded-sm px-3 py-2 text-left text-sm text-red-500 hover:bg-red-50"
+                            className="block w-full rounded-sm px-3 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
                           >
                             {t("Delete")}
                           </button>
@@ -1352,7 +1347,7 @@ function CommissionsPage() {
                                     type="button"
                                     title={t("Remove this image")}
                                     onClick={() => handleDeleteStageImage(image.id)}
-                                    className="flex h-7 w-7 items-center justify-center rounded-sm bg-black/60 text-white hover:bg-red-500"
+                                    className="flex h-7 w-7 items-center justify-center rounded-sm bg-black/60 text-white hover:bg-tone-bad/100"
                                   >
                                     ×
                                   </button>
@@ -1379,7 +1374,7 @@ function CommissionsPage() {
                               <span
                                 className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                                   isDone
-                                    ? "bg-green-600 text-white"
+                                    ? "bg-tone-ok text-on-tone"
                                     : isCurrent
                                       ? "bg-primary text-on-primary"
                                       : "border border-line-strong text-faint"
@@ -1410,7 +1405,7 @@ function CommissionsPage() {
                                   }}
                                   className={`mt-1 self-start rounded-sm px-1.5 py-0.5 text-xs transition ${
                                     pending > 0
-                                      ? "bg-amber-100 font-semibold text-amber-900"
+                                      ? "bg-tone-warn/15 font-semibold text-ink"
                                       : open
                                         ? "text-ink"
                                         : "text-faint hover:text-ink"
@@ -1467,7 +1462,7 @@ function CommissionsPage() {
                                     type="button"
                                     title={t("Show on the image")}
                                     onClick={() => setFocusImageId(pinImage.id)}
-                                    className="flex shrink-0 items-center gap-1 self-center rounded-full bg-amber-400 px-2 py-0.5 text-xs font-black text-black"
+                                    className="chip chip-warn shrink-0 self-center"
                                   >
                                     {pinNumber(activeCorrections, correction)}
                                     <span className="font-semibold">· v{pinImage.version}</span>
@@ -1480,7 +1475,7 @@ function CommissionsPage() {
                                   type="button"
                                   title={t("Remove correction")}
                                   onClick={() => removeCorrection(correction)}
-                                  className="text-faint opacity-0 transition hover:text-red-500 group-hover:opacity-100"
+                                  className="text-faint opacity-0 transition hover:text-tone-bad group-hover:opacity-100"
                                 >
                                   ×
                                 </button>
@@ -1547,7 +1542,7 @@ function CommissionsPage() {
 
                       {isLastStage ? (
                         <>
-                          <span className="rounded-md bg-green-600 px-4 py-1.5 text-sm font-bold text-white">
+                          <span className="rounded-md bg-tone-ok px-4 py-1.5 text-sm font-bold text-on-tone">
                             {t("✓ Finished")}
                             {activeCommission.delivered_at && ` · ${new Date(`${activeCommission.delivered_at}T12:00:00`).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}`}
                             {activeCommission.hours !== null && ` · ${activeCommission.hours} h`}
@@ -1727,16 +1722,7 @@ function CommissionsPage() {
                       {normalTags.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-2">
                           {normalTags.map((tag) => (
-                            <span
-                              key={tag.id}
-                              title={tag.name}
-                              className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-xl text-[0px] font-black text-white shadow-sm xl:w-auto xl:max-w-full xl:rounded-sm xl:px-3 xl:text-xs"
-                              style={{ backgroundColor: tag.color }}
-                            >
-                              <span className="hidden truncate xl:block">
-                                {tag.name}
-                              </span>
-                            </span>
+                            <TagChip key={tag.id} name={tag.name} color={tag.color} />
                           ))}
                         </div>
                       )}
@@ -1759,7 +1745,7 @@ function CommissionsPage() {
                           <div
                             className={
                               completionPercentage === 100
-                                ? "h-full rounded-sm bg-green-500"
+                                ? "h-full rounded-sm bg-tone-ok"
                                 : "h-full rounded-sm bg-primary"
                             }
                             style={{ width: `${completionPercentage}%` }}
@@ -1831,7 +1817,7 @@ function CommissionsPage() {
                   {selectedDeadlineCommission.deadline}
                 </p>
 
-                <p className="mt-3 rounded-sm bg-amber-100 px-3 py-1 text-xs font-bold text-amber-900">
+                <p className="mt-3 rounded-sm bg-tone-warn/15 px-3 py-1 text-xs font-bold text-ink">
                   {daysUntilSelectedDeadline !== null
                     ? t(daysUntilSelectedDeadline === 1 ? "{n} day left" : "{n} days left", { n: daysUntilSelectedDeadline })
                     : t("No date")}
@@ -1880,11 +1866,11 @@ function CommissionsPage() {
                     key={index}
                     className={
                       isDeadlineDay
-                        ? "flex aspect-square items-center justify-center rounded-xl bg-red-500 text-xs font-black text-white"
+                        ? "flex aspect-square items-center justify-center rounded-xl bg-tone-bad text-xs font-black text-on-tone"
                         : isToday
                           ? "flex aspect-square items-center justify-center rounded-xl bg-primary-hover text-xs font-black text-on-primary shadow-sm"
                           : isInDeadlineRange
-                            ? "flex aspect-square items-center justify-center rounded-xl bg-amber-100 text-xs font-bold text-amber-900"
+                            ? "flex aspect-square items-center justify-center rounded-xl bg-tone-warn/15 text-xs font-bold text-ink"
                             : "flex aspect-square items-center justify-center rounded-xl bg-surface text-xs font-bold text-faint"
                     }
                   >
@@ -1913,7 +1899,7 @@ function CommissionsPage() {
 
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-semibold text-muted">{t("Deadline")}</span>
-                    <span className="font-bold text-red-600">
+                    <span className="font-bold text-tone-bad">
                       {new Date(selectedDeadlineCommission.deadline).toLocaleDateString(
                         locale,
                         {
@@ -1924,7 +1910,7 @@ function CommissionsPage() {
                     </span>
                   </div>
 
-                  <div className="rounded-sm bg-amber-100 px-3 py-2 text-center text-xs font-black text-amber-900">
+                  <div className="rounded-sm bg-tone-warn/15 px-3 py-2 text-center text-xs font-bold text-ink">
                     {daysUntilSelectedDeadline !== null
                       ? daysUntilSelectedDeadline > 0
                         ? t(daysUntilSelectedDeadline === 1 ? "{n} day left" : "{n} days left", { n: daysUntilSelectedDeadline })
@@ -2114,9 +2100,11 @@ function CommissionsPage() {
                     const selected = selectedTagIds.includes(tag.id);
 
                     return (
-                      <button
+                      <TagChip
                         key={tag.id}
-                        type="button"
+                        name={tag.name}
+                        color={tag.color}
+                        selected={selected}
                         onClick={() =>
                           setSelectedTagIds((current) => {
                             if (selected) {
@@ -2132,15 +2120,7 @@ function CommissionsPage() {
                             return [...current.filter((id) => !sameCategory.includes(id)), tag.id];
                           })
                         }
-                        className={
-                          selected
-                            ? "rounded-sm px-2.5 py-1 text-xs font-bold text-white"
-                            : "rounded-sm border border-line-strong px-2.5 py-1 text-xs text-muted hover:border-ink hover:text-ink"
-                        }
-                        style={selected ? { backgroundColor: tag.color } : undefined}
-                      >
-                        {tag.name}
-                      </button>
+                      />
                     );
                   })}
                 </div>
@@ -2371,7 +2351,7 @@ function CommissionsPage() {
                         <button type="button" onClick={() => toggleCorrectionDone(openPin)} className="font-semibold hover:underline">
                           {openPin.done_at === null ? t("Mark as done") : t("Mark as not done")}
                         </button>
-                        <button type="button" onClick={() => removeCorrection(openPin)} className="text-faint hover:text-red-500">
+                        <button type="button" onClick={() => removeCorrection(openPin)} className="text-faint hover:text-tone-bad">
                           {t("Remove correction")}
                         </button>
                       </div>

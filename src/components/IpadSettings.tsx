@@ -74,7 +74,7 @@ function IpadSettings() {
         />
       </div>
 
-      {error && <p className="px-5 py-3 text-sm text-red-500">{t("Could not start the iPad receiver: {error}", { error })}</p>}
+      {error && <p className="px-5 py-3 text-sm text-tone-bad">{t("Could not start the iPad receiver: {error}", { error })}</p>}
 
       {settings.enabled && !error && (
         <div className="px-5 py-4 text-sm">
@@ -94,11 +94,11 @@ function IpadSettings() {
                   <p className="text-muted">{t("Listening on port {port}. Scan the code with the iPad camera or open the link.", { port: settings.port })}</p>
 
                   {primary === null ? (
-                    <p className="text-amber-600">{t("No network address found on this PC.")}</p>
+                    <p className="text-tone-warn">{t("No network address found on this PC.")}</p>
                   ) : isTailscale(primary) ? (
-                    <p className="font-semibold text-green-600">{t("Tailscale found: this link works from the iPad even over mobile data.")}</p>
+                    <p className="font-semibold text-tone-ok">{t("Tailscale found: this link works from the iPad even over mobile data.")}</p>
                   ) : (
-                    <p className="text-amber-600">
+                    <p className="text-tone-warn">
                       {t("Tailscale not found on this PC. Install it here and on the iPad (tailscale.com/download) and sign in with the same account so the iPad can reach this PC over mobile data. Until then the link only works on the same Wi-Fi.")}
                     </p>
                   )}

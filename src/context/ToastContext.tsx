@@ -45,15 +45,15 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <div
           className={
             toastType === "success"
-              ? "fixed bottom-6 right-6 z-[60] rounded-2xl bg-green-600 px-5 py-3 text-sm font-bold text-white shadow-xl"
-              : "fixed bottom-6 right-6 z-[60] rounded-2xl bg-red-500 px-5 py-3 text-sm font-bold text-white shadow-xl"
+              ? "fixed bottom-6 right-6 z-[60] rounded-2xl bg-tone-ok px-5 py-3 text-sm font-bold text-on-tone shadow-xl"
+              : "fixed bottom-6 right-6 z-[60] rounded-2xl bg-tone-bad px-5 py-3 text-sm font-bold text-on-tone shadow-xl"
           }
         >
           {toastMessage}
           {toastAction && (
             <button
               type="button"
-              className="ml-4 rounded-sm bg-white/20 px-2 py-1 text-xs font-bold hover:bg-white/30"
+              className="ml-4 rounded-sm bg-black/15 px-2 py-1 text-xs font-bold hover:bg-black/25"
               onClick={() => {
                 setToastMessage("");
                 setToastAction(null);

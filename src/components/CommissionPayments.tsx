@@ -102,7 +102,7 @@ function CommissionPayments({
         </span>
         <span>
           <span className="text-faint">{t("Received")} </span>
-          <b className="text-green-700">{formatMoney(summary.received, currency)}</b>
+          <b className="text-tone-ok">{formatMoney(summary.received, currency)}</b>
           {summary.pendingReceived > 0 && <span className="text-faint"> · {t("{n} not entered", { n: summary.pendingReceived })}</span>}
         </span>
         {summary.fees > 0 && <span className="text-faint">{t("Fees {amount}", { amount: formatMoney(summary.fees, currency) })}</span>}
@@ -154,7 +154,7 @@ function CommissionPayments({
                   type="button"
                   title={t("Remove payment")}
                   onClick={() => run(async () => undoToast(showToast, "Payment removed.", await deletePayment(payment.id)))}
-                  className="rounded-sm text-faint opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+                  className="rounded-sm text-faint opacity-0 transition hover:bg-tone-bad/10 hover:text-tone-bad group-hover:opacity-100"
                 >
                   ×
                 </button>

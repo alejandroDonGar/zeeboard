@@ -25,6 +25,7 @@ import {
 import { locale, t } from "../lib/i18n";
 import { thumbUrl } from "../lib/images";
 import { hide } from "../lib/privacy";
+import TagChip from "../components/TagChip";
 import { ATTENTION_STYLE, loadAttention, type Attention } from "../lib/reminders";
 import PageHeader from "../components/PageHeader";
 
@@ -146,13 +147,13 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
       label: t("Due within 7 days"),
       value: dueThisWeek,
       detail: t("including overdue"),
-      className: dueThisWeek > 0 ? "text-amber-600" : "text-ink",
+      className: dueThisWeek > 0 ? "text-tone-warn" : "text-ink",
     },
     {
       label: t("Waiting for payment"),
       value: formatMoney(unpaid.reduce((sum, entry) => sum + entry.remaining, 0)),
       detail: t(unpaid.length === 1 ? "{n} commission" : "{n} commissions", { n: unpaid.length }),
-      className: unpaid.length > 0 ? "text-red-500" : "text-ink",
+      className: unpaid.length > 0 ? "text-tone-bad" : "text-ink",
     },
     {
       label: t("Received this month"),
@@ -161,7 +162,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
         receivedThisMonth.pendingReceived > 0
           ? t("{n} payments not entered yet", { n: receivedThisMonth.pendingReceived })
           : t("{amount} in platform fees", { amount: formatMoney(receivedThisMonth.fees) }),
-      className: "text-green-600",
+      className: "text-tone-ok",
     },
   ];
 
@@ -185,7 +186,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
                   onClick={() => handleOpenCommission(item.commission)}
                   className="flex w-full items-center gap-3 py-2 text-left text-sm transition hover:bg-paper"
                 >
-                  <span className={`w-16 shrink-0 rounded-sm px-2 py-0.5 text-center text-xs font-bold ${ATTENTION_STYLE[item.kind].className}`}>
+                  <span className={`w-24 shrink-0 rounded-sm px-2 py-0.5 text-xs font-bold ${ATTENTION_STYLE[item.kind].className}`}>
                     {t(ATTENTION_STYLE[item.kind].label)}
                   </span>
                   <span className="truncate">{item.text}</span>
@@ -295,7 +296,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
             {recentRate !== null && (
               <section className={panel}>
                 <h3 className={heading}>{t("Your hourly rate · last 90 days")}</h3>
-                <p className="text-3xl font-black text-green-600">{formatMoney(recentRate)}/h</p>
+                <p className="text-3xl font-black text-tone-ok">{formatMoney(recentRate)}/h</p>
                 <p className="mt-1 text-xs text-muted">
                   {t(recent.length === 1 ? "{n} piece · {hours} h" : "{n} pieces · {hours} h", {
                     n: recent.length,
@@ -314,9 +315,7 @@ function DashboardPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () =>
                 <div className="flex flex-wrap gap-2">
                   {topTags.map(({ tag, count }) => (
                     <span key={tag.id} className="flex items-center gap-1.5 text-xs">
-                      <span className="rounded-sm px-2 py-0.5 font-bold text-white" style={{ backgroundColor: tag.color }}>
-                        {tag.name}
-                      </span>
+                      <TagChip name={tag.name} color={tag.color} />
                       <span className="text-faint">{count}</span>
                     </span>
                   ))}

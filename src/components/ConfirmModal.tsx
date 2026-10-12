@@ -31,7 +31,7 @@ function ConfirmModal({
         <p
           className={
             eyebrowTone === "danger"
-              ? "text-xs font-bold text-red-500"
+              ? "text-xs font-bold text-tone-bad"
               : "text-xs font-bold text-muted"
           }
         >
@@ -61,7 +61,7 @@ function ConfirmModal({
             disabled={isConfirming}
             className={
               confirmVariant === "danger"
-                ? "rounded-2xl bg-red-500 px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-70"
+                ? "rounded-2xl bg-tone-bad px-4 py-2 font-bold text-on-tone disabled:cursor-not-allowed disabled:opacity-70"
                 : "rounded-2xl bg-primary px-4 py-2 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-70"
             }
           >

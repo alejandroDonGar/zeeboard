@@ -355,7 +355,7 @@ function App() {
                   <item.icon size={18} stroke={1.75} aria-hidden="true" />
                   {t(item.label)}
                   {item.id === "requests" && newRequests > 0 && (
-                    <span className="ml-auto rounded-sm bg-amber-100 px-1.5 py-0.5 text-xs font-bold text-amber-900">
+                    <span className="ml-auto rounded-sm bg-tone-warn px-1.5 py-0.5 text-xs font-bold text-on-tone">
                       {newRequests}
                     </span>
                   )}
@@ -370,7 +370,7 @@ function App() {
             title={t("Hide client names and prices while streaming (Ctrl+Shift+P)")}
             className={`mt-auto flex w-full items-center gap-3 rounded-xl border px-3 py-2 text-left text-sm font-bold transition ${
               privateMode
-                ? "border-amber-400 bg-amber-100 text-amber-900"
+                ? "border-tone-warn bg-tone-warn/15 text-ink"
                 : "border-line bg-transparent text-muted hover:border-ink hover:text-ink"
             }`}
           >

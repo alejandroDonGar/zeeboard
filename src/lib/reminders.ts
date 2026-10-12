@@ -50,10 +50,10 @@ export function ageInDays(commission: Reminderable, now: Date): number {
 }
 
 export const ATTENTION_STYLE: Record<AttentionKind, { label: string; className: string }> = {
-  overdue: { label: "Overdue", className: "bg-red-50 text-red-600" },
-  "due-today": { label: "Today", className: "bg-red-50 text-red-600" },
-  "due-soon": { label: "Soon", className: "bg-amber-100 text-amber-900" },
-  payment: { label: "Unpaid", className: "bg-amber-100 text-amber-900" },
+  overdue: { label: "Overdue", className: "chip chip-bad" },
+  "due-today": { label: "Today", className: "chip chip-bad" },
+  "due-soon": { label: "Soon", className: "chip chip-warn" },
+  payment: { label: "Unpaid", className: "chip chip-warn" },
   stalled: { label: "Stalled", className: "bg-highlight text-muted" },
 };
 

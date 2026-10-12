@@ -284,7 +284,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 onChange={(event) =>
                   run(() => setRequestTemplate(request.id, Number(event.target.value)), "Could not set the type")
                 }
-                className="rounded-md border border-amber-400 bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-900"
+                className="rounded-md border border-tone-warn bg-tone-warn/15 px-2 py-0.5 text-sm font-semibold text-ink"
               >
                 <option value="">{t("Choose the type…")}</option>
                 {templates.map((item) => (
@@ -315,7 +315,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
 
         <div className="flex shrink-0 items-center gap-2">
           {request.status === "accepted" && (
-            <span className="rounded-sm bg-green-50 px-2 py-0.5 text-xs font-bold text-green-700">{t("Accepted")}</span>
+            <span className="chip chip-ok">{t("Accepted")}</span>
           )}
           {request.status === "declined" && (
             <span className="rounded-sm bg-highlight px-2 py-0.5 text-xs font-bold text-muted">{t("Declined")}</span>
@@ -367,7 +367,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
               type="button"
               title={t("Remove from the list")}
               onClick={() => run(async () => undoToast(showToast, "Removed from the list.", await deleteRequest(request.id)), "Could not remove it")}
-              className="px-1 text-faint transition hover:text-red-500"
+              className="px-1 text-faint transition hover:text-tone-bad"
             >
               ×
             </button>
@@ -433,7 +433,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
               <div className="flex-1">
                 <p className="font-semibold">
                   {t("{taken} of {total} slots taken", { taken, total: settings.slots_total })}
-                  <span className={`ml-2 text-sm font-normal ${free < 0 ? "text-red-500" : "text-muted"}`}>
+                  <span className={`ml-2 text-sm font-normal ${free < 0 ? "text-tone-bad" : "text-muted"}`}>
                     {free > 0 ? t("{n} free", { n: free }) : free === 0 ? t("full") : t("{n} over", { n: -free })}
                   </span>
                 </p>
@@ -442,7 +442,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                     <span
                       key={index}
                       className={`h-3 w-5 rounded-sm ${
-                        index >= settings.slots_total ? "bg-red-400" : index < taken ? "bg-primary" : "border border-line-strong"
+                        index >= settings.slots_total ? "bg-tone-bad" : index < taken ? "bg-primary" : "border border-line-strong"
                       }`}
                     />
                   ))}

@@ -23,6 +23,13 @@
   --color-primary-hover: var(--primary-hover);
   --color-on-primary: var(--on-primary); /* texto sobre botones principales */
 
+  /* Colores con significado (estado). Nunca decoran: solo dicen "bien", "ojo", "mal" o "info" */
+  --color-tone-ok: var(--tone-ok);
+  --color-tone-warn: var(--tone-warn);
+  --color-tone-bad: var(--tone-bad);
+  --color-tone-info: var(--tone-info);
+  --color-on-tone: var(--on-tone); /* texto sobre un fondo tone-* sólido */
+
   /* Esquinas rectas y sobrias: las clases rounded-* de toda la app usan estos valores */
   --radius-sm: 3px; /* etiquetas, chips, barras de progreso */
   --radius-md: 4px;
@@ -46,6 +53,11 @@
   --primary: #1f2933;
   --primary-hover: #2c3947;
   --on-primary: #ffffff;
+  --tone-ok: #1d7a4a;
+  --tone-warn: #9a5b00;
+  --tone-bad: #b83228;
+  --tone-info: #1f6f8b;
+  --on-tone: #ffffff;
 }
 
 /* Modo oscuro: lo pide el usuario en Ajustes, o lo pide el sistema si el tema es "System" */
@@ -64,6 +76,11 @@
     --primary: #ece6dc;
     --primary-hover: #ffffff;
     --on-primary: #1f2933;
+    --tone-ok: #5ec48d;
+    --tone-warn: #e6a04a;
+    --tone-bad: #ef7b73;
+    --tone-info: #6fc3df;
+    --on-tone: #1a1410;
   }
 }
 
@@ -81,6 +98,11 @@
   --primary: #ece6dc;
   --primary-hover: #ffffff;
   --on-primary: #1f2933;
+  --tone-ok: #5ec48d;
+  --tone-warn: #e6a04a;
+  --tone-bad: #ef7b73;
+  --tone-info: #6fc3df;
+  --on-tone: #1a1410;
 }
 
 /* Cristal esmerilado casi opaco: paneles que flotan sobre el fondo de colores (AmbientBackground) */
@@ -133,6 +155,38 @@
 .glass-heavy {
   background: var(--glass-heavy);
 }
+
+/* Chip: etiqueta de estado o de tag. Fondo neutro, texto normal y un punto de color: el color solo señala,
+   no rellena. `--tone` es el color del punto (chip-ok/warn/bad/info, o el color de la tag). */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 3px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  font-weight: 700;
+  background: var(--highlight);
+  color: var(--ink);
+}
+.chip::before {
+  content: "";
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  background: var(--tone, var(--muted));
+}
+.chip-ok { --tone: var(--tone-ok); }
+.chip-warn { --tone: var(--tone-warn); }
+.chip-bad { --tone: var(--tone-bad); }
+.chip-info { --tone: var(--tone-info); }
+/* Lo único que llena de color: lo urgente de verdad (vencido) */
+.chip-solid { background: var(--tone); color: var(--on-tone); }
+.chip-solid::before { display: none; }
+/* Tag sin seleccionar */
+.chip-outline { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1px var(--line-strong); }
 
 /* Quien pide menos transparencia recibe paneles sólidos */
 @media (prefers-reduced-transparency: reduce) {

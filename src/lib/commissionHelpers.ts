@@ -91,7 +91,7 @@ export function getDeadlineStatus(deadline: string | null) {
     return {
       label: t(daysLeft === -1 ? "{n} day overdue" : "{n} days overdue", { n: Math.abs(daysLeft) }),
       short: t("{n}d late", { n: Math.abs(daysLeft) }),
-      className: "bg-red-500 text-white",
+      className: "chip chip-solid chip-bad",
     };
   }
 
@@ -99,7 +99,7 @@ export function getDeadlineStatus(deadline: string | null) {
     return {
       label: t("Due today"),
       short: t("Due today"),
-      className: "bg-red-500 text-white",
+      className: "chip chip-solid chip-bad",
     };
   }
 
@@ -107,14 +107,14 @@ export function getDeadlineStatus(deadline: string | null) {
     return {
       label: t(daysLeft === 1 ? "{n} day left" : "{n} days left", { n: daysLeft }),
       short: t("{n}d", { n: daysLeft }),
-      className: "bg-amber-100 text-amber-900",
+      className: "chip chip-warn",
     };
   }
 
   return {
     label: t("{n} days left", { n: daysLeft }),
     short: t("{n}d", { n: daysLeft }),
-    className: "bg-white text-[#7c7163]",
+    className: "chip",
   };
 }
 export type PaymentStatus = "unpaid" | "partial" | "paid";
@@ -176,9 +176,9 @@ export function deliveryDay(commission: Commission): string {
 }
 
 export const PAYMENT_STATUS_STYLE: Record<PaymentStatus, { label: string; className: string }> = {
-  unpaid: { label: t("Unpaid"), className: "bg-red-50 text-red-600" },
-  partial: { label: t("Partial"), className: "bg-amber-100 text-amber-900" },
-  paid: { label: t("Paid"), className: "bg-green-50 text-green-700" },
+  unpaid: { label: t("Unpaid"), className: "chip chip-bad" },
+  partial: { label: t("Partial"), className: "chip chip-warn" },
+  paid: { label: t("Paid"), className: "chip chip-ok" },
 };
 
 // ponytail: your handle is hardcoded (same on all your networks); move to Settings if it ever changes

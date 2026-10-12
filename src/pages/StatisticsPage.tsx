@@ -31,7 +31,7 @@ function Change({ now, before }: { now: number | null; before: number | null }) 
   }
 
   return (
-    <span className={change >= 0 ? "text-green-600" : "text-red-500"}>
+    <span className={change >= 0 ? "text-tone-ok" : "text-tone-bad"}>
       {change >= 0 ? "▲" : "▼"} {Math.abs(change)} %
     </span>
   );
@@ -73,7 +73,7 @@ function StatisticsPage() {
       label: t("Received"),
       value: formatMoney(stats.current.received),
       change: <Change now={stats.current.received} before={stats.previous?.received ?? null} />,
-      className: "text-green-600",
+      className: "text-tone-ok",
     },
     {
       label: t("Pieces delivered"),
@@ -194,9 +194,9 @@ function StatisticsPage() {
             <p className="mb-4 text-sm text-muted">
               <span className="text-2xl font-black text-ink">{stats.requests.received}</span> {t("received")}
               {" · "}
-              <span className="font-bold text-green-600">{stats.requests.accepted}</span> {t("accepted")}
+              <span className="font-bold text-tone-ok">{stats.requests.accepted}</span> {t("accepted")}
               {" · "}
-              <span className="font-bold text-red-500">{stats.requests.declined}</span> {t("declined")}
+              <span className="font-bold text-tone-bad">{stats.requests.declined}</span> {t("declined")}
               {" · "}
               <span className="font-bold text-ink">{stats.requests.waitlist}</span> {t("on the waitlist")}
               {" · "}
@@ -266,7 +266,7 @@ function StatisticsPage() {
 
             <section className={panel}>
               <h3 className={heading}>{t("Platform fees")}</h3>
-              <p className="text-3xl font-black text-red-500">{formatMoney(stats.fees.total)}</p>
+              <p className="text-3xl font-black text-tone-bad">{formatMoney(stats.fees.total)}</p>
               <p className="mt-1 text-xs text-muted">
                 {stats.fees.percent === null
                   ? t("No payments with the received amount entered in this period.")

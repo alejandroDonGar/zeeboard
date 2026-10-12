@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { Tag } from "../lib/database";
 import { t } from "../lib/i18n";
+import TagChip from "./TagChip";
 
 export type StatusFilter = "all" | "active" | "overdue";
 export type PaymentFilter = "all" | "unpaid" | "partial" | "paid";
@@ -176,16 +177,14 @@ function BoardFilters({
       {hasFilters && (
         <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {selectedTags.map((tag) => (
-            <button
+            <TagChip
               key={tag.id}
-              type="button"
+              name={tag.name}
+              color={tag.color}
+              suffix=" ×"
               onClick={() => toggleTag(tag.id)}
               title={t("Remove filter")}
-              className="rounded-sm px-2 py-0.5 text-xs font-bold text-white transition hover:opacity-80"
-              style={{ backgroundColor: tag.color }}
-            >
-              {tag.name} ×
-            </button>
+              />
           ))}
 
           <button

@@ -59,7 +59,7 @@ function StageRow({
 
       <span
         className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-          isLast ? "bg-green-600 text-white" : "bg-primary text-on-primary"
+          isLast ? "bg-tone-ok text-on-tone" : "bg-primary text-on-primary"
         }`}
       >
         {index + 1}
@@ -75,7 +75,7 @@ function StageRow({
         type="button"
         title={t("Remove stage")}
         onClick={onRemove}
-        className="rounded-sm px-2 py-1 text-sm text-faint transition hover:bg-red-50 hover:text-red-500"
+        className="rounded-sm px-2 py-1 text-sm text-faint transition hover:bg-tone-bad/10 hover:text-tone-bad"
       >
         ×
       </button>
@@ -304,7 +304,7 @@ function TemplatesPage() {
                 <button
                   type="button"
                   onClick={() => setTemplateToDelete(selectedTemplate)}
-                  className="rounded-md px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
+                  className="rounded-md px-3 py-1.5 text-xs font-semibold text-tone-bad transition hover:bg-tone-bad/10"
                 >
                   {t("Delete")}
                 </button>

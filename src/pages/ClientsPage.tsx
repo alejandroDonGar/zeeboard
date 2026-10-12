@@ -737,7 +737,7 @@ function ClientsPage({
                   <button
                     type="button"
                     onClick={() => setClientToDelete(selectedClient)}
-                    className="rounded-md px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
+                    className="rounded-md px-3 py-1.5 text-xs font-semibold text-tone-bad transition hover:bg-tone-bad/10"
                   >
                     {t("Delete")}
                   </button>
@@ -758,8 +758,8 @@ function ClientsPage({
                     detail: t("{amount} average", { amount: formatMoney(averagePrice) }),
                     className: "text-ink",
                   },
-                  { label: t("Paid"), value: paidCommissionsCount, detail: t("commissions"), className: "text-green-600" },
-                  { label: t("Unpaid"), value: unpaidCommissionsCount, detail: t("commissions"), className: "text-red-500" },
+                  { label: t("Paid"), value: paidCommissionsCount, detail: t("commissions"), className: "text-tone-ok" },
+                  { label: t("Unpaid"), value: unpaidCommissionsCount, detail: t("commissions"), className: "text-tone-bad" },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-md bg-paper p-3">
                     <dt className="text-xs font-bold text-muted">
@@ -822,7 +822,7 @@ function ClientsPage({
                           </div>
                           <div className="mt-1 h-1.5 overflow-hidden rounded-sm bg-paper">
                             <div
-                              className={isCompleted ? "h-full bg-green-500" : "h-full bg-primary"}
+                              className={isCompleted ? "h-full bg-tone-ok" : "h-full bg-primary"}
                               style={{ width: `${completionPercentage}%` }}
                             />
                           </div>
@@ -1010,7 +1010,7 @@ function ClientsPage({
                         <button
                           type="button"
                           onClick={() => setCharacterToDelete(character)}
-                          className="rounded-md px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-50"
+                          className="rounded-md px-3 py-1.5 text-xs font-semibold text-tone-bad transition hover:bg-tone-bad/10"
                         >
                           {t("Delete")}
                         </button>
@@ -1040,7 +1040,7 @@ function ClientsPage({
                             type="button"
                             title={t("Remove reference")}
                             onClick={() => handleDeleteCharacterReference(character.id, reference.id)}
-                            className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-sm bg-black/60 text-sm text-white opacity-0 transition hover:bg-red-500 group-hover:opacity-100"
+                            className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-sm bg-black/60 text-sm text-white opacity-0 transition hover:bg-tone-bad/100 group-hover:opacity-100"
                           >
                             ×
                           </button>
