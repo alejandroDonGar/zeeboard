@@ -9,21 +9,21 @@ import { getThumbPath } from "./images";
 
 export type AmbientColors = [string, string, string];
 
-// Sin imagen (o un boceto en blanco y negro): tonos cálidos y suaves, los de la app
-const NEUTRAL: AmbientColors = ["#e6d6bd", "#d4dbe0", "#eadfc6"];
+// Sin imagen (o un boceto en blanco y negro): `null` = tonos neutros de cada tema (--amb-neutral-* en App.css)
+const NEUTRAL: AmbientColors | null = null;
 
 /** Centro de cada mancha en %: [ax, ay, bx, by, cx, cy] */
 export type AmbientLayout = [number, number, number, number, number, number];
 
 const HOME: AmbientLayout = [68, 35, 82, 78, 34, 82];
 
-let colors: AmbientColors = NEUTRAL;
+let colors: AmbientColors | null = NEUTRAL;
 let layout: AmbientLayout = HOME;
-let state = { colors, layout };
+let state: { colors: AmbientColors | null; layout: AmbientLayout } = { colors, layout };
 let page = "";
 let image = "";
 let requested = 0;
-const cache = new Map<string, AmbientColors>();
+const cache = new Map<string, AmbientColors | null>();
 const listeners = new Set<() => void>();
 
 function emit() {
@@ -31,7 +31,7 @@ function emit() {
   listeners.forEach((listener) => listener());
 }
 
-function publish(next: AmbientColors) {
+function publish(next: AmbientColors | null) {
   colors = next;
   emit();
 }
@@ -174,11 +174,10 @@ export async function setAmbientImage(path: string | null): Promise<void> {
 
   if (!path) return publish(NEUTRAL);
 
-  const known = cache.get(path);
-  if (known) return publish(known);
+  if (cache.has(path)) return publish(cache.get(path) ?? NEUTRAL);
 
   try {
-    const found = (await extract(path)) ?? NEUTRAL;
+    const found = await extract(path);
 
     cache.set(path, found);
     // Si mientras tanto se pidió otra imagen, ésta ya no manda
@@ -189,7 +188,7 @@ export async function setAmbientImage(path: string | null): Promise<void> {
   }
 }
 
-export function useAmbient(): { colors: AmbientColors; layout: AmbientLayout } {
+export function useAmbient(): { colors: AmbientColors | null; layout: AmbientLayout } {
   return useSyncExternalStore(
     (listener) => {
       listeners.add(listener);

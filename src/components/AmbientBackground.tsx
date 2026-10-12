@@ -3,10 +3,10 @@ import { useAmbient } from "../lib/ambient";
 
 /** Fondo de color detrás de toda la app: tonos y posición salen de la pantalla y de la imagen en curso (lib/ambient.ts). */
 function AmbientBackground({ strong = false }: { strong?: boolean }) {
-  const {
-    colors: [a, b, c],
-    layout: [ax, ay, bx, by, cx, cy],
-  } = useAmbient();
+  const { colors, layout } = useAmbient();
+  const [ax, ay, bx, by, cx, cy] = layout;
+  // Sin imagen en pantalla: los tonos neutros del tema
+  const [a, b, c] = colors ?? ["var(--amb-neutral-a)", "var(--amb-neutral-b)", "var(--amb-neutral-c)"];
 
   return (
     <div

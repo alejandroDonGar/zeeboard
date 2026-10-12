@@ -114,6 +114,9 @@
   --shadow-s: rgba(60, 40, 10, 0.08);
   --shadow-l: rgba(60, 40, 10, 0.22);
   --ambient-opacity: 0.55;
+  --amb-neutral-a: #e6d6bd;
+  --amb-neutral-b: #d4dbe0;
+  --amb-neutral-c: #eadfc6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -125,6 +128,9 @@
     --shadow-s: rgba(0, 0, 0, 0.3);
     --shadow-l: rgba(0, 0, 0, 0.55);
     --ambient-opacity: 0.45;
+    --amb-neutral-a: #2b3340;
+    --amb-neutral-b: #382f27;
+    --amb-neutral-c: #25323a;
   }
 }
 
@@ -136,6 +142,9 @@
   --shadow-s: rgba(0, 0, 0, 0.3);
   --shadow-l: rgba(0, 0, 0, 0.55);
   --ambient-opacity: 0.45;
+  --amb-neutral-a: #2b3340;
+  --amb-neutral-b: #382f27;
+  --amb-neutral-c: #25323a;
 }
 
 /* Cristal esmerilado casi opaco, sin backdrop-filter: con un 80-90 % de opacidad sobre un fondo suave el desenfoque
