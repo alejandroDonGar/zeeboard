@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { IconCheck, IconDots, IconDownload } from "@tabler/icons-react";
 import { locale, t } from "../lib/i18n";
 import DialogBehavior from "../components/DialogBehavior";
 import {
@@ -31,7 +32,8 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { Segmented } from "../components/BoardFilters";
 import ConfirmModal from "../components/ConfirmModal";
 import Linkified from "../components/Linkified";
-import PageHeader from "../components/PageHeader";
+import TopBar from "../components/TopBar";
+import GlassPanel from "../components/GlassPanel";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
 
@@ -52,6 +54,8 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   const [showArchive, setShowArchive] = useState(false);
   const [confirmAccept, setConfirmAccept] = useState<CommissionRequest | null>(null);
   const [busy, setBusy] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [formMenuOpen, setFormMenuOpen] = useState(false);
   const { showToast } = useToast();
 
   async function load() {
@@ -251,270 +255,345 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   const archive = requests.filter((request) => request.status === "accepted" || request.status === "declined").reverse();
   const free = settings.slots_total - taken;
 
-  const panel = "panel divide-y divide-line rounded-3xl";
-  const heading = "mb-2 text-xs font-bold text-muted";
-  const ghost =
-    "rounded-md border border-line-strong px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-ink disabled:opacity-50";
+  const btn =
+    "rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
+  const primaryBtn =
+    "inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50";
   const field = "w-full rounded-md border border-line-strong bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
 
-  function renderRequest(request: CommissionRequest) {
+  // The open request; if it left the list, the next one waiting
+  const current = requests.find((request) => request.id === selectedId) ?? waiting[0] ?? waitlist[0] ?? null;
+  const currentTemplate = current ? templates.find((item) => item.id === current.template_id) : undefined;
+  const estimate =
+    current && currentTemplate?.base_price != null
+      ? formatMoney(calculateCommissionPrice(currentTemplate.base_price, current.characters, settings.extra_character_rate), settings.default_currency)
+      : null;
+  const live = current?.status === "new" || current?.status === "waitlist";
+  const dot = { new: "bg-tone-info", waitlist: "bg-tone-warn", accepted: "bg-tone-ok", declined: "bg-faint" } as const;
+  const statusLabel = { new: "New", waitlist: "Waitlist", accepted: "Accepted", declined: "Declined" } as const;
+
+  function row(request: CommissionRequest) {
     const template = templates.find((item) => item.id === request.template_id);
-    const estimate =
-      template?.base_price != null
-        ? formatMoney(calculateCommissionPrice(template.base_price, request.characters, settings.extra_character_rate), settings.default_currency)
-        : null;
-    const archived = request.status === "accepted" || request.status === "declined";
 
     return (
-      <div key={request.id} className="flex items-start gap-4 px-5 py-4">
-        <div className="min-w-0 flex-1">
-          <p className="flex flex-wrap items-baseline gap-x-2">
-            <span className="font-bold">{hide(request.name)}</span>
-            <span className="text-sm text-muted">
-              {[request.platform, request.contact && hide(request.contact)].filter(Boolean).join(" · ")}
-            </span>
-            <span className="text-xs text-faint">{dateFormatter.format(new Date(request.created_at))}</span>
-          </p>
-
-          <p className="mt-0.5 text-sm">
+      <button
+        key={request.id}
+        type="button"
+        onClick={() => setSelectedId(request.id)}
+        aria-current={request.id === current?.id ? "true" : undefined}
+        className={`grid w-full grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition ${
+          request.id === current?.id ? "bg-highlight" : "hover:bg-highlight/60"
+        }`}
+      >
+        <i className={`h-[7px] w-[7px] rounded-full ${dot[request.status]}`} />
+        <span className="min-w-0">
+          <span className="block truncate text-sm font-semibold">{hide(request.name)}</span>
+          <span className="block truncate text-xs text-faint">
             {template ? (
-              template.name
+              `${template.name} · ${t(request.characters === 1 ? "{n} character" : "{n} characters", { n: request.characters })}`
             ) : (
-              <select
-                value=""
-                onChange={(event) =>
-                  run(() => setRequestTemplate(request.id, Number(event.target.value)), "Could not set the type")
-                }
-                className="rounded-md border border-tone-warn bg-tone-warn/15 px-2 py-0.5 text-sm font-semibold text-ink"
-              >
-                <option value="">{t("Choose the type…")}</option>
-                {templates.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            )}{" "}
-            · {t(request.characters === 1 ? "{n} character" : "{n} characters", { n: request.characters })}
-            {estimate && <span className="text-muted"> · ≈ {estimate}</span>}
-            {request.email && <span className="text-muted"> · {hide(request.email)}</span>}
-          </p>
-
-          {request.tag_handle && (
-            <p className="mt-0.5 text-xs text-muted">
-              {t("Tag when posting:")} {request.tag_platform && request.tag_platform !== "Other" ? `${request.tag_platform} ` : ""}
-              {hide(request.tag_handle)}
-            </p>
-          )}
-
-          {request.details && (
-            <p className="mt-1 whitespace-pre-wrap text-sm text-muted">
-              <Linkified text={request.details} />
-            </p>
-          )}
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2">
-          {request.status === "accepted" && (
-            <span className="chip chip-ok">{t("Accepted")}</span>
-          )}
-          {request.status === "declined" && (
-            <span className="rounded-sm bg-highlight px-2 py-0.5 text-xs font-bold text-muted">{t("Declined")}</span>
-          )}
-
-          {(request.status === "new" || request.status === "waitlist") && (
-            <>
-              <button
-                type="button"
-                onClick={() => startAccept(request)}
-                disabled={busy || request.template_id === null}
-                title={request.template_id === null ? t("Choose the type first") : undefined}
-                className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
-              >
-                {t("Accept")}
-              </button>
-              {request.status === "new" && (
-                <button type="button" onClick={() => run(() => setRequestStatus(request.id, "waitlist"), "Could not move it")} disabled={busy} className={ghost}>
-                  {t("Waitlist")}
-                </button>
-              )}
-              <button type="button" onClick={() => run(() => setRequestStatus(request.id, "declined"), "Could not decline")} disabled={busy} className={ghost}>
-                {t("Decline")}
-              </button>
-            </>
-          )}
-
-          {request.status === "declined" && (
-            <button type="button" onClick={() => run(() => setRequestStatus(request.id, "new"), "Could not restore")} disabled={busy} className={ghost}>
-              {t("Restore")}
-            </button>
-          )}
-
-          {request.status === "accepted" && request.commission_id !== null && (
-            <button
-              type="button"
-              onClick={() => {
-                localStorage.setItem("zeeboard-active-commission-id", String(request.commission_id));
-                onOpenCommissionsPage();
-              }}
-              className={ghost}
-            >
-              {t("Open")}
-            </button>
-          )}
-
-          {archived && (
-            <button
-              type="button"
-              title={t("Remove from the list")}
-              onClick={() => run(async () => undoToast(showToast, "Removed from the list.", await deleteRequest(request.id)), "Could not remove it")}
-              className="px-1 text-faint transition hover:text-tone-bad"
-            >
-              ×
-            </button>
-          )}
-        </div>
-      </div>
+              <span className="font-semibold text-tone-warn">{t("Choose the type…")}</span>
+            )}
+          </span>
+        </span>
+        <span className="text-xs text-faint tabular-nums">{dateFormatter.format(new Date(request.created_at))}</span>
+      </button>
     );
   }
 
+  const group = (label: string) => <p className="px-2 pt-3 pb-1 text-xs font-semibold text-muted">{label}</p>;
+  const prop = (label: string, value: React.ReactNode, empty: string) => (
+    <div className="min-w-0">
+      <dt className="text-xs text-faint">{label}</dt>
+      <dd className="[overflow-wrap:anywhere]">{value || <span className="text-faint">{empty}</span>}</dd>
+    </div>
+  );
+
   return (
     <>
-      <PageHeader
-        title={t("Requests")}
-        description={t("People who want a commission: accept them, keep them waiting, or decline.")}
-        action={t("+ New request")}
-        onAction={() => setDraft({ ...emptyDraft })}
-      />
+      <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+        <TopBar title="Requests" action="New request" onAction={() => setDraft({ ...emptyDraft })} end={
+          <label className={`${btn} inline-flex cursor-pointer items-center gap-2 ${busy ? "pointer-events-none opacity-50" : ""}`}>
+            <IconDownload size={16} stroke={1.75} aria-hidden="true" />
+            {t("Import responses…")}
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              className="hidden"
+              onChange={(event) => {
+                handleImport(event.target.files?.[0]);
+                // Lets the same file be chosen again
+                event.target.value = "";
+              }}
+            />
+          </label>
+        }>
+          <Segmented
+            options={[
+              { value: "closed", label: "Closed" },
+              { value: "open", label: "Open" },
+            ]}
+            value={settings.slots_open ? "open" : "closed"}
+            onChange={(value) => saveSlots({ slots_open: value === "open" }).catch(console.error)}
+          />
 
-      <section className="h-[calc(100vh-117px)] overflow-y-auto p-5 pb-10">
-        <div className="mx-auto max-w-3xl space-y-8">
-          <div className={panel}>
-            <div className="flex items-center gap-4 px-5 py-4">
-              <div className="flex-1">
-                <p className="font-semibold">{t("Open for commissions")}</p>
-                <p className="text-sm text-muted">Opening or closing your form is still up to you; this keeps count.</p>
-              </div>
-              <Segmented
-                options={[
-                  { value: "closed", label: "Closed" },
-                  { value: "open", label: "Open" },
-                ]}
-                value={settings.slots_open ? "open" : "closed"}
-                onChange={(value) => saveSlots({ slots_open: value === "open" }).catch(console.error)}
-              />
+          <div className="flex items-center gap-2.5 whitespace-nowrap text-[13px] text-muted">
+            <span aria-hidden="true" className="flex gap-[3px]">
+              {Array.from({ length: Math.max(settings.slots_total, taken) }, (_, index) => (
+                <i
+                  key={index}
+                  className={`h-3.5 w-2.5 rounded-sm border ${
+                    index >= settings.slots_total ? "border-tone-bad bg-tone-bad" : index < taken ? "border-ink bg-ink" : "border-line-strong"
+                  }`}
+                />
+              ))}
+            </span>
+            <span className="tabular-nums" title={t("Every commission that isn't finished takes a slot, including the ones in the queue.")}>
+              <span className="hidden min-[1500px]:inline">{t("{taken} of {total} slots taken", { taken, total: settings.slots_total })} · </span>
+              <span className={free < 0 ? "font-semibold text-tone-bad" : ""}>
+                {free > 0 ? t("{n} free", { n: free }) : free === 0 ? t("full") : t("{n} over", { n: -free })}
+              </span>
+            </span>
+            <input
+              type="number"
+              min={1}
+              value={settings.slots_total}
+              aria-label={t("slots")}
+              onChange={(event) => saveSlots({ slots_total: Math.max(1, Math.round(Number(event.target.value)) || 1) }).catch(console.error)}
+              className="w-14 rounded-md border border-line-strong bg-surface px-1.5 py-1 text-right text-sm font-semibold text-ink tabular-nums outline-none focus:border-ink"
+            />
+          </div>
+        </TopBar>
+
+        <section className="grid min-h-0 flex-1 grid-cols-[minmax(240px,320px)_minmax(0,1fr)] gap-3">
+          <GlassPanel as="nav" className="min-h-0" contentClassName="grid grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto]">
+            <div className="overflow-y-auto p-2">
+              {group(t("New · {n}", { n: waiting.length }))}
+              {!ready ? null : waiting.length === 0 ? (
+                <p className="px-2 py-1 text-xs text-faint">{t("No new requests. Add one with \"+ New request\".")}</p>
+              ) : (
+                waiting.map(row)
+              )}
+
+              {waitlist.length > 0 && (
+                <>
+                  {group(t("Waitlist · {n}", { n: waitlist.length }))}
+                  {free > 0 && (
+                    <p className="mx-2 mb-1.5 rounded-md bg-tone-ok/12 px-2.5 py-2 text-xs">
+                      {t(free === 1 ? "You have {n} free slot: time to take someone from the waitlist." : "You have {n} free slots: time to take someone from the waitlist.", { n: free })}
+                    </p>
+                  )}
+                  {waitlist.map(row)}
+                </>
+              )}
+
+              {archive.length > 0 && (
+                <>
+                  <button
+                    type="button"
+                    aria-expanded={showArchive}
+                    onClick={() => setShowArchive((open) => !open)}
+                    className="px-2 pt-3 pb-1 text-xs font-semibold text-muted transition hover:text-ink"
+                  >
+                    {t("Archive · {n}", { n: archive.length })} {showArchive ? "▴" : "▾"}
+                  </button>
+                  {showArchive && archive.map(row)}
+                </>
+              )}
             </div>
 
-            <div className="flex items-center gap-4 px-5 py-4">
-              <div className="min-w-0 flex-1">
-                <p className="font-semibold">{t("Form responses")}</p>
-                <p className="truncate text-sm text-muted" title={settings.responses_file ?? undefined}>
-                  {settings.responses_file ?? t("Not connected: pick the CSV your Google script keeps up to date.")}
-                </p>
-                {settings.responses_file && (
-                  <p className="text-xs text-faint">
-                    {settings.last_form_sync
+            {/* The form the responses come from */}
+            <div className="flex items-center gap-2 border-t border-line px-3 py-2.5 text-[13px] text-muted">
+              <i className={`h-[7px] w-[7px] shrink-0 rounded-full ${settings.responses_file ? "bg-tone-ok" : "bg-faint"}`} />
+              <span className="min-w-0 flex-1">
+                {settings.responses_file ? t("Form connected") : t("Form not connected")}
+                <small className="block truncate text-xs text-faint" title={settings.responses_file ?? undefined}>
+                  {settings.responses_file
+                    ? settings.last_form_sync
                       ? t("Checked {date} · again every 30 minutes", { date: new Date(settings.last_form_sync).toLocaleString() })
-                      : t("Not checked yet")}
-                  </p>
+                      : t("Not checked yet")
+                    : t("Pick the CSV your Google script keeps up to date.")}
+                </small>
+              </span>
+              <div className="relative">
+                <button
+                  type="button"
+                  title={t("Form options")}
+                  aria-label={t("Form options")}
+                  aria-haspopup="true"
+                  aria-expanded={formMenuOpen}
+                  onClick={() => setFormMenuOpen((open) => !open)}
+                  className="flex h-[30px] w-[30px] items-center justify-center rounded-2xl border border-line-strong bg-surface text-ink transition hover:bg-highlight"
+                >
+                  <IconDots size={16} stroke={1.75} aria-hidden="true" />
+                </button>
+
+                {formMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setFormMenuOpen(false)} />
+                    <div role="menu" className="absolute right-0 bottom-full z-40 mb-1.5 w-48 rounded-3xl border border-line-strong bg-surface p-1.5 shadow-lg">
+                      {settings.responses_file && (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          disabled={busy}
+                          onClick={() => {
+                            setFormMenuOpen(false);
+                            checkNow();
+                          }}
+                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm text-ink hover:bg-highlight"
+                        >
+                          {t("Check now")}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        role="menuitem"
+                        disabled={busy}
+                        onClick={() => {
+                          setFormMenuOpen(false);
+                          chooseResponsesFile();
+                        }}
+                        className="block w-full rounded-sm px-2.5 py-2 text-left text-sm text-ink hover:bg-highlight"
+                      >
+                        {settings.responses_file ? t("Change…") : t("Choose file…")}
+                      </button>
+                    </div>
+                  </>
                 )}
               </div>
-              <button type="button" onClick={chooseResponsesFile} disabled={busy} className={ghost}>
-                {settings.responses_file ? t("Change…") : t("Choose file…")}
-              </button>
-              {settings.responses_file && (
-                <button type="button" onClick={checkNow} disabled={busy} className={ghost}>
-                  {t("Check now")}
-                </button>
-              )}
             </div>
+          </GlassPanel>
 
-            <div className="flex items-center gap-4 px-5 py-4">
-              <div className="flex-1">
-                <p className="font-semibold">
-                  {t("{taken} of {total} slots taken", { taken, total: settings.slots_total })}
-                  <span className={`ml-2 text-sm font-normal ${free < 0 ? "text-tone-bad" : "text-muted"}`}>
-                    {free > 0 ? t("{n} free", { n: free }) : free === 0 ? t("full") : t("{n} over", { n: -free })}
-                  </span>
-                </p>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {Array.from({ length: Math.max(settings.slots_total, taken) }, (_, index) => (
-                    <span
-                      key={index}
-                      className={`h-3 w-5 rounded-sm ${
-                        index >= settings.slots_total ? "bg-tone-bad" : index < taken ? "bg-primary" : "border border-line-strong"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="mt-1.5 text-xs text-faint">{t("Every commission that isn't finished takes a slot, including the ones in the queue.")}</p>
+          <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
+            {!ready ? null : !current ? (
+              <div className="flex h-full flex-col items-center justify-center p-6 text-center">
+                <p className="font-display text-xl font-semibold">{t("Pick a request")}</p>
+                <p className="mt-1 text-sm text-muted">{t("What they asked for shows up here.")}</p>
               </div>
-              <label className="flex items-center gap-1.5 text-sm font-semibold">
-                <input
-                  type="number"
-                  min={1}
-                  value={settings.slots_total}
-                  onChange={(event) => saveSlots({ slots_total: Math.max(1, Math.round(Number(event.target.value)) || 1) }).catch(console.error)}
-                  className="w-16 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink"
-                />
-                {t("slots")}
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-xs font-bold text-muted">{t("New · {n}", { n: waiting.length })}</h3>
-
-              <label className={`${ghost} cursor-pointer ${busy ? "pointer-events-none opacity-50" : ""}`}>
-                {t("Import responses…")}
-                <input
-                  type="file"
-                  accept=".csv,text/csv"
-                  className="hidden"
-                  onChange={(event) => {
-                    handleImport(event.target.files?.[0]);
-                    // Lets the same file be chosen again
-                    event.target.value = "";
-                  }}
-                />
-              </label>
-            </div>
-            {!ready ? null : waiting.length === 0 ? (
-              <p className="rounded-3xl border border-dashed border-line-strong px-5 py-6 text-center text-sm text-faint">
-                {t("No new requests. Add one with \"+ New request\".")}
-              </p>
             ) : (
-              <div className={panel}>{waiting.map(renderRequest)}</div>
+              <>
+                <div className="shrink-0 px-6 pt-5 pb-4">
+                  <h2 className="font-display text-3xl leading-tight font-semibold tracking-tight [overflow-wrap:anywhere]">{hide(current.name)}</h2>
+                  <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-muted">
+                    <span className="inline-flex items-center gap-1.5 text-ink">
+                      <i className={`h-[7px] w-[7px] rounded-full ${dot[current.status]}`} />
+                      {t(statusLabel[current.status])}
+                    </span>
+                    <span>{t("Received on {date}", { date: dateFormatter.format(new Date(current.created_at)) })}</span>
+                  </p>
+                </div>
+
+                <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto border-t border-line @min-[700px]:grid-cols-[minmax(0,1fr)_clamp(250px,32%,320px)] @min-[700px]:overflow-hidden">
+                  <div className="min-w-0 p-5 @min-[700px]:overflow-y-auto">
+                    <p className="mb-2 text-[13px] font-semibold">{t("What they ask for")}</p>
+                    {current.details ? (
+                      <p className="max-w-[68ch] leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]">
+                        <Linkified text={current.details} />
+                      </p>
+                    ) : (
+                      <p className="text-faint">{t("No details.")}</p>
+                    )}
+                  </div>
+
+                  <dl className="grid min-w-0 content-start gap-y-2.5 border-t border-line p-4 @min-[700px]:overflow-y-auto @min-[700px]:border-t-0 @min-[700px]:border-l">
+                    <div className="min-w-0">
+                      <dt className="text-xs text-faint">{t("Type")}</dt>
+                      <dd>
+                        {currentTemplate ? (
+                          currentTemplate.name
+                        ) : (
+                          <select
+                            value=""
+                            onChange={(event) => run(() => setRequestTemplate(current.id, Number(event.target.value)), "Could not set the type")}
+                            className="w-full rounded-md border border-tone-warn bg-tone-warn/15 px-2 py-1 text-sm font-semibold text-ink"
+                          >
+                            <option value="">{t("Choose the type…")}</option>
+                            {templates.map((item) => (
+                              <option key={item.id} value={item.id}>
+                                {item.name}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </dd>
+                    </div>
+                    {prop(t("Characters"), current.characters, "")}
+                    {prop(t("Estimate"), estimate && `≈ ${estimate}`, t("When you pick the type"))}
+                    {prop(
+                      t("Contact"),
+                      current.contact && [current.platform, hide(current.contact)].filter(Boolean).join(" "),
+                      t("No contact"),
+                    )}
+                    {prop(
+                      t("Social account"),
+                      current.tag_handle &&
+                        `${current.tag_platform && current.tag_platform !== "Other" ? `${current.tag_platform} ` : ""}${hide(current.tag_handle)}`,
+                      t("They didn't say"),
+                    )}
+                    {prop(t("Email"), current.email && hide(current.email), t("No email"))}
+                  </dl>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-line bg-surface/60 px-4 py-2.5">
+                  {live && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => startAccept(current)}
+                        disabled={busy || current.template_id === null}
+                        className={primaryBtn}
+                      >
+                        <IconCheck size={16} stroke={2} aria-hidden="true" />
+                        {t("Accept")}
+                      </button>
+                      {current.status === "new" && (
+                        <button type="button" onClick={() => run(() => setRequestStatus(current.id, "waitlist"), "Could not move it")} disabled={busy} className={btn}>
+                          {t("Waitlist")}
+                        </button>
+                      )}
+                      <button type="button" onClick={() => run(() => setRequestStatus(current.id, "declined"), "Could not decline")} disabled={busy} className={btn}>
+                        {t("Decline")}
+                      </button>
+                      {current.template_id === null && <span className="text-xs text-faint">{t("Choose the type first")}</span>}
+                    </>
+                  )}
+
+                  {current.status === "accepted" && current.commission_id !== null && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem("zeeboard-active-commission-id", String(current.commission_id));
+                        onOpenCommissionsPage();
+                      }}
+                      className={btn}
+                    >
+                      {t("Open commission")}
+                    </button>
+                  )}
+
+                  {current.status === "declined" && (
+                    <button type="button" onClick={() => run(() => setRequestStatus(current.id, "new"), "Could not restore")} disabled={busy} className={btn}>
+                      {t("Restore")}
+                    </button>
+                  )}
+
+                  {!live && (
+                    <button
+                      type="button"
+                      onClick={() => run(async () => undoToast(showToast, "Removed from the list.", await deleteRequest(current.id)), "Could not remove it")}
+                      disabled={busy}
+                      className={btn}
+                    >
+                      {t("Remove from the list")}
+                    </button>
+                  )}
+                </div>
+              </>
             )}
           </div>
-
-          {waitlist.length > 0 && (
-            <div>
-              <h3 className={heading}>{t("Waitlist · {n}", { n: waitlist.length })}</h3>
-              <div className={panel}>{waitlist.map(renderRequest)}</div>
-              {free > 0 && (
-                <p className="mt-2 text-sm text-muted">
-                  {t(free === 1 ? "You have {n} free slot: time to take someone from the waitlist." : "You have {n} free slots: time to take someone from the waitlist.", { n: free })}
-                </p>
-              )}
-            </div>
-          )}
-
-          {archive.length > 0 && (
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowArchive((open) => !open)}
-                className={`${heading} transition hover:text-ink`}
-              >
-                {t("Archive · {n}", { n: archive.length })} {showArchive ? "▴" : "▾"}
-              </button>
-              {showArchive && <div className={panel}>{archive.map(renderRequest)}</div>}
-            </div>
-          )}
-        </div>
-      </section>
+        </section>
+      </div>
 
       {draft && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">

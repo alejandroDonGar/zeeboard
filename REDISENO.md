@@ -356,6 +356,13 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - Lateral: Red social (cuenta para etiquetar), contacto (con el nombre de su plataforma), Correo, Cliente desde, y **Notas que se guardan solas** al salir del campo (antes solo se editaban en el formulario).
 - No portado: «Nueva comisión para…» del menú (la ventana de nueva comisión no admite cliente previo todavía).
 
+**Solicitudes (hecho):** misma lógica (aceptar con confirmación si los huecos están llenos, en espera, rechazar, restaurar, abrir comisión, quitar con deshacer, importar CSV, formulario sincronizado, alta manual); solo cambia la presentación.
+- Barra superior: Cerradas / Abiertas, huecos como cuadritos con «N libres / lleno / N de más» (el texto largo «6 de 8 huecos» solo desde 1500 px) y el total editable, «Importar respuestas…» y «Nueva solicitud».
+- Bandeja en dos columnas: lista (Nuevas, En espera con aviso de huecos libres, Archivo plegable; punto por estado; «Elige el tipo…» en ámbar si falta) y detalle de la solicitud elegida (si desaparece de la lista pasa a la siguiente pendiente).
+- Detalle: nombre grande, estado y fecha; «Lo que pide» con enlaces; lateral con Tipo (selector ámbar si falta), Personajes, Estimado, Contacto, Red social y Correo; pie con acciones según estado (Aceptar se desactiva sin tipo y lo dice).
+- Al pie de la lista, el estado del formulario conectado con ⋯ (Revisar ahora, Cambiar archivo…).
+- Sigue igual: el diálogo de nueva solicitud y la confirmación de huecos llenos (se pasarán a `<dialog>` con las ventanas).
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -368,7 +375,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones y Clientes hechos; siguen Solicitudes, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes y Solicitudes hechos; siguen Terminadas, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).
