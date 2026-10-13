@@ -35,8 +35,7 @@ It works in **English and Spanish**, in light, dark or system theme, and it is b
 - [Payments](#payments)
 - [Requests](#requests)
 - [Clients and characters](#clients-and-characters)
-- [Templates](#templates)
-- [Tags](#tags)
+- [Catalog: types and tags](#catalog-types-and-tags)
 - [Finished commissions](#finished-commissions)
 - [Statistics](#statistics)
 - [Trash and undo](#trash-and-undo)
@@ -81,12 +80,11 @@ What is on your desk today, at a glance.
 
 <img src="docs/images/dashboard.png" alt="Dashboard" width="900">
 
-- **Needs attention**: commissions past their limit, due today or soon, stalled, or past the sketch without any payment.
-- **Four counters**: commissions in progress, due within 7 days (overdue included), what is still waiting for payment, and what you received this month (with the platform fees).
-- **In progress**: every open commission with its current stage, progress bar and deadline. Click one to open it.
-- **Not paid yet**: what each commission still owes.
-- **Your hourly rate** over the last 90 days: what you kept (after fees) divided by the hours of the commissions you finished.
-- **Most used tags** and **Received per month**, a six-month chart of the money that actually reached you (net of platform fees, by payment date).
+- **Today**: what needs attention, with the reason next to each item: past its limit, due today or soon, stalled, or past the sketch without any payment.
+- **In progress**: every open commission with the colour bar of its type, its current stage, a thin progress bar and its deadline. Click one to open it.
+- **Received per month**: a line chart of the money that actually reached you (net of platform fees, by payment date). The last point is the month still running, drawn dashed.
+- **This month** (right column): what you received (with the platform fees), what is waiting for payment, how many are in progress and how many are due within 7 days (overdue included).
+- **Not paid yet**: what each commission still owes. Below it, **your hourly rate** over the last 90 days (what you kept after fees divided by the hours of the commissions you finished) and your **most used types and tags**.
 
 ## Commissions
 
@@ -94,9 +92,9 @@ What is on your desk today, at a glance.
 
 <img src="docs/images/commission.png" alt="Commissions screen with a commission open" width="900">
 
-- The left column is your **inbox**: commissions already in a stage, then the **queue** of those not started. The nearest deadline comes first, and each row shows the days left (or the days since you accepted it when there is no deadline).
-- On top: a **search box** (title or client), a **tags menu**, a **payment filter** (All / Unpaid / Partial / Paid) and a **status filter** (All / Active / Overdue).
-- The detail shows the title, client, platform and template, the days left, a **revisions counter**, the number of characters, the tags and a button that copies the client's **tag account** (so you can paste it when you post).
+- The left column is your **inbox**: commissions already in a stage, then the **queue** of those not started. Each row has a **colour bar** (the colour of its type, set in the [Catalog](#catalog-types-and-tags)), a thumbnail (or the client's initials), the stage and the days left (or the days since you accepted it when there is no deadline).
+- On top: a **search box** (title or client) and a single **Filter** button with payment, status, type and tags inside. What you pick shows next to it as chips you remove with ✕, plus **Clear filters**.
+- The detail has a **header tinted with the colours of the image you are looking at** (it changes with a fade), with the title, client and platform, **Edit** and a **···** menu. The column on the right shows the type, stage, deadline, a **revisions counter**, the tags, the payments, the notes and the characters, and a button that copies the client's **tag account** (to paste when you post).
 
 **Grid view** shows every commission as a card, with a **calendar** of your deadlines and a summary of the next one.
 
@@ -106,17 +104,17 @@ The **···** menu on a commission lets you **duplicate** it, **copy the invoic
 
 ### Stages and images
 
-A strip of columns, one per stage of the template, each with its own images.
+The image of the stage you pick is shown **large**, with its alternatives, and below it a **numbered strip of stages** (thumbnail, a ✓ once done). Click a stage to see its image; the current one is selected by default.
 
 - Add images by **dragging them in**, pasting with **Ctrl+V** (they go to the current stage) or clicking the empty slot. The app resizes and compresses them in the background, so even a 60 MB canvas is fine.
 - A stage can hold several **alternatives** (**Alt 1**, **Alt 2**…): the options you show the client, for example with and without glasses. Hover an image for **+ Alt** (another alternative), **+ v** (a retouched **version** of that image) and **×** (remove it).
-- The strip shows the **latest version of each alternative**, with a `v2` badge, or `final` once the commission has moved past that stage. Older versions are never lost.
+- The big image and the strip show the **latest version of each alternative**, with a `v2` badge, or `final` once the commission has moved past that stage. Older versions are never lost.
 - **Focus mode** opens an image full screen, lets you move through all the images of all the stages with the arrow keys, and has chips to see every version of the alternative and a **+ New version** button.
-- The **Rendering done →** button moves the commission to the next stage, and **Back** returns to the previous one.
+- The footer has **[Stage] done →**, which moves the commission to the next stage, **Back** (returns to the previous one) and, on the last working stage, **Mark as finished**. It also reminds you where **Ctrl+V** will paste.
 
 ### Corrections and revisions
 
-Each stage has a **+ correction** button. Corrections are notes of what the client asked to change.
+Each stage in the strip has a **+ correction** button, which opens the corrections panel under it. Corrections are notes of what the client asked to change.
 
 <img src="docs/images/corrections.png" alt="Corrections panel under the stage strip" width="900">
 
@@ -142,7 +140,7 @@ Press **Ctrl+N** or **+ New commission**.
 - Pick the **client** (type to search, or write a new name), the **characters** (also from other clients, for collaborations) and the **template**.
 - The **Characters** number next to the characters decides the price. It follows the characters you link, but you can raise it when a character has no profile (a collaborator you don't have as a client); it never drops below the ones linked. Requests that came with "2 characters" keep that number.
 - The **price** is calculated for you: the template's base price plus a percentage per extra character (50 % by default, adjustable in Settings). You can still change it by hand.
-- The matching **tags** are added automatically: the most specific commission type for the template and the "N Characters" tag. You can change them before saving.
+- The **type** comes from the template (and its colour from the Catalog); only the "N Characters" tag is added automatically, and you can add extra tags before saving. The summary on the right shows the price breakdown as you type.
 - The template is locked once the commission exists, because its stages and images depend on it.
 
 ### Invoice description
@@ -151,12 +149,12 @@ Press **Ctrl+N** or **+ New commission**.
 
 ## Payments
 
-<img src="docs/images/payments.png" alt="Payments dropdown on a commission" width="900">
+<img src="docs/images/payments.png" alt="Payments on a commission" width="900">
 
-The strip above the stages is the single place for money on a commission.
+The payments block, in the properties column of the commission, is the single place for money.
 
-- It shows the **status** (Unpaid, Partial, Paid), the **price**, what the client has **paid** and what is **left**, what you **received** and the **fees**.
-- Open **Payments** to add a payment: the date, what the client paid, and what reached you. Pick a **platform** and "received" is filled with the fee already taken off (for example PayPal's 2.9 % + 0.35).
+- It shows the **status** (Unpaid, Partial, Paid), what the client has **paid** next to the **price**, a progress bar, and what is **left**, what you **received** and the **fees**.
+- **Payments** unfolds the list in the same column and the form to add one: the date, what the client paid, and what reached you. Pick a **platform** and "received" is filled with the fee already taken off (for example PayPal's 2.9 % + 0.35).
 - You can leave "received" empty and enter it later, when the money arrives. Partial payments (a deposit, then the rest) are supported.
 - Platforms and their fees are configured in [Settings](#settings).
 
@@ -166,10 +164,11 @@ The inbox for people who want a commission.
 
 <img src="docs/images/requests.png" alt="Requests screen" width="900">
 
-- **Open for commissions** and **slots**: you open and close your form yourself, and ZeeBoard keeps the count of how many open commissions you have against how many you accept at once. Every unfinished commission takes a slot, queue included.
-- **Form responses**: ZeeBoard can read the responses of a **Google Form** from a CSV file that a small Google script keeps up to date in your Drive. It checks it when it opens and every 30 minutes, adds the new responses and shows a counter in the menu. You can also import a CSV by hand.
-- Each request shows who, which platform and contact, the template, the number of characters, an **estimated price**, the email, the account to tag when posting, and their message (links are clickable).
-- **Accept**, **Waitlist**, **Decline** and **Restore**. If your slots are full, accepting asks for confirmation.
+- The **top bar** has **Closed / Open** (you open and close your form yourself) and the **slots**: little squares for how many unfinished commissions you have (queue included) against how many you accept at once, with the total editable.
+- The left list groups **New**, **Waitlist** (with a note when you have free slots) and a collapsible **Archive**. A request with no type yet shows "Choose the type…". At the bottom, the state of the **connected form** and a **···** menu (Check now, Change file).
+- **Form responses**: ZeeBoard can read the responses of a **Google Form** from a CSV file that a small Google script keeps up to date in your Drive. It checks it when it opens and every 30 minutes, adds the new responses and shows a counter in the menu. You can also **Import** a CSV by hand.
+- The open request shows who and when, **what they ask for** (links are clickable) and, beside it, the type, number of characters, an **estimated price**, contact, social account and email.
+- The footer has **Accept**, **Waitlist**, **Decline** and **Restore** (and **Open commission** / **Remove from the list** for the archived ones). Accept is disabled until the request has a type; if your slots are full, accepting asks for confirmation.
 - Accepting creates, in one step: the **client** (or reuses the one you already have, matched by handle or name), their email and tag account, the **commission** with its price, and the **tags**. It also tries to fetch the client's profile photo in the background.
 - **+ New request** adds one by hand, and it goes through exactly the same flow.
 
@@ -177,33 +176,27 @@ The inbox for people who want a commission.
 
 <img src="docs/images/clients.png" alt="Client profile" width="900">
 
-- A client has a name, platform and handle, an **email** (used to match PayPal payments), the **account to tag** when you post their work, and free notes.
-- The profile shows their **commissions**, how many are active or done, how much they have **spent**, and how many are paid or unpaid.
-- The **photo** can be fetched from Bluesky or Telegram (tag account first, then contact account), or set by hand by clicking the avatar, dropping an image on it or pasting with Ctrl+V. Photos are downloaded once and stored on your disk.
+- A client has a name, platform and handle, an **email** (used to match PayPal payments), the **account to tag** when you post their work, and free notes. The header is tinted with the colours of their photo.
+- The figures show how much they have **spent** (and the average), how many commissions they have (active and done) and what is **still pending** to be paid. Their commissions are listed below with the colour bar of the type.
+- The side column has the **social account**, contact, email and the date they became a client, plus **Notes**, which are saved by themselves when you leave the field.
+- The **photo** can be fetched from Bluesky or Telegram (**··· → Fetch photo**: tag account first, then contact account), or set by hand by clicking the avatar, dropping an image on it or pasting with Ctrl+V. Photos are downloaded once and stored on your disk. **Edit** and **··· → Delete client…** are in the header.
 
 <img src="docs/images/character.png" alt="A character with its references" width="900">
 
-- Each client keeps their **characters**, each with notes and **reference images**. A character can be used in commissions of any client.
+- Each client keeps their **characters** as a gallery, each with notes and **reference images**. A character can be used in commissions of any client.
 - Deleting a character also deletes its references and removes it from any commission.
 
-## Templates
+## Catalog: types and tags
 
-A template is the list of stages a kind of commission goes through.
+One screen with a list on the left (the **commission types** and then the **tags** grouped by category) and an editor on the right.
 
-<img src="docs/images/templates.png" alt="Templates" width="900">
+<img src="docs/images/templates.png" alt="Catalog" width="900">
 
-- Each template has a **base price**, a number of **revisions included**, and an ordered list of **stages** you can rename, reorder by dragging, add or remove.
-- The **last stage marks the commission as finished**.
-- A stage that a commission is using cannot be removed, so no commission loses its place or its images. Templates in use cannot be deleted, but you can **duplicate** them to make a variation.
-
-## Tags
-
-Labels grouped by **category**, with a colour each.
-
-<img src="docs/images/tags.png" alt="Tags grouped by category" width="900">
-
-- Create categories (Commission Type, Characters, Extras… whatever you need) and tags inside them, and edit or delete them later. The list shows how many commissions use each tag.
-- Tags filter the commissions list and feed the "most used tags" panel in the dashboard.
+- A **type of commission** is a template plus a **colour**. The template is the list of stages that kind of commission goes through; the colour is the bar and chip every commission of that type shows.
+- Each type has a **base price**, a number of **revisions included**, and an ordered list of **stages** you can rename, reorder by dragging, add or remove. The **last stage marks the commission as finished**. Beside the stages you see the commissions in progress of that type and the figures of the delivered ones (how many, average price, average hours, rate per hour).
+- A stage that a commission is using cannot be removed, so no commission loses its place or its images. Types in use cannot be deleted, but you can **duplicate** them to make a variation.
+- **Tags** are for extras (rush, commercial use, number of characters…), grouped by category with a colour each; the list shows how many commissions use each. A category is created with its first tag.
+- Tags filter the commissions list and feed the "most used" panel in the dashboard. The old "Commission Type" tags are kept so nothing is lost, but they are no longer shown on commissions.
 
 ## Finished commissions
 
@@ -211,8 +204,8 @@ Everything you have delivered, as a register.
 
 <img src="docs/images/finished.png" alt="Finished commissions grouped by month" width="900">
 
-- Group by **month** or by **client**, search by title or client, and filter by **date range**.
-- The header shows how many you finished, the total they add up to and your **rate per hour**. Click any row to open it again.
+- A gallery grouped by **month** or by **client**, with a sticky header for each group (count and total). Search by title or client and filter by **date range**.
+- Each tile shows the image, the title, the amount and the client (or date), hours and rate per hour. The top line has how many you finished, the total and your **rate per hour**, and the rate per type. Click an image to see it large (the background takes its colours); click the text to open the commission.
 
 **Marking a commission as finished.** On the last working stage, the button reads **Mark as finished**: you set the **delivery date**, the **hours spent** (typed by hand), an optional **final image** and **final notes** (a link to the post, how it went…). **Back** reopens it, and **Edit delivery** changes those details later. Hours and delivery date feed the register and [Statistics](#statistics).
 
@@ -222,10 +215,10 @@ How the business is doing, from your payments and your finished commissions.
 
 <img src="docs/images/statistics.png" alt="Statistics screen" width="900">
 
-- Choose **This year**, **Last 12 months** or **All time**. The four tiles (received, pieces delivered, average per piece, per hour) show the change against the previous period.
+- Choose **This year**, **Last 12 months** or **All time**. The key figures (received, pieces delivered, average per piece, per hour) show the change against the previous period.
 - **Received per month** counts money by the day it reached you, net of platform fees. Pieces, averages and hours count by delivery date.
 - **By type of commission**: pieces, received, average, hours, days from request to delivery and rate per hour for each template.
-- **Requests**: how many came in, were accepted, declined or are waiting, the acceptance rate and a monthly chart.
+- **Requests**: one bar with how many came in and how many were accepted, declined, waiting or unanswered, plus the acceptance rate.
 - **Top clients** with the share of income that comes from clients who come back, and the **platform fees** you paid.
 - Only commissions in your default currency are counted; currencies are never added together.
 
@@ -300,10 +293,13 @@ Skip the email: draw on the iPad and send the images straight to a commission st
 
 <img src="docs/images/settings-general.png" alt="Settings: appearance and pricing" width="900">
 
-- **Appearance**: theme and language.
-- **Pricing**: default currency (EUR, USD or GBP), the extra-character percentage, and your **payment platforms** with their fixed and percentage fees, with a live example (`200 → 193.85`).
-- **Delivery**: the longest time you promise, delivery reminders and stalled alerts, each with its own number of days and an on/off switch.
-- **iPad** and **Trash**: the [iPad receiver](#receiving-images-from-the-ipad) and the list of deleted items.
+Sections on the left, the chosen one on the right. Everything saves by itself.
+
+- **General**: theme and language.
+- **Prices and payments**: default currency (EUR, USD or GBP), the extra-character percentage, and your **payment platforms** with their fixed and percentage fees, with a live example (`200 → 193.85`).
+- **Deadlines and alerts**: the longest time you promise, delivery reminders and stalled alerts, each with its own number of days and an on/off switch.
+- **iPad**: the [iPad receiver](#receiving-images-from-the-ipad).
+- **Backups**, **Data and storage** (PayPal import, CSV export, disk use, unused images) and **Trash**, below.
 
 ### Backups
 
