@@ -380,7 +380,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes y Terminadas hechos; siguen, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes y Terminadas hechos; siguen Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).
