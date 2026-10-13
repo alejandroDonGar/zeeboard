@@ -291,7 +291,7 @@ Skip the email: draw on the iPad and send the images straight to a commission st
 
 ## Settings
 
-<img src="docs/images/settings-general.png" alt="Settings: appearance and pricing" width="900">
+<img src="docs/images/settings-general.png" alt="Settings: prices and payments" width="900">
 
 Sections on the left, the chosen one on the right. Everything saves by itself.
 
@@ -303,7 +303,7 @@ Sections on the left, the chosen one on the right. Everything saves by itself.
 
 ### Backups
 
-<img src="docs/images/settings-backups.png" alt="Settings: delivery and backups" width="900">
+<img src="docs/images/settings-backups.png" alt="Settings: backups" width="900">
 
 - **Export** saves the database and all images into a dated folder, wherever you choose.
 - **Restore** replaces your data with a backup. First it keeps a **safety copy of your current data**, and it never deletes images. The app reloads when it finishes.
@@ -312,7 +312,7 @@ Sections on the left, the chosen one on the right. Everything saves by itself.
 
 ### Exporting data
 
-<img src="docs/images/settings-data.png" alt="Settings: PayPal import, export and storage" width="900">
+<img src="docs/images/settings-data.png" alt="Settings: data and storage" width="900">
 
 Three CSV exports: **Commissions** (one row each), **Payments** (date, paid, received and fee) and a **Quarterly summary** by quarter and currency (currencies are never added together). They use a semicolon and a decimal comma and include a BOM, so **Excel opens them correctly** in Spanish and English locales. The **Storage** card shows how much space the images, thumbnails and database use.
 

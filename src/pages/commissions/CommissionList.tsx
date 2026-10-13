@@ -86,7 +86,7 @@ function CommissionList({
                     </span>
 
                     {deadlineStatus ? (
-                      <span className={`shrink-0 ${deadlineStatus.className}`}>{deadlineStatus.short}</span>
+                      <span className={`shrink-0 whitespace-nowrap ${deadlineStatus.className}`}>{deadlineStatus.short}</span>
                     ) : (
                       <span title={t("Days since you accepted it")} className={`shrink-0 text-xs font-semibold tabular-nums ${ageTone || "text-faint"}`}>
                         {ageInDays(commission, new Date())}d

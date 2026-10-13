@@ -392,6 +392,9 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - Sin tocar: el visor de imágenes (`FocusViewer`) y las capas de imagen a pantalla completa, que son visores y no formularios.
 - `PageHeader.tsx` borrado: ninguna pantalla lo usa ya.
 
+**Documentación (hecha):** README y `docs/index.html` con los textos del diseño nuevo y **capturas rehechas con la instancia de demostración** (`com.zeeboard.demo`: clientes, precios, rutas y dibujos inventados; nunca datos reales). Se retira `tags.png` (el Catálogo es una sola pantalla). Receta: `npx tauri dev --config <json con identifier com.zeeboard.demo>` y recortar la captura al área cliente de la ventana (1500×1000 → 1484×960). Ojo si algún día se vuelve a hacer: la carpeta de datos debe crearse desde un proceso fuera del paquete de Claude (si no, Windows la virtualiza y la app no ve las imágenes), y no se debe capturar Ajustes → iPad (enseña la IP real).
+- Arreglos hallados al capturar: la cabecera fija de «Terminadas» dibujaba una banda de otro color, las barras de «Mejores clientes» se pegaban al texto, y la etiqueta «1d de retraso» se partía en dos líneas en español.
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).

@@ -247,7 +247,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
                       </div>
 
                       {deadlineStatus ? (
-                        <span className={`${deadlineStatus.className} justify-self-end`} title={deadlineStatus.label}>{deadlineStatus.short}</span>
+                        <span className={`${deadlineStatus.className} justify-self-end whitespace-nowrap`} title={deadlineStatus.label}>{deadlineStatus.short}</span>
                       ) : (
                         <span className="text-xs text-faint">{t("No deadline")}</span>
                       )}

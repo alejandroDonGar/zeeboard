@@ -152,7 +152,7 @@ function StatisticsPage() {
                     <thead>
                       <tr className="text-right text-faint">
                         {[t("Template"), t("Pieces"), t("Received"), t("Average"), t("Hours"), t("Days"), t("Per hour")].map((label, index) => (
-                          <th key={label} className={`pb-2 pl-3 font-medium whitespace-nowrap ${index === 0 ? "pl-0 text-left" : ""}`}>
+                          <th key={label} className={`pb-2 font-medium whitespace-nowrap ${index === 0 ? "text-left" : "pl-3"}`}>
                             {label}
                           </th>
                         ))}
@@ -193,7 +193,7 @@ function StatisticsPage() {
                         <span className="text-muted tabular-nums">
                           {t(client.pieces === 1 ? "{n} piece" : "{n} pieces", { n: client.pieces })} · <b className="font-semibold text-ink">{formatMoney(client.net)}</b>
                         </span>
-                        <span className="col-start-2 col-end-4 -mt-0.5 h-1 overflow-hidden rounded-sm bg-line">
+                        <span className="col-start-2 col-end-4 mt-1 mb-1 h-1 overflow-hidden rounded-sm bg-line">
                           <i className="block h-full bg-ink" style={{ width: `${(client.net / bestClient) * 100}%` }} />
                         </span>
                       </div>

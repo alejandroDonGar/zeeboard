@@ -275,7 +275,7 @@ function FinishedPage({
                 return (
                   <section key={group.key}>
                     {/* Group header stays at the top while its images scroll */}
-                    <div className="sticky top-0 z-10 flex items-baseline gap-2.5 bg-gradient-to-b from-[var(--glass-heavy)] from-70% to-transparent pt-4 pb-2.5">
+                    <div className="sticky top-0 z-10 flex items-baseline gap-2.5 bg-gradient-to-b from-[var(--glass)] from-70% to-transparent pt-4 pb-2.5">
                       <h3 className="font-display text-[22px] leading-tight font-semibold tracking-tight first-letter:uppercase">
                         {groupMode === "client" ? hide(group.label) : group.label}
                       </h3>
