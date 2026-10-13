@@ -402,7 +402,7 @@ function App() {
           {currentPage === "clients" && (
             <ClientsPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />
           )}
-          {currentPage === "catalog" && <CatalogPage />}
+          {currentPage === "catalog" && <CatalogPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />}
           {currentPage === "finished" && (
             <FinishedPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />
           )}

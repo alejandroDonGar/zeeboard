@@ -186,7 +186,7 @@ Las dos pantallas por separado quedaban vacías. Además, revisando la lógica s
   - **Las etiquetas de tipo y sus enlaces con las comisiones se conservan tal cual.** Simplemente no se muestran en las comisiones, en el selector de etiquetas del formulario ni en el filtro; en su lugar se muestra el tipo (plantilla) con su color. En Catálogo › Etiquetas, la categoría «Commission Type» lleva un aviso explicándolo; el usuario puede borrarlas a mano (con «Deshacer») cuando quiera.
   - Código: `src/lib/catalog.ts` (`PALETTE`, `TYPE_CATEGORY`, `typeTagsFor`, `templateColors`; puro, comprobado en `scripts/check-catalog.ts`), migración en `getDatabase` (`src/lib/database.ts`), `updateTemplateColor`; plantillas nuevas y duplicadas ya nacen con color.
 - **`autoTagIds`** ya solo añade la etiqueta de «Characters» (firma nueva: `autoTagIds(personajes, etiquetas)`); `scripts/check-form-import.ts` actualizado.
-- **Pantalla Catálogo (ya en la app):** `src/pages/CatalogPage.tsx` sustituye a Plantillas y Etiquetas en la barra lateral, con pestañas «Tipos de comisión / Etiquetas» que reutilizan `TemplatesPage` y `TagsPage` (sin cambiar su comportamiento). El editor de tipo tiene **selector de color** (12 colores + personalizado), que se guarda al momento. El aspecto final de la maqueta (`catalogo.html`: lista única + editor con datos de uso) queda para la pasada visual por pantallas.
+- **Pantalla Catálogo (hecha):** `src/pages/CatalogPage.tsx` sustituye a Plantillas y Etiquetas en la barra lateral: lista única (tipos y etiquetas por categoría) y editor a la derecha (`catalog/TypeEditor.tsx`, `catalog/TagEditor.tsx`, `catalog/Swatches.tsx`). `TemplatesPage.tsx` y `TagsPage.tsx` desaparecen; su lógica pasó a esos componentes sin cambiar (guardar con «Guardar cambios», color del tipo al momento, borrar con deshacer, un tipo en uso no se puede borrar).
 - **Dónde se ve el tipo:** chip del tipo con su color en el detalle y en la cuadrícula de Comisiones; grupo «Tipo de comisión» en el filtro (las plantillas como opciones); el Resumen cuenta «Tipos y etiquetas más usados» a partir de la plantilla.
 - Pendiente de valorar (no decidido): hacer lo mismo con las etiquetas de «Characters», que también se pueden deducir del número de personajes de la comisión.
 
@@ -368,6 +368,12 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - Galería tipo Fotos: totales y €/h por plantilla arriba, grupos con cabecera fija (mes en Fraunces, número e importe) y cuadrícula de imágenes cuadradas con título, importe y «cliente · horas · €/h» (en «Por cliente», la fecha en vez del cliente). Pulsar la imagen abre el visor; pulsar el texto abre la comisión.
 - Visor: la imagen sola con pie «título · cliente · fecha» y «Abrir comisión»; **el fondo toma sus colores mientras está abierto** (`useAmbientImage`). Sigue siendo la capa a pantalla completa de antes (pasará a `<dialog>` con las ventanas).
 
+**Catálogo (hecho):**
+- Barra superior con «Nueva etiqueta» y «Nuevo tipo». Lista única: «Tipos de comisión» (cuadrado del color, «N etapas · precio», «N en curso») y una sección por categoría de etiquetas (punto del color, «N comisiones» o «Sin usar»).
+- Editor de tipo: cabecera teñida con el color del tipo, nombre editable, precio base, revisiones incluidas y selector de color (se guarda al momento); etapas numeradas que se reordenan arrastrando (la última, discontinua y verde, se oculta hasta «Marcar como terminada»); lateral con «En curso» (abre la comisión) y cifras de lo entregado (número, precio medio, horas medias, €/h). Pie: Duplicar, Borrar, Guardar cambios.
+- Editor de etiqueta: nombre, categoría (solo al crear; cambiarla en una existente no estaba antes y sigue sin estarlo), color, vista previa y número de comisiones. Las de «Commission Type» siguen con su aviso.
+- Cambio: ya no se pueden crear categorías vacías (no tenían sentido); la categoría se escribe al crear la primera etiqueta.
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -380,7 +386,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes y Terminadas hechos; siguen Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes, Terminadas y Catálogo hechos; siguen Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).
