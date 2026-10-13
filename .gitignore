@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Maquetas del rediseño: quedan en local (ver REDISENO.md, anexo con todo el código)
+maquetas-ui/

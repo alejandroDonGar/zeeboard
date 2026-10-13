@@ -2881,3 +2881,7 @@ document.addEventListener("keydown", (e) => {
 </body>
 </html>
 ````
+
+---
+
+**Estado final de la pasada visual (local, sin push):** todas las pantallas y ventanas migradas, documentación y capturas al día. La carpeta `maquetas-ui/` ya no está en git (queda en local y en `.gitignore`); su código completo sigue en el anexo (sección 11). Pendiente: revisión final.
