@@ -2885,3 +2885,9 @@ document.addEventListener("keydown", (e) => {
 ---
 
 **Estado final de la pasada visual (local, sin push):** todas las pantallas y ventanas migradas, documentación y capturas al día. La carpeta `maquetas-ui/` ya no está en git (queda en local y en `.gitignore`); su código completo sigue en el anexo (sección 11). Pendiente: revisión final.
+
+**Revisión final (Opus):**
+- Arreglado: en el Catálogo, guardar dos veces seguidas un tipo con etapas nuevas las borraba y las volvía a crear (las nuevas no recibían su id tras guardar). Si una comisión ya estaba en esa etapa, el segundo guardado fallaba. Ahora el editor recarga las etapas tras guardar. Comprobado en la demo: mismo id tras dos guardados.
+- Comprobado en la demo: borrar etiqueta + Ctrl+Z, notas del cliente que se guardan al cambiar de cliente (en el cliente correcto), Ctrl+V a la etapa actual y quitar esa imagen, todas las pantallas a 1066×700 en oscuro.
+- Comprobado en el código: los manejadores de Comisiones siguen todos conectados tras el reparto en componentes, las zonas de arrastre conservan sus identificadores, Ajustes y las demás pantallas conservan sus controles.
+- Observación (ya era así antes del rediseño): quitar una imagen de una etapa no pasa por la papelera ni tiene deshacer.

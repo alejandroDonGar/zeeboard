@@ -696,9 +696,6 @@ function CommissionsPage() {
     : [];
 
   const pasteStage = workflowStages[currentStageIndex] ?? workflowStages[0] ?? null;
-  // Strip gap minus each stage's label and corrections button
-  // The strip clips what sticks out of it, so each column keeps 4 px around its image for the current stage's ring (ring + offset = 4 px);
-  // the image gives those 8 px back so the column keeps its height
 
   // Focus mode: all images from all stages, in order
   const focusImages = activeCommission

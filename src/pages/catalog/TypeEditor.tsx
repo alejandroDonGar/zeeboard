@@ -117,14 +117,15 @@ function TypeEditor({
     setBasePrice(template.base_price !== null ? String(template.base_price).replace(".", ",") : "");
     setRevisions(template.revisions_included !== null ? String(template.revisions_included) : "");
     setNewStageName("");
-    getTemplateStages(template.id)
-      .then((list) => current && setStages(list.map(({ id, name: stageName }) => ({ id, name: stageName, key: String(id) }))))
-      .catch(console.error);
+    loadStages().then((list) => current && setStages(list)).catch(console.error);
 
     return () => {
       current = false;
     };
   }, [template.id]);
+
+  const loadStages = async () =>
+    (await getTemplateStages(template.id)).map(({ id, name: stageName }) => ({ id, name: stageName, key: String(id) }));
 
   function handleAddStage() {
     const stageName = newStageName.trim();
@@ -144,6 +145,8 @@ function TypeEditor({
       await updateTemplateRevisions(template.id, revisions.trim() === "" ? null : Math.max(0, Math.round(Number(revisions)) || 0));
       await saveTemplateStages(template.id, stages);
       await onSaved();
+      // New stages now have their ids; without them a second save would remove and recreate them
+      setStages(await loadStages());
       showToast("Template saved.", "success");
     } catch (error) {
       console.error(error);
