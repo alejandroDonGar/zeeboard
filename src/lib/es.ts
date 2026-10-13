@@ -173,8 +173,6 @@ export const es: Record<string, string> = {
   "{n} commissions need your attention": "{n} comisiones necesitan tu atención",
 
   // Commissions
-  "Organize your drawings by stages, clients, dates and tags.": "Organiza tus dibujos por etapas, clientes, fechas y etiquetas.",
-  "+ New commission": "+ Nueva comisión",
   List: "Lista",
   Grid: "Cuadrícula",
   Queue: "En cola",
@@ -187,7 +185,6 @@ export const es: Record<string, string> = {
   "No date": "Sin fecha",
   "No base price": "Sin precio base",
   "No notes.": "Sin notas.",
-  "No characters.": "Sin personajes.",
   "+ Correction pin": "+ Chincheta de corrección",
   "Click the image to add a correction": "Haz clic en la imagen para añadir una corrección",
   "What should change here? Enter to add": "¿Qué hay que cambiar aquí? Enter para añadir",
@@ -631,6 +628,17 @@ export const es: Record<string, string> = {
   Unpaid: "Sin pagar",
   Partial: "Parcial",
   Paid: "Pagado",
+  // Comisiones: filtros y detalle
+  Filter: "Filtro",
+  Status: "Estado",
+  Type: "Tipo",
+  Stage: "Etapa",
+  Stages: "Etapas",
+  Corrections: "Correcciones",
+  "Alt {n} of {total}": "Alternativa {n} de {total}",
+  "of {amount}": "de {amount}",
+  "No fees": "Sin tarifa",
+
   // Catálogo: tipos de comisión (plantillas con color) y etiquetas
   Catalog: "Catálogo",
   "Commission types": "Tipos de comisión",

@@ -335,6 +335,19 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 
 **Cómo se comprobó (útil para las demás pantallas):** `npm run tauri dev`, ventana a 1216×799 (tamaño por defecto) y a 1066×700 (mínimo), en claro y oscuro, y a 3456 px de ancho. Nada se corta, solapa ni desborda. Las capturas se hicieron con `PrintWindow` desde PowerShell (el capturador de pantalla de la herramienta deslava los colores de WebView2). Cuidado: `open_application "ZeeBoard"` abre la app **instalada** (versión antigua), no la de desarrollo.
 
+**Comisiones (hecho):** `CommissionsPage.tsx` pasa de 1466 a 1142 líneas; el comportamiento no cambia (mismos datos, filtros, atajos, arrastrar y pegar imágenes, correcciones, pagos, modo foco).
+- Barra superior con búsqueda, un solo botón **Filtro** (pago, estado, tipo y etiquetas dentro; lo elegido sale como chips que se quitan con ✕ y «Borrar filtros»), cambio Lista / Cuadrícula con iconos y «Nueva comisión · Ctrl N». `BoardFilters.tsx` reescrito (mismo estado que antes: `filterTagIds`, `filterStatus`, `filterPayment`); `Segmented` admite iconos.
+- Lista (`CommissionList.tsx`): barra con el color del tipo, miniatura (o iniciales), punto de estado, cliente · etapa y plazo.
+- Detalle: **cabecera teñida con los colores de la imagen que se está viendo** (`tintStrengths()` en `lib/ambient.ts` calcula cuánto tinte aguanta el texto, una intensidad por tema; el CSS `.hero-tint` elige y anima el color), título en Fraunces, cliente · plataforma, Editar y menú ⋯ con fondo sólido.
+- `StageViewer.tsx`: la imagen de la etapa elegida **en grande** (alternativas, versiones, + Alt / + v / ×, clic = modo foco) y debajo **la tira de etapas** numeradas (miniatura, ✓ o número, correcciones). Cada etapa y la imagen grande siguen siendo zonas para soltar imágenes (`data-image-drop`). La etapa grande es la actual hasta que se elige otra; al avanzar o añadir imágenes a una etapa, pasa a verse esa. El fondo de la app y el tinte siguen a esa imagen.
+- `CorrectionsPanel.tsx`: lista de correcciones de una etapa (con chinchetas), campo para añadir y botones de versión retocada; guarda su propio texto.
+- `CommissionInfo.tsx`: columna de propiedades (tipo, etapa, entrega, revisiones, cuenta para etiquetar), etiquetas, **pagos** (importe pagado en grande, barra, lo que falta y lo recibido; los cobros se despliegan en la misma columna en vez de un menú flotante), notas y personajes.
+- Pie fijo: Atrás, avanzar / Marcar como terminada / Terminada, y «Ctrl+V añade a …».
+- Ajuste: el detalle usa `@container`; con ≥ 760 px de ancho van dos columnas (imagen y tira a la izquierda, propiedades a la derecha); por debajo (lo normal en la ventana por defecto, por la lista de 320 px) se apilan y **solo hay un scroll**, con las propiedades en rejilla de columnas bajo la tira.
+- **Trampa de CSS encontrada:** un hijo de rejilla con `min-h-0` dentro de una rejilla con scroll puede encogerse por debajo de su contenido y solaparse con el siguiente (`minmax(0,1fr)` + `min-height` tampoco lo evitan). Se arregla con `minmax(14rem,1fr)` en la fila y quitando `min-h-0` cuando el contenido apila.
+- Cuadrícula: tarjetas con el contenido arriba y sin elevarse al pasar el ratón.
+- Traducciones nuevas: Filtro, Estado, Tipo, Etapa, Etapas, Correcciones, «Alternativa n de m», «de {importe}», «Sin tarifa».
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -347,7 +360,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen hecho; siguen Comisiones, Clientes, Solicitudes, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen y Comisiones hechos; siguen Clientes, Solicitudes, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).

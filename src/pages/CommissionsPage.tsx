@@ -1,11 +1,11 @@
 import { locale, t } from "../lib/i18n";
 import { takeAction } from "../lib/actions";
-import { useEffect, useState } from "react";
-import { imageUrl, thumbUrl, importImage, pickImagePaths } from "../lib/images";
+import { useEffect, useState, type CSSProperties } from "react";
+import { IconCheck, IconDots, IconLayoutGrid, IconList } from "@tabler/icons-react";
+import { importImage, pickImagePaths } from "../lib/images";
 import { IPAD_IMAGE_ADDED } from "../lib/ipad";
 import { useImageInput } from "../lib/useImageInput";
 import { hide } from "../lib/privacy";
-import Linkified from "../components/Linkified";
 import BoardFilters, { Segmented, type PaymentFilter } from "../components/BoardFilters";
 import CommissionPayments from "../components/CommissionPayments";
 import {
@@ -15,7 +15,6 @@ import {
   isCommissionCompleted as isCommissionCompletedHelper,
   getDeadlineStatus,
   paymentSummary,
-  pinNumber,
   pendingCorrectionsText,
   invoiceDescription,
 } from "../lib/commissionHelpers";
@@ -26,7 +25,6 @@ import {
   getCommissions,
   getAllPayments,
   getAllCorrections,
-  addCorrection,
   deleteCorrection,
   setCorrectionDone,
   updateCommissionStage,
@@ -53,10 +51,8 @@ import {
   type Template,
   type TemplateStage,
 } from "../lib/database";
-import PageHeader from "../components/PageHeader";
-import TagChip from "../components/TagChip";
-import GlassPanel from "../components/GlassPanel";
-import { useAmbientImage } from "../lib/ambient";
+import TopBar from "../components/TopBar";
+import { tintStrengths, useAmbient, useAmbientImage } from "../lib/ambient";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
@@ -65,6 +61,9 @@ import FocusViewer from "./commissions/FocusViewer";
 import CommissionForm from "./commissions/CommissionForm";
 import CommissionGrid from "./commissions/CommissionGrid";
 import CommissionList from "./commissions/CommissionList";
+import CommissionInfo from "./commissions/CommissionInfo";
+import CorrectionsPanel from "./commissions/CorrectionsPanel";
+import StageViewer from "./commissions/StageViewer";
 import FinishCommissionModal, { type FinishDetails } from "../components/FinishCommissionModal";
 
 function CommissionsPage() {
@@ -98,14 +97,8 @@ function CommissionsPage() {
   const [corrections, setCorrections] = useState<CommissionCorrection[]>([]);
   // Stage whose corrections show under the strip; null = none
   const [correctionsStageId, setCorrectionsStageId] = useState<number | null>(null);
-  const [correctionDraft, setCorrectionDraft] = useState("");
-  // Image height follows the window only, so every commission shows the same size (it used to follow the space left by the content above)
-  const [windowHeight, setWindowHeight] = useState(window.innerHeight);
-  useEffect(() => {
-    const onResize = () => setWindowHeight(window.innerHeight);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
+  // Stage whose image is shown big; null = the current stage
+  const [viewStageId, setViewStageId] = useState<number | null>(null);
   const [commissionMenuOpen, setCommissionMenuOpen] = useState(false);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
   const [importingStageId, setImportingStageId] = useState<number | null>(null);
@@ -356,6 +349,7 @@ function CommissionsPage() {
     }
 
     await updateCommissionStage(activeCommission.id, nextStage.id);
+    setViewStageId(null);
 
     const data = await getCommissions();
     setCommissions(data);
@@ -483,6 +477,7 @@ function CommissionsPage() {
     }
 
     setImportingStageId(stageId);
+    setViewStageId(stageId);
 
     try {
       for (const item of items) {
@@ -704,7 +699,6 @@ function CommissionsPage() {
   // Strip gap minus each stage's label and corrections button
   // The strip clips what sticks out of it, so each column keeps 4 px around its image for the current stage's ring (ring + offset = 4 px);
   // the image gives those 8 px back so the column keeps its height
-  const stageImageHeight = Math.max(windowHeight - 580, 180);
 
   // Focus mode: all images from all stages, in order
   const focusImages = activeCommission
@@ -716,14 +710,10 @@ function CommissionsPage() {
   const focusIndex = focusImages.findIndex((item) => getVersions(item.image).some((version) => version.id === focusImageId));
 
 
-  // On opening a commission, the strip centers on the current stage
-  useEffect(() => {
-    document.getElementById("current-stage")?.scrollIntoView({ inline: "center", block: "nearest" });
-  }, [activeCommissionId, workflowStages]);
-
-  // Open corrections belong to the previous commission
+  // Open corrections and the stage shown big belong to the previous commission
   useEffect(() => {
     setCorrectionsStageId(null);
+    setViewStageId(null);
   }, [activeCommissionId]);
 
 
@@ -754,54 +744,61 @@ function CommissionsPage() {
   }
 
   const activeNormalTags = getNormalTags(activeCommissionTags);
+
+  // Header tint: the colours of the image shown (the same ones the background takes), as strong as the text allows
+  const { colors: imageColors } = useAmbient();
+  const strengths = imageColors ? tintStrengths(imageColors[0]) : null;
+  const heroStyle = { "--tint": imageColors?.[0] ?? "transparent", "--ts-light": strengths?.light ?? 0, "--ts-dark": strengths?.dark ?? 0 } as CSSProperties;
+  const typeColor = (commission: Commission) => typeOf(commission)?.color ?? "var(--line-strong)";
   const activeType = activeCommission ? typeOf(activeCommission) : null;
 
   // Colores del fondo: la imagen en foco, la que tiene el cursor encima o la etapa más avanzada de la comisión abierta
   const focusItem = focusIndex >= 0 ? focusImages[focusIndex] : null;
   const focusShown = focusItem ? (getVersions(focusItem.image).find((version) => version.id === focusImageId) ?? focusItem.image) : null;
+  // Sin otra cosa en foco: la imagen de la etapa que se está viendo en grande (o, si no tiene, la más avanzada)
+  const viewedStage = activeCommission ? (visibleStages.find((stage) => stage.id === viewStageId) ?? visibleStages[currentStageIndex]) : undefined;
+  const viewedImages = viewedStage && activeCommission ? getStageImages(activeCommission.id, viewedStage.id) : [];
+  const viewedImage = viewedStage ? viewedImages[getActiveStageImageIndex(viewedStage.id, viewedImages)] : undefined;
   useAmbientImage(
     focusShown?.image_data_url ??
       hoveredImagePath ??
-      (viewMode === "list" ? focusImages[focusImages.length - 1]?.image.image_data_url : null),
+      (viewMode === "list" ? (viewedImage ?? focusImages[focusImages.length - 1]?.image)?.image_data_url : null),
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <PageHeader
-        title={t("Commissions")}
-        description={t("Organize your drawings by stages, clients, dates and tags.")}
-        action={t("+ New commission")}
+    <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+      <TopBar
+        title="Commissions"
+        action="New commission"
+        shortcut="Ctrl N"
         onAction={openNewCommissionForm}
-      />
-
-      <div className="flex items-start gap-3 px-5 pt-5">
-        <div className="min-w-0 flex-1">
-          <BoardFilters
-            tags={filterableTags}
-            searchQuery={searchQuery}
-            onSearchQueryChange={setSearchQuery}
-            filterTagIds={filterTagIds}
-            onFilterTagIdsChange={setFilterTagIds}
-            filterStatus={filterStatus}
-            onFilterStatusChange={setFilterStatus}
-            filterPayment={filterPayment}
-            onFilterPaymentChange={setFilterPayment}
+        end={
+          <Segmented
+            options={[
+              { value: "list", label: "List", icon: <IconList size={16} stroke={1.75} aria-hidden="true" /> },
+              { value: "grid", label: "Grid", icon: <IconLayoutGrid size={16} stroke={1.75} aria-hidden="true" /> },
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
           />
-        </div>
-
-        <Segmented
-          options={[
-            { value: "list", label: "List" },
-            { value: "grid", label: "Grid" },
-          ]}
-          value={viewMode}
-          onChange={setViewMode}
+        }
+      >
+        <BoardFilters
+          tags={filterableTags}
+          searchQuery={searchQuery}
+          onSearchQueryChange={setSearchQuery}
+          filterTagIds={filterTagIds}
+          onFilterTagIdsChange={setFilterTagIds}
+          filterStatus={filterStatus}
+          onFilterStatusChange={setFilterStatus}
+          filterPayment={filterPayment}
+          onFilterPaymentChange={setFilterPayment}
         />
-      </div>
+      </TopBar>
 
       <section
-        className={`grid min-h-0 flex-1 gap-5 px-5 pb-6 ${
-          viewMode === "list" ? "grid-cols-[280px_minmax(0,1fr)]" : "grid-cols-[minmax(0,1fr)_320px]"
+        className={`grid min-h-0 flex-1 gap-3 ${
+          viewMode === "list" ? "grid-cols-[minmax(250px,320px)_minmax(0,1fr)]" : "grid-cols-[minmax(0,1fr)_320px]"
         }`}
       >
         {viewMode === "list" && (
@@ -812,582 +809,261 @@ function CommissionsPage() {
             activeCommissionId={activeCommissionId}
             templateStagesByTemplateId={templateStagesByTemplateId}
             stageImagesByCommissionId={stageImagesByCommissionId}
+            typeColor={typeColor}
             handleOpenCommission={handleOpenCommission}
           />
         )}
 
-
-        <GlassPanel className="h-full min-h-0" contentClassName="flex flex-col p-5">
-          <div className="min-h-0 flex-1 overflow-y-auto p-1.5">
-            {viewMode === "list" && !activeCommission ? (
-              <div className="flex h-full flex-col items-center justify-center text-center">
-                <p className="text-lg font-black">{t("Pick a commission")}</p>
-                <p className="mt-1 text-sm text-muted">{t("Choose one from the list, or use ↑ ↓ to move between them.")}</p>
-              </div>
-            ) : viewMode === "list" && activeCommission ? (
-              <div className="flex h-full min-h-0 flex-col gap-5">
-                {/* Header: everything important on one line */}
-                <div className="flex items-start gap-4">
-                  <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-2xl font-black">{activeCommission.title}</h3>
-                    <p className="mt-1 text-sm text-muted">
-                      {[
-                        hide(activeCommission.client_name || t("No client")),
-                        activeCommission.platform,
-                        templates.find((template) => template.id === activeCommission.template_id)?.name,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                      {activeDeadlineStatus && (
-                        <span className={`ml-2 rounded-sm px-2 py-0.5 text-xs font-bold ${activeDeadlineStatus.className}`}>
-                          {activeDeadlineStatus.label}
-                        </span>
-                      )}
-                    </p>
-
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      {(revisionsIncluded !== null || activeCorrections.length > 0) && (
-                        <span
-                          title={t("Each client correction counts as one revision")}
-                          className={`rounded-sm px-2 py-0.5 text-xs font-bold ${
-                            revisionsIncluded === null
-                              ? "chip"
-                              : activeCorrections.length > revisionsIncluded
-                                ? "chip chip-bad"
-                                : activeCorrections.length === revisionsIncluded
-                                  ? "chip chip-warn"
-                                  : "chip"
-                          }`}
-                        >
-                          {t("Revisions")} {activeCorrections.length}
-                          {revisionsIncluded !== null && ` / ${revisionsIncluded}`}
-                          {revisionsIncluded !== null && activeCorrections.length > revisionsIncluded && ` · ${t("extra")}`}
-                        </span>
-                      )}
-                      {activeClient?.tag_handle && (
-                        <button
-                          type="button"
-                          title={t("Copy the account to tag when you post")}
-                          onClick={() => copyTag(activeClient.tag_handle!)}
-                          className="rounded-sm border border-line-strong px-2 py-0.5 text-xs font-bold text-muted transition hover:border-ink hover:text-ink"
-                        >
-                          {t("Tag")} {hide(activeClient.tag_handle)}
-                          {activeClient.tag_platform && activeClient.tag_platform !== "Other" ? ` · ${activeClient.tag_platform}` : ""} ⧉
-                        </button>
-                      )}
-                      {activeType && <TagChip name={activeType.name} color={activeType.color} />}
-                      {activeNormalTags.map((tag) => (
-                        <TagChip key={tag.id} name={tag.name} color={tag.color} />
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={handleOpenEditCommission}
-                    className="rounded-md border border-line-strong px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-ink"
-                  >
-                    {t("Edit")}
-                  </button>
-
-                  <div className="relative">
-                    <button
-                      type="button"
-                      title={t("More actions")}
-                      onClick={() => setCommissionMenuOpen((open) => !open)}
-                      className="rounded-md border border-line-strong px-3 py-1.5 text-xs font-semibold text-ink transition hover:border-ink"
-                    >
-                      ···
-                    </button>
-
-                    {commissionMenuOpen && (
-                      <>
-                        <div className="fixed inset-0 z-30" onClick={() => setCommissionMenuOpen(false)} />
-                        <div className="absolute right-0 top-full z-40 mt-1 w-40 rounded-md border border-line bg-surface p-1 shadow-lg">
-                          <button
-                            type="button"
-                            disabled={duplicatingCommission}
-                            onClick={() => {
-                              setCommissionMenuOpen(false);
-                              handleDuplicateCommission();
-                            }}
-                            className="block w-full rounded-sm px-3 py-2 text-left text-sm hover:bg-highlight"
-                          >
-                            {duplicatingCommission ? t("Duplicating…") : t("Duplicate")}
-                          </button>
-                          <button
-                            type="button"
-                            title={t("Short text for the PayPal invoice")}
-                            onClick={() => {
-                              setCommissionMenuOpen(false);
-                              copyInvoiceDescription();
-                            }}
-                            className="block w-full rounded-sm px-3 py-2 text-left text-sm hover:bg-highlight"
-                          >
-                            {t("Copy description")}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCommissionMenuOpen(false);
-                              setShowDeleteCommissionModal(true);
-                            }}
-                            className="block w-full rounded-sm px-3 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
-                          >
-                            {t("Delete")}
-                          </button>
-                        </div>
-                      </>
-                    )}
-                  </div>
+        <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
+          {viewMode === "list" && activeCommission ? (
+            <>
+              {/* Header: tinted with the colours of the image being looked at */}
+              <div className="hero-tint flex shrink-0 items-start gap-3 px-6 pt-5 pb-4" style={heroStyle}>
+                <div className="min-w-0 flex-1">
+                  <h2 className="font-display text-3xl leading-tight font-semibold tracking-tight [overflow-wrap:anywhere]">{activeCommission.title}</h2>
+                  <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-muted">
+                    <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-highlight text-[11px] font-bold text-ink">
+                      {hide(activeCommission.client_name || "?").slice(0, 2)}
+                    </span>
+                    <span>
+                      <b className="font-semibold text-ink">{hide(activeCommission.client_name || t("No client"))}</b>
+                      {activeCommission.platform ? ` · ${activeCommission.platform}` : ""}
+                    </span>
+                  </p>
                 </div>
 
-                <CommissionPayments
-                  commission={activeCommission}
-                  payments={paymentsByCommissionId[activeCommission.id] ?? []}
-                  onChange={loadPayments}
-                />
+                <button
+                  type="button"
+                  onClick={handleOpenEditCommission}
+                  className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                >
+                  {t("Edit")}
+                </button>
 
+                <div className="relative">
+                  <button
+                    type="button"
+                    title={t("More actions")}
+                    aria-label={t("More actions")}
+                    aria-haspopup="true"
+                    aria-expanded={commissionMenuOpen}
+                    onClick={() => setCommissionMenuOpen((open) => !open)}
+                    className="flex h-[34px] w-[34px] items-center justify-center rounded-2xl border border-line-strong bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                  >
+                    <IconDots size={16} stroke={1.75} aria-hidden="true" />
+                  </button>
+
+                  {commissionMenuOpen && (
+                    <>
+                      <div className="fixed inset-0 z-30" onClick={() => setCommissionMenuOpen(false)} />
+                      <div role="menu" className="absolute top-full right-0 z-40 mt-1.5 w-48 rounded-3xl border border-line-strong bg-surface p-1.5 shadow-lg">
+                        <button
+                          type="button"
+                          role="menuitem"
+                          disabled={duplicatingCommission}
+                          onClick={() => {
+                            setCommissionMenuOpen(false);
+                            handleDuplicateCommission();
+                          }}
+                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                        >
+                          {duplicatingCommission ? t("Duplicating…") : t("Duplicate")}
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          title={t("Short text for the PayPal invoice")}
+                          onClick={() => {
+                            setCommissionMenuOpen(false);
+                            copyInvoiceDescription();
+                          }}
+                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                        >
+                          {t("Copy description")}
+                        </button>
+                        <hr className="my-1 border-line" />
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setCommissionMenuOpen(false);
+                            setShowDeleteCommissionModal(true);
+                          }}
+                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
+                        >
+                          {t("Delete")}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Body: the stages (image and strip) and, beside them or below, the properties */}
+              <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto border-t border-line @min-[760px]:grid-cols-[minmax(0,1fr)_clamp(250px,30%,310px)] @min-[760px]:overflow-hidden">
                 {workflowStages.length === 0 ? (
-                  <p className="rounded-md border border-dashed border-line-strong p-6 text-center text-sm text-faint">
+                  <p className="m-4 rounded-md border border-dashed border-line-strong p-6 text-center text-sm text-faint">
                     {t("This commission has no template, so it has no stages. Edit it to pick one.")}
                   </p>
                 ) : (
-                  <>
-                    {/* Stage strip: same height for all, each image at its real aspect ratio */}
-                    <div
-                      onWheel={(event) => {
-                        // The vertical wheel scrolls the strip horizontally
-                        if (event.deltaY !== 0) event.currentTarget.scrollLeft += event.deltaY;
-                      }}
-                      className="flex min-h-48 flex-1 gap-4 overflow-x-auto"
-                      style={{ minHeight: stageImageHeight + 72 }}
-                    >
-                      {visibleStages.map((stage, index) => {
-                        const stageImages = getStageImages(activeCommission.id, stage.id);
-                        const imageIndex = getActiveStageImageIndex(stage.id, stageImages);
-                        const image = stageImages[imageIndex] ?? null;
-                        const isDone = index < currentStageIndex;
-                        const isCurrent = index === currentStageIndex;
-                        const dropId = `stage:${stage.id}`;
-                        const isDropTarget = dragZoneId === dropId;
-
-                        return (
-                          <div
-                            key={stage.id}
-                            id={isCurrent ? "current-stage" : undefined}
-                            data-image-drop={dropId}
-                            className="flex shrink-0 flex-col p-1"
-                          >
-                            {image ? (
-                              <div
-                                className={`group relative ${
-                                  isDropTarget ? "opacity-60" : ""
-                                }`}
-                              >
-                                <button
-                                  type="button"
-                                  title={t("Open in focus mode")}
-                                  onClick={() => setFocusImageId(image.id)}
-                                  onMouseEnter={() => setHoveredImagePath(image.image_data_url)}
-                                  onMouseLeave={() => setHoveredImagePath(null)}
-                                  className="block cursor-zoom-in"
-                                >
-                                  <img
-                                    src={imageUrl(image.image_data_url)}
-                                    alt={`${stage.name} · ${image.label}`}
-                                    style={{ height: stageImageHeight }}
-                                    className={`w-auto rounded-md object-contain ${
-                                      isCurrent ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : ""
-                                    }`}
-                                  />
-                                </button>
-
-                                {(getVersions(image).length > 1 || isDone) && (
-                                  <span className="absolute left-2 top-2 rounded-sm bg-black/60 px-1.5 py-0.5 text-xs font-bold text-white">
-                                    {versionLabel(image, getVersions(image), isDone)}
-                                  </span>
-                                )}
-
-                                {stageImages.length > 1 && (
-                                  <span className="absolute bottom-2 right-2 flex items-center gap-1 rounded-sm bg-black/60 px-1.5 py-0.5 text-xs text-white">
-                                    <button
-                                      type="button"
-                                      title={t("Previous alt")}
-                                      onClick={() => setActiveStageImageIndexByStageId((current) => ({
-                                        ...current,
-                                        [stage.id]: (imageIndex - 1 + stageImages.length) % stageImages.length,
-                                      }))}
-                                      className="px-1 hover:text-white/70"
-                                    >
-                                      ‹
-                                    </button>
-                                    Alt {imageIndex + 1} of {stageImages.length}
-                                    <button
-                                      type="button"
-                                      title={t("Next alt")}
-                                      onClick={() => setActiveStageImageIndexByStageId((current) => ({
-                                        ...current,
-                                        [stage.id]: (imageIndex + 1) % stageImages.length,
-                                      }))}
-                                      className="px-1 hover:text-white/70"
-                                    >
-                                      ›
-                                    </button>
-                                  </span>
-                                )}
-
-                                <span className="absolute right-2 top-2 flex gap-1 opacity-0 transition group-hover:opacity-100">
-                                  <button
-                                    type="button"
-                                    title={t("Add an alt")}
-                                    disabled={importingStageId !== null}
-                                    onClick={() => handleAddStageImages(stage.id)}
-                                    className="flex h-7 items-center justify-center rounded-sm bg-black/60 px-2 text-xs font-bold text-white hover:bg-black/80"
-                                  >
-                                    + Alt
-                                  </button>
-                                  <button
-                                    type="button"
-                                    title={t("New version of this image (retouched)")}
-                                    disabled={importingStageId !== null}
-                                    onClick={() => handleAddVersion(image)}
-                                    className="flex h-7 items-center justify-center rounded-sm bg-black/60 px-2 text-xs font-bold text-white hover:bg-black/80"
-                                  >
-                                    + v
-                                  </button>
-                                  <button
-                                    type="button"
-                                    title={t("Remove this image")}
-                                    onClick={() => handleDeleteStageImage(image.id)}
-                                    className="flex h-7 w-7 items-center justify-center rounded-sm bg-black/60 text-white hover:bg-tone-bad/100"
-                                  >
-                                    ×
-                                  </button>
-                                </span>
-                              </div>
-                            ) : (
-                              <button
-                                type="button"
-                                disabled={importingStageId !== null}
-                                onClick={() => handleAddStageImages(stage.id)}
-                                style={{ height: stageImageHeight, width: stageImageHeight * 0.75 }}
-                                className={`flex shrink-0 flex-col items-center justify-center rounded-md border border-dashed text-center text-xs transition ${
-                                  isDropTarget
-                                    ? "border-ink bg-highlight text-ink"
-                                    : "border-line-strong text-faint hover:border-ink hover:text-ink"
-                                }`}
-                              >
-                                <span className="text-xl">+</span>
-                                {importingStageId === stage.id ? t("Optimizing…") : isCurrent ? t("Drop or Ctrl+V") : t("Drop here")}
-                              </button>
-                            )}
-
-                            <p className="mt-2 flex items-center gap-2 text-sm">
-                              <span
-                                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                                  isDone
-                                    ? "bg-tone-ok text-on-tone"
-                                    : isCurrent
-                                      ? "bg-primary text-on-primary"
-                                      : "border border-line-strong text-faint"
-                                }`}
-                              >
-                                {isDone ? "✓" : index + 1}
-                              </span>
-                              <span className={isCurrent ? "font-black" : isDone ? "font-semibold" : "text-faint"}>
-                                {stage.name}
-                              </span>
-                              {importingStageId === stage.id && image && (
-                                <span className="text-xs text-faint">{t("Optimizing…")}</span>
-                              )}
-                            </p>
-
-                            {(() => {
-                              const stageCorrections = activeCorrections.filter((correction) => correction.stage_id === stage.id);
-                              const count = stageCorrections.length;
-                              const pending = stageCorrections.filter((correction) => correction.done_at === null).length;
-                              const open = correctionsStageId === stage.id;
-
-                              return (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setCorrectionDraft("");
-                                    setCorrectionsStageId(open ? null : stage.id);
-                                  }}
-                                  className={`mt-1 self-start rounded-sm px-1.5 py-0.5 text-xs transition ${
-                                    pending > 0
-                                      ? "bg-tone-warn/15 font-semibold text-ink"
-                                      : open
-                                        ? "text-ink"
-                                        : "text-faint hover:text-ink"
-                                  }`}
-                                >
-                                  {count > 0 ? t(count === 1 ? "{n} correction" : "{n} corrections", { n: count }) : t("+ correction")}
-                                  {count > 0 && pending === 0 ? " ✓" : ""}
-                                  {open ? " ▴" : count > 0 ? " ▾" : ""}
-                                </button>
-                              );
-                            })()}
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {correctionsStage && (
-                      <div className="shrink-0 rounded-md border border-line bg-paper p-3">
-                        <div className="mb-2 flex items-center justify-between">
-                          <p className="text-xs font-bold text-muted">
-                            Corrections · {correctionsStage.name}
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => copyPendingCorrections(correctionsStage.id)}
-                            className="text-xs text-faint transition hover:text-ink"
-                          >
-                            {t("Copy corrections")}
-                          </button>
-                        </div>
-
-                        {activeCorrections
-                          .filter((correction) => correction.stage_id === correctionsStage.id)
-                          .map((correction) => {
-                            const pinImage =
-                              correction.image_id === null
-                                ? null
-                                : (stageImagesByCommissionId[activeCommission.id] ?? []).find((image) => image.id === correction.image_id);
-
-                            return (
-                              <div key={correction.id} className="group flex items-baseline gap-3 py-1 text-sm">
-                                <input
-                                  type="checkbox"
-                                  checked={correction.done_at !== null}
-                                  onChange={() => toggleCorrectionDone(correction)}
-                                  title={correction.done_at === null ? t("Mark as done") : t("Mark as not done")}
-                                  className="shrink-0 self-center"
-                                />
-                                <span className="w-14 shrink-0 text-xs text-faint">
-                                  {new Date(correction.created_at).toLocaleDateString(locale, { day: "numeric", month: "short" })}
-                                </span>
-                                {pinImage && (
-                                  <button
-                                    type="button"
-                                    title={t("Show on the image")}
-                                    onClick={() => setFocusImageId(pinImage.id)}
-                                    className="chip chip-warn shrink-0 self-center"
-                                  >
-                                    {pinNumber(activeCorrections, correction)}
-                                    <span className="font-semibold">· v{pinImage.version}</span>
-                                  </button>
-                                )}
-                                <span className={`flex-1 whitespace-pre-wrap ${correction.done_at !== null ? "text-faint line-through" : ""}`}>
-                                  {correction.text}
-                                </span>
-                                <button
-                                  type="button"
-                                  title={t("Remove correction")}
-                                  onClick={() => removeCorrection(correction)}
-                                  className="text-faint opacity-0 transition hover:text-tone-bad group-hover:opacity-100"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            );
-                          })}
-
-                        <input
-                          autoFocus
-                          value={correctionDraft}
-                          onChange={(event) => setCorrectionDraft(event.target.value)}
-                          onKeyDown={async (event) => {
-                            if (event.key === "Escape") setCorrectionsStageId(null);
-                            if (event.key !== "Enter" || !correctionDraft.trim()) return;
-
-                            try {
-                              await addCorrection(activeCommission.id, correctionsStage.id, correctionDraft);
-                              setCorrectionDraft("");
-                              setCorrections(await getAllCorrections());
-                            } catch (error) {
-                              showToast(error instanceof Error ? error.message : `${error}`, "error");
-                            }
-                          }}
-                          placeholder={t("What did the client ask to change? Enter to add")}
-                          className="mt-2 w-full rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
-                        />
-
-                        {(() => {
-                          const alternatives = getStageImages(activeCommission.id, correctionsStage.id);
-
-                          return (
-                            alternatives.length > 0 && (
-                              <div className="mt-2 flex flex-wrap gap-2">
-                                {alternatives.map((image) => (
-                                  <button
-                                    key={image.id}
-                                    type="button"
-                                    disabled={importingStageId !== null}
-                                    onClick={() => handleAddVersion(image)}
-                                    className="rounded-sm border border-line-strong px-2.5 py-1 text-xs font-semibold text-muted transition hover:border-ink hover:text-ink disabled:opacity-50"
-                                  >
-                                    {alternatives.length > 1
-                                      ? t("Upload retouched version · {name}", { name: image.label })
-                                      : t("Upload retouched version")}
-                                  </button>
-                                ))}
-                              </div>
-                            )
-                          );
-                        })()}
-                      </div>
-                    )}
-
-                    <div className="flex shrink-0 items-center gap-2">
-                      <button
-                        type="button"
-                        title={t("Back to the previous stage")}
-                        onClick={() => handleMoveStage(-1)}
-                        disabled={currentStageIndex <= 0}
-                        className="rounded-md border border-line-strong px-3 py-1.5 text-sm text-muted transition hover:border-ink hover:text-ink disabled:opacity-30"
-                      >
-                        {t("‹ Back")}
-                      </button>
-
-                      {isLastStage ? (
-                        <>
-                          <span className="rounded-md bg-tone-ok px-4 py-1.5 text-sm font-bold text-on-tone">
-                            {t("✓ Finished")}
-                            {activeCommission.delivered_at && ` · ${new Date(`${activeCommission.delivered_at}T12:00:00`).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}`}
-                            {activeCommission.hours !== null && ` · ${activeCommission.hours} h`}
-                          </span>
-                          <button
-                            type="button"
-                            title={t("Finish it again with a new delivery date")}
-                            onClick={() => setShowFinishModal(true)}
-                            className="rounded-md border border-line-strong px-3 py-1.5 text-sm text-muted transition hover:border-ink hover:text-ink"
-                          >
-                            {t("Edit delivery")}
-                          </button>
-                        </>
-                      ) : nextIsFinish ? (
-                        <button
-                          type="button"
-                          onClick={() => setShowFinishModal(true)}
-                          className="rounded-md bg-primary px-4 py-1.5 text-sm font-bold text-on-primary transition hover:bg-primary-hover"
-                        >
-                          {t("Mark as finished")}
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => handleMoveStage(1)}
-                          className="rounded-md bg-primary px-4 py-1.5 text-sm font-bold text-on-primary transition hover:bg-primary-hover"
-                        >
-                          {currentStageIndex < 0
-                            ? t("Start {name}", { name: workflowStages[0].name })
-                            : t("{name} done →", { name: workflowStages[currentStageIndex].name })}
-                        </button>
-                      )}
-
-                      {pasteStage && (
-                        <span className="ml-2 text-xs text-faint">
-                          {t("Ctrl+V adds to")} <b className="text-ink">{pasteStage.name}</b>
-                        </span>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {(activeCommission.notes || activeCommission.final_notes || activeCharacters.length > 0) && (
-                  <div className="grid shrink-0 grid-cols-2 gap-6 border-t border-line pt-4">
-                    <div>
-                      <p className="mb-1 text-xs font-bold text-muted">{t("Notes")}</p>
-                      <p className="line-clamp-4 whitespace-pre-wrap text-sm text-muted">
-                        {activeCommission.notes ? <Linkified text={activeCommission.notes} /> : t("No notes.")}
-                      </p>
-                      {isLastStage && activeCommission.final_notes && (
-                        <>
-                          <p className="mb-1 mt-3 text-xs font-bold text-muted">{t("Final notes")}</p>
-                          <p className="line-clamp-4 whitespace-pre-wrap text-sm text-muted">
-                            <Linkified text={activeCommission.final_notes} />
-                          </p>
-                        </>
-                      )}
-                    </div>
-
-                    <div>
-                      <p className="mb-1 text-xs font-bold text-muted">{t("Characters")}</p>
-                      {activeCharacters.length === 0 ? (
-                        <p className="text-sm text-faint">{t("No characters.")}</p>
-                      ) : (
-                        <div className="space-y-1.5">
-                          {activeCharacters.map((character) => (
-                            <div key={character.id} className="flex items-center gap-2">
-                              <span className="w-24 shrink-0 truncate text-sm font-semibold">{character.name}</span>
-                              <div className="flex flex-wrap gap-1">
-                                {(referencesByCharacterId[character.id] ?? []).map((reference) => (
-                                  <button
-                                    key={reference.id}
-                                    type="button"
-                                    title={reference.label}
-                                    onClick={() => setZoomedImage(imageUrl(reference.image_data_url))}
-                                    className="cursor-zoom-in"
-                                  >
-                                    <img
-                                      src={thumbUrl(reference.image_data_url)}
-                                      loading="lazy" decoding="async"
-                                      alt={reference.label}
-                                      className="h-8 w-8 rounded-sm object-cover"
-                                    />
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+                  <div className="@min-[760px]:h-full @min-[760px]:min-h-0">
+                    <StageViewer
+                      commissionId={activeCommission.id}
+                      stages={visibleStages}
+                      currentStageIndex={currentStageIndex}
+                      viewStageId={viewStageId}
+                      setViewStageId={setViewStageId}
+                      getStageImages={getStageImages}
+                      getVersions={getVersions}
+                      versionLabel={versionLabel}
+                      getActiveIndex={getActiveStageImageIndex}
+                      setActiveIndex={(stageId, index) => setActiveStageImageIndexByStageId((current) => ({ ...current, [stageId]: index }))}
+                      importingStageId={importingStageId}
+                      dragZoneId={dragZoneId}
+                      addImages={handleAddStageImages}
+                      addVersion={handleAddVersion}
+                      deleteImage={handleDeleteStageImage}
+                      setFocusImageId={setFocusImageId}
+                      setHoveredImagePath={setHoveredImagePath}
+                      corrections={activeCorrections}
+                      correctionsStageId={correctionsStageId}
+                      toggleCorrections={(stageId) => setCorrectionsStageId((current) => (current === stageId ? null : stageId))}
+                      correctionsPanel={
+                        correctionsStage && (
+                          <CorrectionsPanel
+                            key={correctionsStage.id}
+                            commissionId={activeCommission.id}
+                            stage={correctionsStage}
+                            corrections={activeCorrections}
+                            commissionImages={stageImagesByCommissionId[activeCommission.id] ?? []}
+                            stageImages={getStageImages(activeCommission.id, correctionsStage.id)}
+                            importingStageId={importingStageId}
+                            setFocusImageId={setFocusImageId}
+                            copyPending={copyPendingCorrections}
+                            toggleDone={toggleCorrectionDone}
+                            remove={removeCorrection}
+                            setCorrections={setCorrections}
+                            addVersion={handleAddVersion}
+                            onClose={() => setCorrectionsStageId(null)}
+                          />
+                        )
+                      }
+                    />
                   </div>
                 )}
-              </div>
-            ) : commissions.length === 0 ? (
-              <div className="flex h-full items-center justify-center">
-                <div className="max-w-md text-center">
-                  <h4 className="text-xl font-black">{t("No commissions yet")}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">
-                    {t("Create a commission type first (Catalog), then your first commission.")}
-                  </p>
-                </div>
-              </div>
-            ) : filteredCommissions.length === 0 ? (
-              <div className="flex h-full items-center justify-center">
-                <div className="max-w-md text-center">
-                  <h4 className="text-xl font-black">{t("No matches")}</h4>
-                  <p className="mt-2 text-sm leading-relaxed text-muted">
-                    {t("No commissions match your current search or filters.")}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <CommissionGrid
-                filteredCommissions={filteredCommissions}
-                commissionTagsById={commissionTagsById}
-                getNormalTags={getNormalTags}
-                typeOf={typeOf}
-                stageImagesByCommissionId={stageImagesByCommissionId}
-                getCommissionCompletionPercentage={getCommissionCompletionPercentage}
-                commissionCharactersById={commissionCharactersById}
-                charactersByClientId={charactersByClientId}
-                paymentsByCommissionId={paymentsByCommissionId}
-                handleOpenCommission={handleOpenCommission}
-                setZoomedImage={setZoomedImage}
-              />
-            )}
-          </div>
-        </GlassPanel>
 
-        {viewMode === "grid" && (
-        <DeadlineCalendar activeCommission={activeCommission} />
-        )}
+                <CommissionInfo
+                  commission={activeCommission}
+                  type={activeType}
+                  stageLabel={
+                    currentStageIndex >= 0 ? `${workflowStages[currentStageIndex].name} · ${currentStageIndex + 1}/${workflowStages.length}` : t("Not started")
+                  }
+                  deadlineStatus={activeDeadlineStatus}
+                  revisions={{ count: activeCorrections.length, included: revisionsIncluded }}
+                  client={activeClient}
+                  copyTag={copyTag}
+                  tags={activeNormalTags}
+                  payments={<CommissionPayments commission={activeCommission} payments={paymentsByCommissionId[activeCommission.id] ?? []} onChange={loadPayments} />}
+                  isLastStage={isLastStage}
+                  characters={activeCharacters}
+                  referencesByCharacterId={referencesByCharacterId}
+                  setZoomedImage={setZoomedImage}
+                />
+              </div>
+
+              {workflowStages.length > 0 && (
+                <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-line bg-surface/60 px-4 py-2.5">
+                  <button
+                    type="button"
+                    title={t("Back to the previous stage")}
+                    onClick={() => handleMoveStage(-1)}
+                    disabled={currentStageIndex <= 0}
+                    className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97] disabled:opacity-40"
+                  >
+                    {t("‹ Back")}
+                  </button>
+
+                  {isLastStage ? (
+                    <>
+                      <span className="rounded-2xl bg-tone-ok px-4 py-1.5 text-sm font-semibold text-on-tone">
+                        {t("✓ Finished")}
+                        {activeCommission.delivered_at &&
+                          ` · ${new Date(`${activeCommission.delivered_at}T12:00:00`).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}`}
+                        {activeCommission.hours !== null && ` · ${activeCommission.hours} h`}
+                      </span>
+                      <button
+                        type="button"
+                        title={t("Finish it again with a new delivery date")}
+                        onClick={() => setShowFinishModal(true)}
+                        className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97]"
+                      >
+                        {t("Edit delivery")}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => (nextIsFinish ? setShowFinishModal(true) : handleMoveStage(1))}
+                      className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97]"
+                    >
+                      <IconCheck size={16} stroke={2} aria-hidden="true" />
+                      {nextIsFinish
+                        ? t("Mark as finished")
+                        : currentStageIndex < 0
+                          ? t("Start {name}", { name: workflowStages[0].name })
+                          : t("{name} done →", { name: workflowStages[currentStageIndex].name })}
+                    </button>
+                  )}
+
+                  {pasteStage && (
+                    <span className="ml-1 text-xs text-faint">
+                      {t("Ctrl+V adds to")} <b className="font-semibold text-muted">{pasteStage.name}</b>
+                    </span>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="min-h-0 flex-1 overflow-y-auto p-4">
+              {viewMode === "list" ? (
+                <div className="flex h-full flex-col items-center justify-center text-center">
+                  <p className="text-lg font-semibold">{t("Pick a commission")}</p>
+                  <p className="mt-1 text-sm text-muted">{t("Choose one from the list, or use ↑ ↓ to move between them.")}</p>
+                </div>
+              ) : commissions.length === 0 ? (
+                <div className="flex h-full items-center justify-center">
+                  <div className="max-w-md text-center">
+                    <h4 className="text-xl font-semibold">{t("No commissions yet")}</h4>
+                    <p className="mt-2 text-sm leading-relaxed text-muted">{t("Create a commission type first (Catalog), then your first commission.")}</p>
+                  </div>
+                </div>
+              ) : filteredCommissions.length === 0 ? (
+                <div className="flex h-full items-center justify-center">
+                  <div className="max-w-md text-center">
+                    <h4 className="text-xl font-semibold">{t("No matches")}</h4>
+                    <p className="mt-2 text-sm leading-relaxed text-muted">{t("No commissions match your current search or filters.")}</p>
+                  </div>
+                </div>
+              ) : (
+                <CommissionGrid
+                  filteredCommissions={filteredCommissions}
+                  commissionTagsById={commissionTagsById}
+                  getNormalTags={getNormalTags}
+                  typeOf={typeOf}
+                  stageImagesByCommissionId={stageImagesByCommissionId}
+                  getCommissionCompletionPercentage={getCommissionCompletionPercentage}
+                  commissionCharactersById={commissionCharactersById}
+                  charactersByClientId={charactersByClientId}
+                  paymentsByCommissionId={paymentsByCommissionId}
+                  handleOpenCommission={handleOpenCommission}
+                  setZoomedImage={setZoomedImage}
+                />
+              )}
+            </div>
+          )}
+        </div>
+
+        {viewMode === "grid" && <DeadlineCalendar activeCommission={activeCommission} />}
       </section>
       {form && (
         <CommissionForm

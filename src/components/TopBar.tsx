@@ -6,6 +6,7 @@ import { t } from "../lib/i18n";
 function TopBar({
   title,
   children,
+  end,
   action,
   shortcut,
   onAction,
@@ -13,6 +14,8 @@ function TopBar({
   title: string;
   /** Controles junto al título (búsqueda, filtros, fecha…) */
   children?: ReactNode;
+  /** Controles a la derecha, justo antes de la acción (p. ej. cambiar de vista) */
+  end?: ReactNode;
   /** Texto de la acción principal, sin el «+»: lo pone el icono */
   action?: string;
   /** Atajo de teclado que hace lo mismo, en gris al lado del texto */
@@ -24,6 +27,7 @@ function TopBar({
       <h1 className="mr-1.5 text-[15px] font-semibold tracking-tight">{t(title)}</h1>
       {children}
       <div className="flex-1" />
+      {end}
       {action && (
         <button
           type="button"

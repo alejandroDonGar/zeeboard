@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { dominantColors, layoutFor } from "../src/lib/ambient";
+import { dominantColors, layoutFor, tintStrengths } from "../src/lib/ambient";
 
 const fill = (colors: [number, number, number][], n = 400) => {
   const data = new Uint8ClampedArray(n * 4);
@@ -29,5 +29,13 @@ assert.notDeepStrictEqual(dash, layoutFor("dashboard", "images/ab12.webp"), "otr
 for (const page of ["dashboard", "commissions", "clients", "tags", "templates", "settings"]) {
   assert(layoutFor(page, "images/x.webp").every((n) => n >= 6 && n <= 94), `${page}: dentro de la ventana`);
 }
+
+// Tinte de la cabecera: nunca por encima del tope y más suave cuanto más choca con el texto
+const soft = tintStrengths("#ffffff");
+assert(soft.light === 0.34 && soft.dark < 0.3, "blanco: el máximo en claro; en oscuro se queda corto (el texto secundario es claro)");
+const dark = tintStrengths("#000000");
+assert(dark.light < 0.34 && dark.dark === 0.3, "negro: en claro se queda corto (el texto es oscuro), en oscuro el máximo");
+const yellow = tintStrengths("#e2b55a");
+assert(yellow.light > 0 && yellow.light <= 0.34 && yellow.dark > 0 && yellow.dark <= 0.3, "color medio: algo de tinte dentro de los topes");
 
 console.log("check-ambient OK", fox);

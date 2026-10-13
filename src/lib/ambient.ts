@@ -188,6 +188,32 @@ async function setAmbientImage(path: string | null): Promise<void> {
   }
 }
 
+const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+const luminance = (c: number[]) => {
+  const [r, g, b] = c.map((v) => ((v /= 255) <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+};
+const contrast = (a: number[], b: number[]) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+
+/**
+ * Cuánto puede teñir un color la cabecera del detalle sin que el texto deje de leerse: la mayor intensidad (con tope)
+ * con la que el texto principal y el secundario siguen en ≥ 4,8:1 sobre el cristal. Una por tema; el CSS elige.
+ */
+export function tintStrengths(tint: string): { light: number; dark: number } {
+  const fit = (glass: string, texts: string[], cap: number) => {
+    let strength = cap;
+    const mixed = () => rgb(tint).map((v, i) => v * strength + rgb(glass)[i] * (1 - strength));
+
+    while (strength > 0 && !texts.every((text) => contrast(rgb(text), mixed()) >= 4.8)) strength -= 0.01;
+    return Math.max(0, Math.round(strength * 100) / 100);
+  };
+
+  return { light: fit("#fcf9f3", ["#1f2933", "#4f473c"], 0.34), dark: fit("#1f2227", ["#ece6dc", "#b8b0a3"], 0.3) };
+}
+
 export function useAmbient(): { colors: AmbientColors | null; layout: AmbientLayout } {
   return useSyncExternalStore(
     (listener) => {

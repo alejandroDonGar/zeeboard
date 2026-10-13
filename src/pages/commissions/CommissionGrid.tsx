@@ -49,7 +49,7 @@ function CommissionGrid({
           <button
             key={commission.id}
             onClick={() => handleOpenCommission(commission)}
-            className="min-w-0 rounded-3xl border border-line bg-paper p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-ink hover:shadow-md"
+            className="flex min-w-0 flex-col justify-start rounded-3xl border border-line bg-paper p-4 text-left transition hover:border-ink"
           >
             {latestImage && (
               <div

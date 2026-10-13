@@ -12,6 +12,7 @@ import {
 import { formatMoney, parsePrice, paymentSummary, receivedAfterFees, PAYMENT_STATUS_STYLE } from "../lib/commissionHelpers";
 import { undoToast } from "../lib/undo";
 import { useToast } from "../context/ToastContext";
+import Money from "./Money";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -86,41 +87,48 @@ function CommissionPayments({
 
   const status = PAYMENT_STATUS_STYLE[summary.status];
   const field = "min-w-0 rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
+  const paidShare = commission.price ? Math.min(100, (summary.paid / commission.price) * 100) : summary.paid > 0 ? 100 : 0;
 
   return (
-    <div className="relative shrink-0">
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-1 rounded-md border border-line bg-paper px-3 py-2 text-sm">
-        <span className={`rounded-sm px-2 py-0.5 text-xs font-bold ${status.className}`}>{status.label}</span>
-        <span>
-          <span className="text-faint">{t("Price")} </span>
-          <b>{commission.price !== null ? formatMoney(commission.price, currency) : "—"}</b>
-        </span>
-        <span>
-          <span className="text-faint">{t("Client paid")} </span>
-          <b>{formatMoney(summary.paid, currency)}</b>
-          {summary.remaining > 0 && <span className="text-faint"> · {t("{amount} left", { amount: formatMoney(summary.remaining, currency) })}</span>}
-        </span>
-        <span>
-          <span className="text-faint">{t("Received")} </span>
-          <b className="text-tone-ok">{formatMoney(summary.received, currency)}</b>
-          {summary.pendingReceived > 0 && <span className="text-faint"> · {t("{n} not entered", { n: summary.pendingReceived })}</span>}
-        </span>
-        {summary.fees > 0 && <span className="text-faint">{t("Fees {amount}", { amount: formatMoney(summary.fees, currency) })}</span>}
-
+    <div className="shrink-0">
+      <div className="mb-2 flex items-center gap-2">
+        <span className={status.className}>{status.label}</span>
         <button
           type="button"
           onClick={() => setOpen((value) => !value)}
-          className="ml-auto rounded-md border border-line-strong bg-surface px-2.5 py-1 text-xs font-semibold text-ink transition hover:border-ink"
+          aria-expanded={open}
+          className="ml-auto text-xs font-medium text-faint transition hover:text-ink"
         >
-          {t("Payments")}{payments.length > 0 ? ` · ${payments.length}` : ""} {open ? "▴" : "▾"}
+          {t("Payments")}
+          {payments.length > 0 ? ` · ${payments.length}` : ""} {open ? "▴" : "▾"}
         </button>
       </div>
 
+      <p className="flex flex-wrap items-baseline gap-x-2 text-[22px] font-semibold">
+        <Money amount={summary.paid} currency={currency} />
+        <span className="text-xs font-medium text-faint">
+          {commission.price !== null ? t("of {amount}", { amount: formatMoney(commission.price, currency) }) : t("No price")}
+        </span>
+      </p>
+
+      <div className="my-2.5 h-1.5 overflow-hidden rounded-sm bg-line" role="presentation">
+        <div className="h-full bg-tone-ok" style={{ width: `${paidShare}%` }} />
+      </div>
+
+      <div className="flex flex-wrap justify-between gap-x-3 gap-y-0.5 text-xs text-faint">
+        <span className={summary.remaining > 0 ? "font-semibold text-tone-warn" : ""}>
+          {summary.remaining > 0 ? t("{amount} left", { amount: formatMoney(summary.remaining, currency) }) : ""}
+        </span>
+        <span>
+          {t("Received")} <b className="text-ink">{formatMoney(summary.received, currency)}</b>
+          {summary.pendingReceived > 0 && ` · ${t("{n} not entered", { n: summary.pendingReceived })}`}
+          {summary.fees > 0 && ` · ${t("Fees {amount}", { amount: formatMoney(summary.fees, currency) })}`}
+        </span>
+      </div>
+
       {open && (
-        <>
-          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full z-40 mt-1 w-[440px] rounded-md border border-line bg-surface p-3 shadow-lg">
-            <div className="divide-y divide-line border-y border-line text-sm">
+        <div className="mt-3 text-sm">
+          <div className="divide-y divide-line border-y border-line">
             <div className="grid grid-cols-[minmax(0,1.1fr)_1fr_1fr_24px] gap-2 py-1.5 text-xs text-faint">
               <span>{t("Date")}</span>
               <span>{t("Client paid")}</span>
@@ -130,7 +138,7 @@ function CommissionPayments({
 
             {payments.map((payment) => (
               <div key={payment.id} className="group grid grid-cols-[minmax(0,1.1fr)_1fr_1fr_24px] items-center gap-x-2 py-1.5">
-                <span>{dateFormatter.format(new Date(`${payment.paid_at}T00:00:00`))}</span>
+                <span className="text-xs">{dateFormatter.format(new Date(`${payment.paid_at}T00:00:00`))}</span>
                 <span className="font-semibold">{formatMoney(payment.amount, currency)}</span>
 
                 {/* Received is entered when it arrives: Enter or blur */}
@@ -154,7 +162,7 @@ function CommissionPayments({
                   type="button"
                   title={t("Remove payment")}
                   onClick={() => run(async () => undoToast(showToast, "Payment removed.", await deletePayment(payment.id)))}
-                  className="rounded-sm text-faint opacity-0 transition hover:bg-tone-bad/10 hover:text-tone-bad group-hover:opacity-100"
+                  className="rounded-sm text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
                 >
                   ×
                 </button>
@@ -162,71 +170,62 @@ function CommissionPayments({
                 {payment.note && <span className="col-span-full truncate text-xs text-muted">{payment.note}</span>}
               </div>
             ))}
-
-            <div
-              className="grid grid-cols-[minmax(0,1.1fr)_1fr_1fr_24px] items-center gap-2 py-1.5"
-              onKeyDown={(event) => {
-                if (event.key === "Enter") handleAdd();
-              }}
-            >
-              <input type="date" value={paidAt} onChange={(event) => setPaidAt(event.target.value)} className={field} />
-              <input
-                value={amount}
-                onChange={(event) => setAmount(event.target.value)}
-                placeholder={summary.remaining > 0 ? String(summary.remaining).replace(".", ",") : "0"}
-                inputMode="decimal"
-                  data-private
-                className={field}
-              />
-              <input
-                value={received}
-                onChange={(event) => setReceived(event.target.value)}
-                placeholder={suggestedReceived !== null ? String(suggestedReceived).replace(".", ",") : t("Later")}
-                title={platform ? `${platform.name}: ${platform.percent}% + ${platform.fixed}` : undefined}
-                inputMode="decimal"
-                  data-private
-                className={field}
-              />
-              <button
-                type="button"
-                title={t("Add payment")}
-                onClick={handleAdd}
-                className="h-full rounded-sm bg-primary text-on-primary transition hover:bg-primary-hover"
-              >
-                +
-              </button>
-
-              <div className="col-span-full flex gap-2">
-                {platforms.length > 0 && (
-                  <select
-                    value={platformId ?? ""}
-                    onChange={(event) => {
-                      const next = platforms.find((item) => item.id === Number(event.target.value)) ?? null;
-                      // The note takes the platform name if empty or still the previous one
-                      if (note === "" || note === platform?.name) setNote(next?.name ?? "");
-                      setPlatformId(next?.id ?? null);
-                    }}
-                    className={field}
-                  >
-                    <option value="">No fees</option>
-                    {platforms.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                )}
-                <input
-                  value={note}
-                  onChange={(event) => setNote(event.target.value)}
-                  placeholder={t("Note: PayPal, deposit…")}
-                  className={`${field} flex-1`}
-                />
-              </div>
-            </div>
-            </div>
           </div>
-        </>
+
+          {/* New payment: Enter adds it */}
+          <div
+            className="mt-3 grid grid-cols-2 gap-2"
+            onKeyDown={(event) => {
+              if (event.key === "Enter") handleAdd();
+            }}
+          >
+            <input type="date" value={paidAt} onChange={(event) => setPaidAt(event.target.value)} aria-label={t("Date")} className={field} />
+            <input
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder={summary.remaining > 0 ? String(summary.remaining).replace(".", ",") : "0"}
+              aria-label={t("Client paid")}
+              inputMode="decimal"
+              data-private
+              className={field}
+            />
+            <input
+              value={received}
+              onChange={(event) => setReceived(event.target.value)}
+              placeholder={suggestedReceived !== null ? String(suggestedReceived).replace(".", ",") : t("Later")}
+              aria-label={t("You received")}
+              title={platform ? `${platform.name}: ${platform.percent}% + ${platform.fixed}` : undefined}
+              inputMode="decimal"
+              data-private
+              className={field}
+            />
+            {platforms.length > 0 ? (
+              <select
+                value={platformId ?? ""}
+                onChange={(event) => {
+                  const next = platforms.find((item) => item.id === Number(event.target.value)) ?? null;
+                  // The note takes the platform name if empty or still the previous one
+                  if (note === "" || note === platform?.name) setNote(next?.name ?? "");
+                  setPlatformId(next?.id ?? null);
+                }}
+                className={field}
+              >
+                <option value="">{t("No fees")}</option>
+                {platforms.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <span />
+            )}
+            <input value={note} onChange={(event) => setNote(event.target.value)} placeholder={t("Note: PayPal, deposit…")} aria-label={t("Note: PayPal, deposit…")} className={field} />
+            <button type="button" onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
+              {t("Add payment")}
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );

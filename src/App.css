@@ -213,6 +213,27 @@
   }
 }
 
+/* Cabecera del detalle de una comisión: tinte con el color de la imagen. La intensidad la calcula tintStrengths() (lib/ambient.ts)
+   para que el texto siga legible; aquí se elige la del tema. El color se anima, así que cambia con un fundido. */
+@property --tint {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+.hero-tint {
+  --tint-strength: var(--ts-light, 0);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--tint) calc(var(--tint-strength) * 100%), transparent), transparent);
+  transition: --tint 0.7s ease;
+}
+:root[data-theme="dark"] .hero-tint {
+  --tint-strength: var(--ts-dark, 0);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero-tint {
+    --tint-strength: var(--ts-dark, 0);
+  }
+}
+
 /* Fondo de colores: tres degradados radiales. Los colores son propiedades registradas (<color>), así que
    pueden animarse con un fundido sin repintar nada desenfocado. */
 @property --amb-a {
