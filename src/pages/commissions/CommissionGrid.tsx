@@ -89,7 +89,7 @@ function CommissionGrid({
               );
             })()}
 
-            <h4 className="break-words font-black leading-tight">
+            <h4 className="break-words font-bold leading-tight">
               {commission.title}
             </h4>
 
@@ -98,7 +98,7 @@ function CommissionGrid({
                 {commissionCharacters.map((character) => (
                   <span
                     key={character.id}
-                    className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-black text-muted shadow-sm"
+                    className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-bold text-muted shadow-sm"
                   >
                     {character.name}
                   </span>
@@ -143,7 +143,7 @@ function CommissionGrid({
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {altCount > 0 && (
-                <span className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-black text-muted shadow-sm">
+                <span className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-bold text-muted shadow-sm">
                   📷 {altCount} {t(altCount === 1 ? "Alt" : "Alts")}
                 </span>
               )}
@@ -156,7 +156,7 @@ function CommissionGrid({
 
               {deadlineStatus ? (
                 <span
-                  className={`rounded-sm px-3 py-1 text-xs font-black shadow-sm ${deadlineStatus.className}`}
+                  className={`rounded-sm px-3 py-1 text-xs font-bold shadow-sm ${deadlineStatus.className}`}
                 >
                   {deadlineStatus.label}
                 </span>

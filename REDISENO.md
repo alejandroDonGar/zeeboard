@@ -384,6 +384,14 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - Filas agrupadas con borde fino (`rounded-lg border`), botones secundarios con el estilo nuevo; `IpadSettings.tsx` usa el mismo estilo de grupo.
 - No portado: los interruptores nativos de la maqueta; se mantienen los selectores Apagado / Encendido que ya había.
 
+**Ventanas (hecho):** nueva comisión, nuevo cliente, nueva solicitud, marcar como terminada, importar de PayPal, confirmaciones, atajos y paleta de comandos.
+- Aspecto común en dos clases de `App.css`: `.modal-backdrop` (velo oscuro sin desenfoque, con fundido) y `.modal-card` (**fondo sólido**, borde fino, sombra, entrada breve que respeta «reducir movimiento»). Títulos en Fraunces, botón principal con el estilo nuevo y los `font-black` pasan a `font-bold` / `font-semibold`.
+- **Decisión:** se mantiene `div role="dialog"` con `DialogBehavior` / `useDialog` (Esc, foco atrapado y devolución del foco), que ya daba lo que la maqueta pedía del `<dialog>` nativo; cambiarlo habría tocado el comportamiento de todas las ventanas sin ganar nada visible.
+- Atajos: se añade `Ctrl+V` (pegar imagen en la etapa abierta), que la app ya hacía.
+- Nueva comisión: ya tenía el resumen en vivo (tipo, desglose del precio, entrega). **No portado:** la lista de etapas del tipo dentro del resumen, porque el formulario no carga las etapas.
+- Sin tocar: el visor de imágenes (`FocusViewer`) y las capas de imagen a pantalla completa, que son visores y no formularios.
+- `PageHeader.tsx` borrado: ninguna pantalla lo usa ya.
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -396,7 +404,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes, Terminadas, Catálogo, Estadísticas y Ajustes hechos; siguen las ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas hechos, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).

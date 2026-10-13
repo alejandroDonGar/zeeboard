@@ -170,8 +170,8 @@ function CommissionForm({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div role="dialog" aria-modal="true" aria-label={mode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden glass-heavy rounded-3xl">
+    <div className="modal-backdrop">
+      <div role="dialog" aria-modal="true" aria-label={mode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden modal-card rounded-3xl">
         <DialogBehavior onClose={() => onClose()} />
         {/* Left: pick */}
         <div className="min-h-0 space-y-5 overflow-y-auto p-6">
@@ -180,7 +180,7 @@ function CommissionForm({
             value={commissionTitle}
             onChange={(event) => setCommissionTitle(event.target.value)}
             placeholder={t("Commission title")}
-            className="w-full rounded-md border border-transparent bg-transparent px-1 text-2xl font-black outline-none hover:border-line focus:border-ink"
+            className="w-full rounded-md border border-transparent bg-transparent px-1 font-display text-2xl font-semibold tracking-tight outline-none hover:border-line focus:border-ink"
           />
 
           <div>
@@ -375,7 +375,7 @@ function CommissionForm({
         <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-l border-line bg-paper p-6">
           <div>
             <p className={formLabel}>{t("Summary")}</p>
-            <p className="truncate text-lg font-black">{commissionTitle.trim() || "Untitled commission"}</p>
+            <p className="truncate font-display text-lg font-semibold">{commissionTitle.trim() || "Untitled commission"}</p>
             <p className="text-sm text-muted">
               {[clientName.trim() || t("No client"), platform, formTemplate?.name].filter(Boolean).join(" · ")}
             </p>
@@ -409,7 +409,7 @@ function CommissionForm({
               </>
             )}
 
-            <div className="flex items-center justify-between gap-2 pt-1 font-black">
+            <div className="flex items-center justify-between gap-2 pt-1 font-semibold">
               <span>{t("Price")}</span>
               <span className="flex items-center gap-1">
                 <input
@@ -419,7 +419,7 @@ function CommissionForm({
                   inputMode="decimal"
                   data-private
                   title={t("Calculated from the type and characters; you can change it")}
-                  className="w-24 rounded-md border border-line-strong bg-surface px-2 py-1 text-right font-black outline-none focus:border-ink"
+                  className="w-24 rounded-md border border-line-strong bg-surface px-2 py-1 text-right font-semibold outline-none focus:border-ink"
                 />
                 <select
                   value={currency}
@@ -466,7 +466,7 @@ function CommissionForm({
               type="button"
               onClick={handleSaveCommissionForm}
               disabled={savingCommission || !commissionTitle.trim()}
-              className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
+              className="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
             >
               {savingCommission ? t("Saving…") : mode === "new" ? t("Create commission") : t("Save changes")}
             </button>

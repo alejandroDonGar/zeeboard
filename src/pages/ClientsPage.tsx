@@ -1194,10 +1194,10 @@ function ClientsPage({
         </div>
       )}
       {clientForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] glass-heavy rounded-3xl p-6">
+        <div className="modal-backdrop">
+          <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] modal-card rounded-3xl p-6">
             <DialogBehavior onClose={closeClientForm} />
-            <h3 className="text-xl font-black text-ink">
+            <h3 className="font-display text-2xl font-semibold tracking-tight text-ink">
               {clientForm === "new" ? t("New client") : t("Edit client")}
             </h3>
 
@@ -1273,7 +1273,7 @@ function ClientsPage({
                 type="button"
                 onClick={clientForm === "new" ? handleCreateClient : handleSaveClientChanges}
                 disabled={savingClient || !clientName.trim()}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
+                className="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
               >
                 {savingClient ? t("Saving…") : clientForm === "new" ? t("Create client") : t("Save")}
               </button>

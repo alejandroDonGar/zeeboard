@@ -42,10 +42,10 @@ function FinishCommissionModal({
   const dialogRef = useDialog(onCancel);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Mark as finished")} className="w-[480px] glass-heavy rounded-3xl p-6">
+    <div className="modal-backdrop">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Mark as finished")} className="w-[480px] modal-card rounded-3xl p-6">
         <p className="text-xs font-bold text-muted">{t("Mark as finished")}</p>
-        <h3 className="mt-2 text-2xl font-black text-ink">{title}</h3>
+        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">{title}</h3>
 
         <div className="mt-5 grid grid-cols-2 gap-4">
           <label>
@@ -97,7 +97,7 @@ function FinishCommissionModal({
           <button
             onClick={confirm}
             disabled={isSaving || deliveredAt === ""}
-            className="rounded-2xl bg-primary px-4 py-2 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-70"
+            className="rounded-2xl bg-primary px-4 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-70"
           >
             {t(isSaving ? "Saving..." : "Mark as finished")}
           </button>

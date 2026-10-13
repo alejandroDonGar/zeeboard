@@ -702,4 +702,5 @@ export const es: Record<string, string> = {
   "Prices and payments": "Precios y pagos",
   "Deadlines and alerts": "Plazos y avisos",
   "Data and storage": "Datos y almacenamiento",
+  "Paste an image into the open stage": "Pegar una imagen en la etapa abierta",
 };

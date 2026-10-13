@@ -30,8 +30,8 @@ function ConfirmModal({
   const dialogRef = useDialog(isConfirming ? undefined : onCancel);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} className="w-[450px] glass-heavy rounded-3xl p-6">
+    <div className="modal-backdrop">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} className="w-[450px] modal-card rounded-3xl p-6">
         <p
           className={
             eyebrowTone === "danger"
@@ -42,7 +42,7 @@ function ConfirmModal({
           {t(eyebrow)}
         </p>
 
-        <h3 className="mt-2 text-2xl font-black text-ink">
+        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">
           {t(title)}
         </h3>
 
@@ -54,7 +54,7 @@ function ConfirmModal({
           {onCancel && (
             <button
               onClick={onCancel}
-              className="rounded-2xl border border-line-strong px-4 py-2 font-semibold"
+              className="rounded-2xl border border-line-strong bg-surface px-4 py-2 font-semibold"
             >
               {t(cancelLabel)}
             </button>
@@ -65,8 +65,8 @@ function ConfirmModal({
             disabled={isConfirming}
             className={
               confirmVariant === "danger"
-                ? "rounded-2xl bg-tone-bad px-4 py-2 font-bold text-on-tone disabled:cursor-not-allowed disabled:opacity-70"
-                : "rounded-2xl bg-primary px-4 py-2 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-70"
+                ? "rounded-2xl bg-tone-bad px-4 py-2 font-semibold text-on-tone disabled:cursor-not-allowed disabled:opacity-70"
+                : "rounded-2xl bg-primary px-4 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-70"
             }
           >
             {t(isConfirming && confirmingLabel ? confirmingLabel : confirmLabel)}

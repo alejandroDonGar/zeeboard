@@ -73,10 +73,10 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
   const dialogRef = useDialog(saving ? undefined : onClose);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("PayPal")} className="flex max-h-[80vh] w-[720px] flex-col glass-heavy rounded-3xl p-6">
+    <div className="modal-backdrop">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("PayPal")} className="flex max-h-[80vh] w-[720px] flex-col modal-card rounded-3xl p-6">
         <p className="text-xs font-bold text-muted">{t("PayPal")}</p>
-        <h3 className="mt-2 text-2xl font-black text-ink">
+        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">
           {t("{ready} of {total} payments ready", { ready: ready.length, total: matches.length })}
         </h3>
 
@@ -121,7 +121,7 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
           <button
             onClick={handleImport}
             disabled={saving || ready.length === 0}
-            className="rounded-md bg-primary px-4 py-2 font-bold text-on-primary disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-2xl bg-primary px-4 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? t("Importing…") : t("Import {n}", { n: ready.length })}
           </button>

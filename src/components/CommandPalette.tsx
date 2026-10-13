@@ -56,6 +56,7 @@ const SHORTCUTS: [string, string][] = [
   ["Ctrl+K", "Search and actions"],
   ["Ctrl+1 … 9", "Go to a screen (menu order)"],
   ["Ctrl+N", "New commission"],
+  ["Ctrl+V", "Paste an image into the open stage"],
   ["Ctrl+Z", "Restore what you just deleted"],
   ["Ctrl+Shift+P", "Toggle private mode"],
   ["?", "Show this list"],
@@ -66,8 +67,8 @@ export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
   const dialogRef = useDialog(onClose);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm" onClick={onClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Keyboard shortcuts")} className="w-[420px] glass-heavy rounded-3xl p-6" onClick={(event) => event.stopPropagation()}>
+    <div className="modal-backdrop" onClick={onClose}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Keyboard shortcuts")} className="w-[420px] modal-card rounded-3xl p-6" onClick={(event) => event.stopPropagation()}>
         <h3 className="font-display text-2xl font-semibold">{t("Keyboard shortcuts")}</h3>
         <div className="mt-4 divide-y divide-line">
           {SHORTCUTS.map(([keys, description]) => (
@@ -236,8 +237,8 @@ function CommandPalette({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/30 px-4 pt-[14vh] backdrop-blur-sm" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={t("Search")} className="w-full max-w-xl overflow-hidden glass-heavy rounded-3xl" onClick={(event) => event.stopPropagation()}>
+    <div className="modal-backdrop items-start! px-4 pt-[14vh]" onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label={t("Search")} className="w-full max-w-xl overflow-hidden modal-card rounded-3xl" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-line px-4 py-3">
           <IconSearch size={18} stroke={1.75} className="text-faint" aria-hidden="true" />
           <input

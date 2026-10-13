@@ -596,10 +596,10 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
       </div>
 
       {draft && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div role="dialog" aria-modal="true" aria-label={t("New request")} className="w-[520px] max-w-[94vw] glass-heavy rounded-3xl p-6">
+        <div className="modal-backdrop">
+          <div role="dialog" aria-modal="true" aria-label={t("New request")} className="w-[520px] max-w-[94vw] modal-card rounded-3xl p-6">
             <DialogBehavior onClose={() => setDraft(null)} />
-            <h3 className="text-xl font-black">{t("New request")}</h3>
+            <h3 className="font-display text-2xl font-semibold tracking-tight">{t("New request")}</h3>
 
             <div className="mt-5 space-y-3">
               <input
@@ -666,7 +666,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 type="button"
                 onClick={handleAdd}
                 disabled={busy || !draft.name.trim() || draft.template_id === null}
-                className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
+                className="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
               >
                 {t("Add request")}
               </button>

@@ -52,7 +52,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
           {t("Calendar")}
         </p>
 
-        <p className="mt-2 text-lg font-black">
+        <p className="mt-2 text-lg font-bold">
           {currentMonth} {currentYear}
         </p>
 
@@ -62,7 +62,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
               {t("Next deadline")}
             </p>
 
-            <p className="mt-2 text-sm font-black">
+            <p className="mt-2 text-sm font-bold">
               {selectedDeadlineCommission.title}
             </p>
 
@@ -119,9 +119,9 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
                 key={index}
                 className={
                   isDeadlineDay
-                    ? "flex aspect-square items-center justify-center rounded-xl bg-tone-bad text-xs font-black text-on-tone"
+                    ? "flex aspect-square items-center justify-center rounded-xl bg-tone-bad text-xs font-bold text-on-tone"
                     : isToday
-                      ? "flex aspect-square items-center justify-center rounded-xl bg-primary-hover text-xs font-black text-on-primary shadow-sm"
+                      ? "flex aspect-square items-center justify-center rounded-xl bg-primary-hover text-xs font-bold text-on-primary shadow-sm"
                       : isInDeadlineRange
                         ? "flex aspect-square items-center justify-center rounded-xl bg-tone-warn/15 text-xs font-bold text-ink"
                         : "flex aspect-square items-center justify-center rounded-xl bg-surface text-xs font-bold text-faint"
