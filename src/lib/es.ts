@@ -697,4 +697,5 @@ export const es: Record<string, string> = {
   "New type": "Nuevo tipo",
   "Untitled": "Sin nombre",
   "no price": "sin precio",
+  "No previous period": "Sin periodo anterior",
 };

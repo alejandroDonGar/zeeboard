@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import PageHeader from "../components/PageHeader";
+import TopBar from "../components/TopBar";
+import GlassPanel from "../components/GlassPanel";
+import Money from "../components/Money";
+import LineChart from "../components/LineChart";
 import { Segmented } from "../components/BoardFilters";
 import { formatMoney } from "../lib/commissionHelpers";
 import {
@@ -19,15 +22,12 @@ import { locale, t } from "../lib/i18n";
 import { hide } from "../lib/privacy";
 import { changePercent, computeStats, type Period } from "../lib/stats";
 
-const panel = "panel rounded-3xl p-5";
-const heading = "mb-3 text-xs font-bold text-muted";
-
 /** ▲ 12 % / ▼ 5 % against the previous period (nothing when there is nothing to compare) */
 function Change({ now, before }: { now: number | null; before: number | null }) {
   const change = changePercent(now, before);
 
   if (change === null) {
-    return null;
+    return <span className="text-faint">{t("No previous period")}</span>;
   }
 
   return (
@@ -64,210 +64,186 @@ function StatisticsPage() {
   );
 
   const monthFormatter = new Intl.DateTimeFormat(locale, { month: "short" });
-  const maxMonth = Math.max(...(stats?.months.map((month) => month.total) ?? []), 1);
-  const maxRequests = Math.max(...(stats?.requests.months.map((month) => month.received) ?? []), 1);
   const noData = stats !== null && stats.current.pieces === 0 && stats.current.received === 0;
+  const colorOf = (name: string) => data?.templates.find((template) => template.name === name)?.color ?? "var(--line-strong)";
+  // "This year" lists the whole year; the line stops at the current month (the last point is the one still running)
+  const now = new Date();
+  const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const chartMonths = stats?.months.filter((month) => month.key <= thisMonth) ?? [];
 
   const tiles = stats && [
-    {
-      label: t("Received"),
-      value: formatMoney(stats.current.received),
-      change: <Change now={stats.current.received} before={stats.previous?.received ?? null} />,
-      className: "text-tone-ok",
-    },
-    {
-      label: t("Pieces delivered"),
-      value: stats.current.pieces,
-      change: <Change now={stats.current.pieces} before={stats.previous?.pieces ?? null} />,
-      className: "text-ink",
-    },
+    { label: t("Received"), value: <Money amount={stats.current.received} />, change: <Change now={stats.current.received} before={stats.previous?.received ?? null} /> },
+    { label: t("Pieces delivered"), value: stats.current.pieces, change: <Change now={stats.current.pieces} before={stats.previous?.pieces ?? null} /> },
     {
       label: t("Average per piece"),
-      value: stats.current.avgPerPiece === null ? "—" : formatMoney(stats.current.avgPerPiece),
+      value: stats.current.avgPerPiece === null ? "—" : <Money amount={stats.current.avgPerPiece} />,
       change: <Change now={stats.current.avgPerPiece} before={stats.previous?.avgPerPiece ?? null} />,
-      className: "text-ink",
     },
     {
       label: t("Per hour"),
-      value: stats.current.rate === null ? "—" : `${formatMoney(stats.current.rate)}/h`,
+      value: stats.current.rate === null ? "—" : <><Money amount={stats.current.rate} />/h</>,
       change: <Change now={stats.current.rate} before={stats.previous?.rate ?? null} />,
-      className: "text-ink",
     },
   ];
 
-  return (
-    <div className="flex h-full min-h-0 flex-col overflow-y-auto">
-      <PageHeader title="Statistics" description="How your commissions are doing." />
+  const h3 = "mb-2.5 flex items-baseline gap-2 text-[13px] font-semibold";
+  const funnel = stats && [
+    { label: t("accepted"), n: stats.requests.accepted, color: "bg-tone-ok" },
+    { label: t("declined"), n: stats.requests.declined, color: "bg-faint" },
+    { label: t("on the waitlist"), n: stats.requests.waitlist, color: "bg-tone-warn" },
+    { label: t("unanswered"), n: stats.requests.open, color: "bg-tone-info" },
+  ];
+  const bestClient = Math.max(...(stats?.topClients.map((client) => client.net) ?? []), 1);
 
-      <div className="space-y-5 p-5 pb-10">
-        <div className="flex items-center gap-3">
-          <Segmented
-            options={[
-              { value: "year", label: "This year" },
-              { value: "12m", label: "Last 12 months" },
-              { value: "all", label: "All time" },
-            ]}
-            value={period}
-            onChange={setPeriod}
-          />
-          {stats && stats.excluded > 0 && (
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+      <TopBar
+        title="Statistics"
+        end={
+          stats && stats.excluded > 0 ? (
             <span className="text-xs text-faint">
               {t(stats.excluded === 1 ? "{n} commission in another currency isn't counted." : "{n} commissions in another currency aren't counted.", { n: stats.excluded })}
             </span>
-          )}
-        </div>
+          ) : undefined
+        }
+      >
+        <Segmented
+          options={[
+            { value: "year", label: "This year" },
+            { value: "12m", label: "Last 12 months" },
+            { value: "all", label: "All time" },
+          ]}
+          value={period}
+          onChange={setPeriod}
+        />
+      </TopBar>
 
-        {noData && <p className={`${panel} text-sm text-muted`}>{t("Nothing in this period yet.")}</p>}
+      <GlassPanel className="min-h-0 flex-1" contentClassName="overflow-y-auto px-6 pb-8">
+        {noData && <p className="pt-5 text-muted">{t("Nothing in this period yet.")}</p>}
 
         {tiles && (
-          <dl className="grid grid-cols-4 gap-4">
+          <dl className="grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-y-4 pt-5 pb-5">
             {tiles.map((tile) => (
-              <div key={tile.label} className={panel}>
-                <dt className="text-xs font-bold text-muted">{tile.label}</dt>
-                <dd className={`mt-1 text-2xl font-black ${tile.className}`}>{tile.value}</dd>
-                <dd className="text-xs">{tile.change}</dd>
+              <div key={tile.label} className="border-l border-line px-5 first:border-l-0 first:pl-0">
+                <dt className="text-[13px] text-muted">{tile.label}</dt>
+                <dd className="mt-1 font-display text-2xl leading-tight font-semibold tabular-nums">{tile.value}</dd>
+                <dd className="mt-0.5 text-xs">{tile.change}</dd>
               </div>
             ))}
           </dl>
         )}
 
+        {stats && chartMonths.length > 1 && (
+          <section className="border-t border-line py-5">
+            <h3 className={h3}>{t("Received per month · after platform fees")}</h3>
+            <LineChart points={chartMonths.map((month) => ({ label: monthFormatter.format(new Date(`${month.key}-01T12:00:00`)), value: month.total }))} height={200} />
+          </section>
+        )}
+
         {stats && (
-          <section className={panel}>
-            <h3 className={heading}>{t("Received per month · after platform fees")}</h3>
-
-            <div className="flex h-36 items-end gap-3 border-b border-line">
-              {stats.months.map((month) => (
-                <div key={month.key} title={`${month.key}: ${formatMoney(month.total)}`} className="flex h-full flex-1 flex-col justify-end">
-                  <div
-                    className="min-h-px rounded-t-sm bg-primary transition hover:bg-primary-hover"
-                    style={{ height: `${(month.total / maxMonth) * 100}%` }}
-                  />
+          <div className="grid grid-cols-1 border-t border-line min-[1100px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <section className="min-w-0 py-5 min-[1100px]:pr-6">
+              <h3 className={h3}>{t("By type of commission")}</h3>
+              {stats.byTemplate.length === 0 ? (
+                <p className="text-faint">{t("Nothing in this period yet.")}</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-[13px] tabular-nums">
+                    <thead>
+                      <tr className="text-right text-faint">
+                        {[t("Template"), t("Pieces"), t("Received"), t("Average"), t("Hours"), t("Days"), t("Per hour")].map((label, index) => (
+                          <th key={label} className={`pb-2 pl-3 font-medium whitespace-nowrap ${index === 0 ? "pl-0 text-left" : ""}`}>
+                            {label}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {stats.byTemplate.map((row) => (
+                        <tr key={row.name} className="border-t border-line text-right whitespace-nowrap">
+                          <td className="py-2.5 pl-0 text-left font-semibold whitespace-normal">
+                            <i className="mr-2 inline-block h-2.5 w-2.5 rounded-sm align-[-1px]" style={{ backgroundColor: colorOf(row.name) }} />
+                            {row.name || t("No template")}
+                          </td>
+                          <td className="py-2.5 pl-3 text-muted">{row.pieces}</td>
+                          <td className="py-2.5 pl-3 font-semibold">{formatMoney(row.net)}</td>
+                          <td className="py-2.5 pl-3 text-muted">{formatMoney(row.avgNet)}</td>
+                          <td className="py-2.5 pl-3 text-muted">{row.avgHours ?? "—"}</td>
+                          <td className="py-2.5 pl-3 text-muted">{row.avgDays ?? "—"}</td>
+                          <td className="py-2.5 pl-3 font-semibold">{row.rate === null ? "—" : `${formatMoney(row.rate)}/h`}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              ))}
-            </div>
-
-            <div className="mt-1 flex gap-3">
-              {stats.months.map((month) => (
-                <div key={month.key} className="flex-1 text-center text-xs text-faint">
-                  {monthFormatter.format(new Date(`${month.key}-01T12:00:00`))}
-                  <span className="block font-semibold text-muted">{formatMoney(month.total)}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {stats && stats.byTemplate.length > 0 && (
-          <section className={panel}>
-            <h3 className={heading}>{t("By type of commission")}</h3>
-
-            <div className="grid grid-cols-[minmax(0,1fr)_70px_100px_100px_80px_70px_110px] gap-4 px-2 pb-2 text-xs font-bold text-muted">
-              <span>{t("Template")}</span>
-              <span className="text-right">{t("Pieces")}</span>
-              <span className="text-right">{t("Received")}</span>
-              <span className="text-right">{t("Average")}</span>
-              <span className="text-right">{t("Hours")}</span>
-              <span className="text-right">{t("Days")}</span>
-              <span className="text-right">{t("Per hour")}</span>
-            </div>
-
-            <div className="divide-y divide-line border-y border-line">
-              {stats.byTemplate.map((row) => (
-                <div key={row.name} className="grid grid-cols-[minmax(0,1fr)_70px_100px_100px_80px_70px_110px] items-center gap-4 px-2 py-2 text-sm">
-                  <span className="truncate font-bold">{row.name || t("No template")}</span>
-                  <span className="text-right text-muted">{row.pieces}</span>
-                  <span className="text-right font-bold">{formatMoney(row.net)}</span>
-                  <span className="text-right text-muted">{formatMoney(row.avgNet)}</span>
-                  <span className="text-right text-muted">{row.avgHours ?? "—"}</span>
-                  <span className="text-right text-muted">{row.avgDays ?? "—"}</span>
-                  <span className="text-right font-bold">{row.rate === null ? "—" : `${formatMoney(row.rate)}/h`}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {stats && stats.requests.received > 0 && (
-          <section className={panel}>
-            <h3 className={heading}>{t("Requests")}</h3>
-
-            <p className="mb-4 text-sm text-muted">
-              <span className="text-2xl font-black text-ink">{stats.requests.received}</span> {t("received")}
-              {" · "}
-              <span className="font-bold text-tone-ok">{stats.requests.accepted}</span> {t("accepted")}
-              {" · "}
-              <span className="font-bold text-tone-bad">{stats.requests.declined}</span> {t("declined")}
-              {" · "}
-              <span className="font-bold text-ink">{stats.requests.waitlist}</span> {t("on the waitlist")}
-              {" · "}
-              <span className="font-bold text-ink">{stats.requests.open}</span> {t("unanswered")}
-              {stats.requests.rate !== null && (
-                <>
-                  {" · "}
-                  {t("{n} % of the decided ones were accepted", { n: stats.requests.rate })}
-                </>
               )}
-            </p>
+            </section>
 
-            <div className="flex h-24 items-end gap-3 border-b border-line">
-              {stats.requests.months.map((month) => (
-                <div
-                  key={month.key}
-                  title={`${month.key}: ${t("{received} received · {accepted} accepted", { received: month.received, accepted: month.accepted })}`}
-                  className="flex h-full flex-1 flex-col justify-end"
-                >
-                  <div className="flex min-h-px flex-col justify-end" style={{ height: `${(month.received / maxRequests) * 100}%` }}>
-                    <div className="bg-line-strong" style={{ flex: month.received - month.accepted }} />
-                    <div className="rounded-t-sm bg-primary" style={{ flex: month.accepted }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-1 flex gap-3">
-              {stats.requests.months.map((month) => (
-                <div key={month.key} className="flex-1 text-center text-xs text-faint">
-                  {monthFormatter.format(new Date(`${month.key}-01T12:00:00`))}
-                  <span className="block font-semibold text-muted">{month.received}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {stats && (
-          <div className="grid grid-cols-2 items-start gap-5">
-            <section className={panel}>
-              <h3 className={heading}>{t("Top clients")}</h3>
-
+            <section className="min-w-0 border-t border-line py-5 min-[1100px]:border-t-0 min-[1100px]:border-l min-[1100px]:pl-6">
+              <h3 className={h3}>{t("Top clients")}</h3>
               {stats.topClients.length === 0 ? (
-                <p className="text-sm text-muted">{t("No delivered pieces with a client in this period.")}</p>
+                <p className="text-faint">{t("No delivered pieces with a client in this period.")}</p>
               ) : (
                 <>
-                  <div className="divide-y divide-line">
-                    {stats.topClients.map((client) => (
-                      <div key={client.name} className="flex items-center justify-between gap-3 py-2 text-sm">
-                        <span className="truncate font-bold">{hide(client.name)}</span>
-                        <span className="shrink-0 text-muted">
-                          {t(client.pieces === 1 ? "{n} piece" : "{n} pieces", { n: client.pieces })} ·{" "}
-                          <span className="font-bold text-ink">{formatMoney(client.net)}</span>
+                  <div className="grid gap-2">
+                    {stats.topClients.map((client, index) => (
+                      <div key={client.name} className="grid grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-x-2.5">
+                        <span className="text-faint tabular-nums">{index + 1}</span>
+                        <strong className="truncate font-semibold">{hide(client.name)}</strong>
+                        <span className="text-muted tabular-nums">
+                          {t(client.pieces === 1 ? "{n} piece" : "{n} pieces", { n: client.pieces })} · <b className="font-semibold text-ink">{formatMoney(client.net)}</b>
+                        </span>
+                        <span className="col-start-2 col-end-4 -mt-0.5 h-1 overflow-hidden rounded-sm bg-line">
+                          <i className="block h-full bg-ink" style={{ width: `${(client.net / bestClient) * 100}%` }} />
                         </span>
                       </div>
                     ))}
                   </div>
                   {stats.returningShare !== null && (
-                    <p className="mt-3 text-xs text-muted">
-                      {t("{n} % of this income comes from clients who come back.", { n: stats.returningShare })}
-                    </p>
+                    <p className="mt-3.5 text-muted">{t("{n} % of this income comes from clients who come back.", { n: stats.returningShare })}</p>
+                  )}
+                </>
+              )}
+            </section>
+          </div>
+        )}
+
+        {stats && (
+          <div className="grid grid-cols-1 border-t border-line min-[1100px]:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <section className="min-w-0 py-5 min-[1100px]:pr-6">
+              <h3 className={h3}>
+                {t("Requests")} <span className="font-medium text-faint tabular-nums">{stats.requests.received}</span>
+              </h3>
+              {stats.requests.received === 0 ? (
+                <p className="text-faint">{t("Nothing in this period yet.")}</p>
+              ) : (
+                <>
+                  <div className="my-3 flex h-2.5 overflow-hidden rounded-full bg-line" role="img" aria-label={t("Requests")}>
+                    {funnel!.map((part) => (
+                      <i key={part.label} className={`block ${part.color}`} style={{ flex: part.n }} />
+                    ))}
+                  </div>
+                  <p className="flex flex-wrap gap-x-[18px] gap-y-1.5 text-[13px] text-muted">
+                    {funnel!.map((part) => (
+                      <span key={part.label} className="inline-flex items-center gap-1.5">
+                        <i className={`h-[7px] w-[7px] rounded-full ${part.color}`} />
+                        <b className="font-semibold text-ink tabular-nums">{part.n}</b> {part.label}
+                      </span>
+                    ))}
+                  </p>
+                  {stats.requests.rate !== null && (
+                    <p className="mt-3 text-muted">{t("{n} % of the decided ones were accepted", { n: stats.requests.rate })}</p>
                   )}
                 </>
               )}
             </section>
 
-            <section className={panel}>
-              <h3 className={heading}>{t("Platform fees")}</h3>
-              <p className="text-3xl font-black text-tone-bad">{formatMoney(stats.fees.total)}</p>
-              <p className="mt-1 text-xs text-muted">
+            <section className="min-w-0 border-t border-line py-5 min-[1100px]:border-t-0 min-[1100px]:border-l min-[1100px]:pl-6">
+              <h3 className={h3}>{t("Platform fees")}</h3>
+              <p className="font-display text-[22px] leading-tight font-semibold tabular-nums">
+                <Money amount={stats.fees.total} />
+              </p>
+              <p className="mt-1 text-muted">
                 {stats.fees.percent === null
                   ? t("No payments with the received amount entered in this period.")
                   : t("{percent} % of what clients paid.", { percent: stats.fees.percent.toLocaleString(locale) })}
@@ -280,7 +256,7 @@ function StatisticsPage() {
             </section>
           </div>
         )}
-      </div>
+      </GlassPanel>
     </div>
   );
 }

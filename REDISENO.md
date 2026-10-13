@@ -374,6 +374,11 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - Editor de etiqueta: nombre, categoría (solo al crear; cambiarla en una existente no estaba antes y sigue sin estarlo), color, vista previa y número de comisiones. Las de «Commission Type» siguen con su aviso.
 - Cambio: ya no se pueden crear categorías vacías (no tenían sentido); la categoría se escribe al crear la primera etiqueta.
 
+**Estadísticas (hecho):** mismos datos (`computeStats`); solo cambia la presentación.
+- Barra superior: periodo (Este año / Últimos 12 meses / Todo) y el aviso de comisiones en otra moneda.
+- Cifras clave sin cajas con su cambio (▲ / ▼; «Sin periodo anterior» si no hay con qué comparar), `LineChart` del Resumen más alto (con «Este año» la línea acaba en el mes en curso, no en diciembre), tabla por tipo con el color del Catálogo, mejores clientes con barra proporcional, embudo de solicitudes en una barra y comisiones de plataformas.
+- Cambio: el mini gráfico de solicitudes por mes se sustituye por el embudo (los datos mensuales se siguen calculando, solo no se dibujan).
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -386,7 +391,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes, Terminadas y Catálogo hechos; siguen Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes, Terminadas, Catálogo y Estadísticas hechos; siguen Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).
