@@ -1,4 +1,14 @@
-import PageHeader from "../components/PageHeader";
+import {
+  IconAdjustments,
+  IconClock,
+  IconCurrencyEuro,
+  IconDatabase,
+  IconDeviceTablet,
+  IconShieldCheck,
+  IconTrash,
+  type Icon,
+} from "@tabler/icons-react";
+import TopBar from "../components/TopBar";
 import { Segmented } from "../components/BoardFilters";
 import { useEffect, useState } from "react";
 import { backupBeforeCleanup, exportBackup, pickBackupFolder, pickFolder, restoreBackup, runAutoBackup } from "../lib/backup";
@@ -37,7 +47,20 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+type SectionId = "general" | "pricing" | "deadlines" | "ipad" | "backups" | "data" | "trash";
+
+const SECTIONS: { id: SectionId; label: string; Icon: Icon }[] = [
+  { id: "general", label: "General", Icon: IconAdjustments },
+  { id: "pricing", label: "Prices and payments", Icon: IconCurrencyEuro },
+  { id: "deadlines", label: "Deadlines and alerts", Icon: IconClock },
+  { id: "ipad", label: "iPad", Icon: IconDeviceTablet },
+  { id: "backups", label: "Backups", Icon: IconShieldCheck },
+  { id: "data", label: "Data and storage", Icon: IconDatabase },
+  { id: "trash", label: "Trash", Icon: IconTrash },
+];
+
 function SettingsPage() {
+  const [page, setPage] = useState<SectionId>("general");
   const [theme, setTheme] = useState<ThemeChoice>(getTheme);
   const [currency, setCurrency] = useState(appSettings().default_currency);
   const [ratePercent, setRatePercent] = useState(String(Math.round(appSettings().extra_character_rate * 100)));
@@ -248,18 +271,41 @@ function SettingsPage() {
   const numberField =
     "w-16 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink";
 
-  const section = "mb-2 mt-8 text-xs font-bold text-muted first:mt-0";
-  const panel = "panel divide-y divide-line rounded-3xl";
-  const row = "flex items-center gap-4 px-5 py-4";
+  const section = "mb-2 mt-5 text-[13px] font-semibold text-muted";
+  const panel = "divide-y divide-line rounded-lg border border-line bg-surface";
+  const row = "flex items-center gap-4 px-4 py-3";
   const ghostButton =
-    "rounded-md border border-line-strong px-3 py-1.5 text-sm font-semibold text-ink transition hover:border-ink disabled:cursor-not-allowed disabled:opacity-60";
+    "rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <>
-      <PageHeader title="Settings" description="Appearance, pricing, backups and storage." />
+      <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+        <TopBar title="Settings" />
 
-      <section className="h-[calc(100vh-117px)] overflow-y-auto p-5 pb-10">
-        <div className="mx-auto max-w-2xl">
+        <div className="glass grid min-h-0 flex-1 grid-cols-[minmax(150px,210px)_minmax(0,1fr)] overflow-hidden rounded-3xl">
+          <nav aria-label={t("Settings")} className="overflow-y-auto border-r border-line p-2">
+            {SECTIONS.map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setPage(id)}
+                aria-current={page === id ? "true" : undefined}
+                className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition ${
+                  page === id ? "bg-highlight font-semibold text-ink" : "text-muted hover:bg-highlight/60 hover:text-ink"
+                }`}
+              >
+                <Icon size={16} stroke={1.5} aria-hidden="true" />
+                {t(label)}
+                {id === "trash" && trash.length > 0 && <span className="ml-auto text-xs text-faint tabular-nums">{trash.length}</span>}
+              </button>
+            ))}
+          </nav>
+
+          <div className="min-w-0 overflow-y-auto px-7 pt-5 pb-9">
+            <h2 className="mb-4 font-display text-[26px] leading-tight font-semibold tracking-tight">{t(SECTIONS.find((item) => item.id === page)!.label)}</h2>
+            <div className="max-w-[760px] pb-2">
+          {page === "general" && (
+            <>
           <h3 className={section}>{t("Appearance")}</h3>
           <div className={panel}>
             <div className={row}>
@@ -296,8 +342,11 @@ function SettingsPage() {
               />
             </div>
           </div>
+            </>
+          )}
 
-          <h3 className={section}>{t("Pricing")}</h3>
+          {page === "pricing" && (
+            <>
           <div className={panel}>
             <div className={row}>
               <div className="flex-1">
@@ -374,7 +423,7 @@ function SettingsPage() {
                         onBlur={savePlatforms}
                         className="w-20 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
                       />
-                      <span className="w-24 text-xs text-faint">
+                      <span className="w-28 text-xs whitespace-nowrap text-faint">
                         200 → {formatMoney(receivedAfterFees(200, platform), currency)}
                       </span>
                       <button
@@ -403,8 +452,11 @@ function SettingsPage() {
               </button>
             </div>
           </div>
+            </>
+          )}
 
-          <h3 className={section}>{t("Delivery")}</h3>
+          {page === "deadlines" && (
+            <>
           <div className={panel}>
             <div className={row}>
               <div className="flex-1">
@@ -485,8 +537,11 @@ function SettingsPage() {
               />
             </div>
           </div>
+            </>
+          )}
 
-          <h3 className={section}>{t("Backups")}</h3>
+          {page === "backups" && (
+            <>
           <div className={panel}>
             <div className={row}>
               <div className="flex-1">
@@ -500,7 +555,7 @@ function SettingsPage() {
                 type="button"
                 onClick={handleExportBackup}
                 disabled={exporting}
-                className="rounded-md bg-primary px-3 py-1.5 text-sm font-bold text-on-primary transition hover:bg-primary-hover disabled:opacity-60"
+                className="rounded-2xl bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-60"
               >
                 {exporting ? t("Exporting…") : t("Export")}
               </button>
@@ -581,7 +636,11 @@ function SettingsPage() {
               )}
             </div>
           </div>
+            </>
+          )}
 
+          {page === "data" && (
+            <>
           <h3 className={section}>{t("Import payments")}</h3>
           <div className={panel}>
             <div className={row}>
@@ -599,7 +658,11 @@ function SettingsPage() {
               </button>
             </div>
           </div>
+            </>
+          )}
 
+          {page === "data" && (
+            <>
           <h3 className={section}>{t("Export data")}</h3>
           <div className={panel}>
             {(
@@ -629,11 +692,17 @@ function SettingsPage() {
               {exportMessage && <span className="mt-1 block">{exportMessage}</span>}
             </p>
           </div>
+            </>
+          )}
 
-          <h3 className={section}>{t("iPad")}</h3>
+          {page === "ipad" && (
+            <>
           <IpadSettings />
+            </>
+          )}
 
-          <h3 className={section}>{t("Trash")}</h3>
+          {page === "trash" && (
+            <>
           <div className={panel}>
             {trash.length === 0 ? (
               <p className={`${row} text-sm text-muted`}>
@@ -673,7 +742,11 @@ function SettingsPage() {
               </>
             )}
           </div>
+            </>
+          )}
 
+          {page === "data" && (
+            <>
           <h3 className={section}>{t("Storage")}</h3>
           <div className={panel}>
             <div className={row}>
@@ -723,8 +796,12 @@ function SettingsPage() {
               </button>
             </div>
           </div>
+            </>
+          )}
+            </div>
+          </div>
         </div>
-      </section>
+      </div>
 
       {paypal && <PaypalImport preview={paypal} onClose={() => setPaypal(null)} />}
 

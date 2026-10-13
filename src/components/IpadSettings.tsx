@@ -7,10 +7,10 @@ import { isPrivate } from "../lib/privacy";
 import { useToast } from "../context/ToastContext";
 import { t } from "../lib/i18n";
 
-const panel = "panel divide-y divide-line rounded-3xl";
+const panel = "divide-y divide-line rounded-lg border border-line bg-surface";
 const row = "flex items-center gap-4 px-5 py-4";
 const ghostButton =
-  "rounded-md border border-line-strong px-3 py-1.5 text-sm font-semibold text-ink transition hover:border-ink disabled:cursor-not-allowed disabled:opacity-60";
+  "rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
 
 function qrSvg(text: string): string {
   const qr = qrcode(0, "M");

@@ -698,4 +698,8 @@ export const es: Record<string, string> = {
   "Untitled": "Sin nombre",
   "no price": "sin precio",
   "No previous period": "Sin periodo anterior",
+  "General": "General",
+  "Prices and payments": "Precios y pagos",
+  "Deadlines and alerts": "Plazos y avisos",
+  "Data and storage": "Datos y almacenamiento",
 };
