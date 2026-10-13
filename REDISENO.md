@@ -348,6 +348,14 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - Cuadrícula: tarjetas con el contenido arriba y sin elevarse al pasar el ratón.
 - Traducciones nuevas: Filtro, Estado, Tipo, Etapa, Etapas, Correcciones, «Alternativa n de m», «de {importe}», «Sin tarifa».
 
+**Clientes (hecho):** mismos datos y flujos (alta, edición, borrado con deshacer, foto por clic / arrastrar / Ctrl+V, personajes y referencias); solo cambia la presentación.
+- `TopBar` + lista de clientes (avatar, usuario y «N en curso» o el total) + detalle en panel de cristal con `@container`.
+- Cabecera con avatar grande y nombre, **teñida con los colores de la foto** (no en modo privado). Sin datos de contacto bajo el nombre; «Editar» a la vista y menú ⋯ con «Buscar foto» (si hay cuenta Bluesky/Telegram) y «Borrar cliente…».
+- Cifras sin cajas: gastado (+ media), comisiones (activas · terminadas), **pendiente de cobro** (suma de lo que falta por comisión; ámbar si > 0). Sustituye a los contadores «pagadas / sin pagar».
+- Comisiones del cliente con barra del color del tipo (`getTemplates()`), miniatura, progreso · plazo, estado de pago e importe. Personajes como galería con mosaico de referencias (1, 2 o 3+ con «+N»); el panel del personaje abierto conserva su lógica.
+- Lateral: Red social (cuenta para etiquetar), contacto (con el nombre de su plataforma), Correo, Cliente desde, y **Notas que se guardan solas** al salir del campo (antes solo se editaban en el formulario).
+- No portado: «Nueva comisión para…» del menú (la ventana de nueva comisión no admite cliente previo todavía).
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -360,7 +368,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen y Comisiones hechos; siguen Clientes, Solicitudes, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones y Clientes hechos; siguen Solicitudes, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).
