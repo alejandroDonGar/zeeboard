@@ -363,6 +363,11 @@ De 2481 a 1466 líneas, **sin cambiar nada de su comportamiento**. Las piezas qu
 - Al pie de la lista, el estado del formulario conectado con ⋯ (Revisar ahora, Cambiar archivo…).
 - Sigue igual: el diálogo de nueva solicitud y la confirmación de huecos llenos (se pasarán a `<dialog>` con las ventanas).
 
+**Terminadas (hecho):** mismos filtros, agrupación y cifras; solo cambia la presentación.
+- Barra superior: Por mes / Por cliente, búsqueda, rango de fechas y «Quitar filtros» (solo si hay filtros).
+- Galería tipo Fotos: totales y €/h por plantilla arriba, grupos con cabecera fija (mes en Fraunces, número e importe) y cuadrícula de imágenes cuadradas con título, importe y «cliente · horas · €/h» (en «Por cliente», la fecha en vez del cliente). Pulsar la imagen abre el visor; pulsar el texto abre la comisión.
+- Visor: la imagen sola con pie «título · cliente · fecha» y «Abrir comisión»; **el fondo toma sus colores mientras está abierto** (`useAmbientImage`). Sigue siendo la capa a pantalla completa de antes (pasará a `<dialog>` con las ventanas).
+
 ### Limpieza de código (hecha)
 Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 - 20 traducciones de `es.ts` que ya no usaba ningún código (textos antiguos de cabeceras, avisos y la pantalla de Plantillas/Etiquetas).
@@ -375,7 +380,7 @@ Revisión de todo lo que solo ocupaba sitio, sin tocar datos del usuario:
 
 ## 10. Plan para pasar a la app
 
-Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes y Solicitudes hechos; siguen Terminadas, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
+Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpieza de código y `CommissionsPage.tsx` partido (commits en `feature/glass-ui`). **Pasada visual en marcha (Sonnet):** Resumen, Comisiones, Clientes, Solicitudes y Terminadas hechos; siguen, Terminadas, Catálogo, Estadísticas, Ajustes y ventanas, siguiendo las secciones 5, 6 y 9 y el anexo.
 
 1. Terminar y aprobar las maquetas que faltan.
 2. Seguridad del iPad y de copias (sección 2).

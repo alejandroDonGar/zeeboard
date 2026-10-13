@@ -678,4 +678,7 @@ export const es: Record<string, string> = {
   "When you pick the type": "Al elegir el tipo",
   "They didn't say": "No la indicó",
   New: "Nueva",
+  "From": "Desde",
+  "To": "Hasta",
+  "no hours": "sin horas",
 };
