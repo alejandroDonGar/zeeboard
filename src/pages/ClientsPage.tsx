@@ -525,8 +525,12 @@ function ClientsPage({
     (commission) => !isCommissionCompleted(commission),
   );
 
+  // Prices plus the tips they left
   const totalSpent = selectedClientCommissions.reduce(
-    (sum, commission) => sum + (commission.price ?? 0),
+    (sum, commission) =>
+      sum +
+      (commission.price ?? 0) +
+      payments.filter((payment) => payment.commission_id === commission.id && payment.tip).reduce((tips, payment) => tips + payment.amount, 0),
     0,
   );
 

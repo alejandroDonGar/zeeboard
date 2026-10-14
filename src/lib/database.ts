@@ -468,6 +468,8 @@ export async function initializeDatabase() {
   await database.execute(`ALTER TABLE clients ADD COLUMN tag_platform TEXT;`).catch(() => {});
   // PayPal transaction id: prevents importing the same payment twice
   await database.execute(`ALTER TABLE commission_payments ADD COLUMN external_id TEXT;`).catch(() => {});
+  // A tip: counts as money received (and its fees) but not towards the price
+  await database.execute(`ALTER TABLE commission_payments ADD COLUMN tip INTEGER NOT NULL DEFAULT 0;`).catch(() => {});
   await database.execute(`ALTER TABLE clients ADD COLUMN tag_handle TEXT;`).catch(() => {});
   // When a commission last changed stage: counts as activity for the stalled alert
   await database.execute(`ALTER TABLE commissions ADD COLUMN stage_changed_at TEXT;`).catch(() => {});
@@ -1849,13 +1851,15 @@ export type CommissionPayment = {
   paid_at: string;
   note: string | null;
   external_id: string | null;
+  /** 1 = a tip: received money that doesn't count towards the price */
+  tip: number;
 };
 
 export async function getAllPayments(): Promise<CommissionPayment[]> {
   const database = await getDatabase();
 
   return await database.select<CommissionPayment[]>(
-    `SELECT id, commission_id, amount, received, paid_at, note, external_id FROM commission_payments ORDER BY paid_at ASC, id ASC;`,
+    `SELECT id, commission_id, amount, received, paid_at, note, external_id, tip FROM commission_payments ORDER BY paid_at ASC, id ASC;`,
   );
 }
 
@@ -1865,12 +1869,13 @@ export async function addPayment(
   received: number | null,
   paidAt: string,
   note: string,
+  tip = false,
 ): Promise<void> {
   const database = await getDatabase();
 
   await database.execute(
-    `INSERT INTO commission_payments (commission_id, amount, received, paid_at, note) VALUES (?, ?, ?, ?, ?);`,
-    [commissionId, amount, received, paidAt, note.trim() || null],
+    `INSERT INTO commission_payments (commission_id, amount, received, paid_at, note, tip) VALUES (?, ?, ?, ?, ?, ?);`,
+    [commissionId, amount, received, paidAt, note.trim() || null, tip ? 1 : 0],
   );
 }
 

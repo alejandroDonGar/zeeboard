@@ -120,8 +120,10 @@ export function getDeadlineStatus(deadline: string | null) {
 export type PaymentStatus = "unpaid" | "partial" | "paid";
 
 export type PaymentSummary = {
-  /** What clients have paid */
+  /** What clients have paid towards the price (tips aside) */
   paid: number;
+  /** Tips: extra money on top of the price */
+  tips: number;
   /** What reached you, from payments where you entered it */
   received: number;
   /** What the platform kept, from those same payments */
@@ -139,9 +141,10 @@ export const round2 = (value: number) => Math.round(Number((value * 100).toPreci
 /** Payment status of a commission from its payments: used by every screen. */
 export function paymentSummary(
   price: number | null,
-  payments: { amount: number; received: number | null }[],
+  payments: { amount: number; received: number | null; tip?: number }[],
 ): PaymentSummary {
-  const paid = round2(payments.reduce((sum, payment) => sum + payment.amount, 0));
+  const paid = round2(payments.reduce((sum, payment) => sum + (payment.tip ? 0 : payment.amount), 0));
+  const tips = round2(payments.reduce((sum, payment) => sum + (payment.tip ? payment.amount : 0), 0));
   const withReceived = payments.filter((payment) => payment.received !== null);
   const received = round2(withReceived.reduce((sum, payment) => sum + (payment.received ?? 0), 0));
   const fees = round2(withReceived.reduce((sum, payment) => sum + payment.amount, 0) - received);
@@ -150,12 +153,12 @@ export function paymentSummary(
   const status: PaymentStatus =
     paid > 0 && (price === null || remaining === 0) ? "paid" : paid > 0 ? "partial" : "unpaid";
 
-  return { paid, received, fees, remaining, pendingReceived: payments.length - withReceived.length, status };
+  return { paid, tips, received, fees, remaining, pendingReceived: payments.length - withReceived.length, status };
 }
 
 /** What reached you: net of fees where the net is entered, what the client paid where it isn't yet. */
 export function netIncome(summary: PaymentSummary): number {
-  return round2(summary.paid - summary.fees);
+  return round2(summary.paid + summary.tips - summary.fees);
 }
 
 /** Euros per hour over the entries that have hours (total income / total hours, so long pieces weigh more). */

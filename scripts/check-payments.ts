@@ -15,6 +15,11 @@ assert.deepStrictEqual([s.status, s.remaining, s.pendingReceived, s.fees], ["par
 // No payments
 assert.strictEqual(paymentSummary(160, []).status, "unpaid");
 
+// A tip doesn't pay the price, but its money and its fee count as income
+s = paymentSummary(200, [{ amount: 100, received: 96.75 }, { amount: 20, received: 19.07, tip: 1 }]);
+assert.deepStrictEqual([s.status, s.paid, s.tips, s.remaining, s.received, s.fees], ["partial", 100, 20, 100, 115.82, 4.18]);
+assert.strictEqual(netIncome(s), 115.82);
+
 // Decimals that don't add up exactly in floating point
 s = paymentSummary(0.3, [{ amount: 0.1, received: 0.1 }, { amount: 0.2, received: 0.2 }]);
 assert.deepStrictEqual([s.status, s.paid, s.fees], ["paid", 0.3, 0]);

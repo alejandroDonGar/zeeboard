@@ -104,7 +104,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
     .map((commission) => ({ commission, remaining: summaryOf(commission).remaining }))
     .filter((entry) => entry.remaining > 0);
 
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  const thisMonth = isoDay(new Date()).slice(0, 7);
   const receivedThisMonth = paymentSummary(
     null,
     payments.filter((payment) => payment.paid_at.startsWith(thisMonth)),

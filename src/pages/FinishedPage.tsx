@@ -121,10 +121,11 @@ function FinishedPage({
     return matchesSearch && matchesFrom && matchesTo;
   });
 
-  const totalEarnings = filteredCompleted.reduce(
-    (sum, commission) => sum + (commission.price ?? 0),
-    0,
-  );
+  // Price plus the tips it got
+  const tipsOf = (commission: Commission) =>
+    payments.filter((payment) => payment.commission_id === commission.id && payment.tip).reduce((sum, payment) => sum + payment.amount, 0);
+  const earned = (commission: Commission) => (commission.price ?? 0) + tipsOf(commission);
+  const totalEarnings = filteredCompleted.reduce((sum, commission) => sum + earned(commission), 0);
 
   // What each finished commission brought in per hour (only those with hours)
   const net = (commission: Commission) =>
@@ -270,7 +271,7 @@ function FinishedPage({
               </p>
 
               {groups.map((group) => {
-                const groupEarnings = group.commissions.reduce((sum, commission) => sum + (commission.price ?? 0), 0);
+                const groupEarnings = group.commissions.reduce((sum, commission) => sum + earned(commission), 0);
 
                 return (
                   <section key={group.key}>

@@ -104,7 +104,7 @@ The **···** menu on a commission lets you **duplicate** it, **copy the invoic
 
 ### Stages and images
 
-The image of the stage you pick is shown **large**, with its alternatives, and below it a **numbered strip of stages** (thumbnail, a ✓ once done). Click a stage to see its image; the current one is selected by default.
+The image of the stage you pick is shown **large**, with its alternatives, and below it a **numbered strip of stages** (thumbnail, a ✓ once done). Click a stage to see its image, or move between stages with **← →**; the current one is selected by default.
 
 - Add images by **dragging them in**, pasting with **Ctrl+V** (they go to the current stage) or clicking the empty slot. The app resizes and compresses them in the background, so even a 60 MB canvas is fine.
 - A stage can hold several **alternatives** (**Alt 1**, **Alt 2**…): the options you show the client, for example with and without glasses. Hover an image for **+ Alt** (another alternative), **+ v** (a retouched **version** of that image) and **×** (remove it).
@@ -156,6 +156,7 @@ The payments block, in the properties column of the commission, is the single pl
 - It shows the **status** (Unpaid, Partial, Paid), what the client has **paid** next to the **price**, a progress bar, and what is **left**, what you **received** and the **fees**.
 - **Payments** unfolds the list in the same column and the form to add one: the date, what the client paid, and what reached you. Pick a **platform** and "received" is filled with the fee already taken off (for example PayPal's 2.9 % + 0.35).
 - You can leave "received" empty and enter it later, when the money arrives. Partial payments (a deposit, then the rest) are supported.
+- **Tips** are added from the same form (switch it to **Tip**), with what the client sent and what reached you. They don't count towards the price, but their money and their fee count everywhere income is counted: the dashboard, the monthly chart, statistics, rate per hour, finished commissions and what a client has spent.
 - Platforms and their fees are configured in [Settings](#settings).
 
 ## Requests
@@ -283,7 +284,7 @@ Skip the email: draw on the iPad and send the images straight to a commission st
 
 1. In **Settings → iPad** switch **Receive images from the iPad** on. ZeeBoard shows a **QR code** and a link.
 2. Open the link on the iPad (scan the QR with the camera, then add the page to the Home Screen if you like). ZeeBoard must be open on the PC.
-3. Pick the **commission**, the **stage** (the current one by default) and what the image is: a **new alternative** (default) or a **new version** of one of the stage's alternatives, shown with its thumbnail.
+3. Pick the **commission** (**‹ Change commission**, or the iPad's back gesture, returns to the list to send to another one), the **stage** (the current one by default) and what the image is: a **new alternative** (default) or a **new version** of one of the stage's alternatives, shown with its thumbnail.
 4. Choose the images and send. They go through the same processing as any image and appear in the commission straight away.
 
 - **Same Wi-Fi or not**: on the same network the link works as is. To send from **mobile data** (or any other network), install [Tailscale](https://tailscale.com/download) on the PC and the iPad and sign in with the same account; ZeeBoard detects it and shows the Tailscale address.

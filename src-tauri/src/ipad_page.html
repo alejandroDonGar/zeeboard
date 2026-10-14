@@ -33,6 +33,7 @@
   #queue li.ok { color: var(--ok); } #queue li.bad { color: var(--bad); }
   input[type=file] { display: none; }
   :focus-visible { outline: 2px solid var(--ink); outline-offset: -2px; }
+  .back { display: inline-flex; align-items: center; gap: 6px; margin: 18px 0 0; padding: 10px 14px 10px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--glass); color: var(--ink); font: inherit; font-weight: 700; }
   [hidden] { display: none !important; }
 </style>
 </head>
@@ -47,6 +48,7 @@
   </section>
 
   <section id="send" hidden>
+    <button class="back" id="back"></button>
     <h2 id="t-sending"></h2>
     <p id="chosen"></p>
     <h2 id="t-stage"></h2>
@@ -58,7 +60,6 @@
     <h2 id="t-photos"></h2>
     <label class="btn primary" id="pick"></label>
     <input id="files" type="file" accept="image/*" multiple>
-    <button class="btn" id="back"></button>
     <ul id="queue"></ul>
   </section>
 </main>
@@ -84,7 +85,7 @@ $("t-target").textContent = L.target;
 $("t-photos").textContent = L.photos;
 $("pick").textContent = L.pick;
 $("pick").htmlFor = "files";
-$("back").textContent = L.back;
+$("back").textContent = "‹ " + L.back;
 
 async function fetchData() {
   const response = await fetch("/api/commissions?k=" + encodeURIComponent(key), { cache: "no-store" });
@@ -122,6 +123,7 @@ function renderList() {
 function choose(commission) {
   chosen = commission;
   target = null;
+  if (!history.state) history.pushState({ send: true }, "");
   $("list").hidden = true;
   $("send").hidden = false;
   $("chosen").textContent = commission.title + (commission.client ? " · " + commission.client : "");
@@ -173,7 +175,10 @@ function renderTargets() {
 }
 
 $("stage").onchange = renderTargets;
-$("back").onclick = () => { $("send").hidden = true; $("list").hidden = false; load(); };
+// Going back (this button, the swipe or the browser's back) returns to the list instead of leaving the page
+function showList() { $("send").hidden = true; $("list").hidden = false; $("queue").innerHTML = ""; load(); }
+$("back").onclick = () => (history.state ? history.back() : showList());
+window.onpopstate = showList;
 
 $("files").onchange = async (event) => {
   const files = [...event.target.files];

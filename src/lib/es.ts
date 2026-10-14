@@ -703,4 +703,8 @@ export const es: Record<string, string> = {
   "Deadlines and alerts": "Plazos y avisos",
   "Data and storage": "Datos y almacenamiento",
   "Paste an image into the open stage": "Pegar una imagen en la etapa abierta",
+  Tips: "Propinas",
+  Tip: "Propina",
+  "Add tip": "Añadir propina",
+  Platform: "Plataforma",
 };

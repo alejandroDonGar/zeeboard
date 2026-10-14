@@ -74,7 +74,8 @@ export function buildCommissionsCsv(data: Data): string {
           : "In progress",
       commission.price,
       commission.currency ?? "EUR",
-      summary.paid,
+      // What the client paid, tips included
+      round2(summary.paid + summary.tips),
       // Received and fees only count on payments where you entered it
       payments.some((payment) => payment.received !== null) ? summary.received : null,
       payments.some((payment) => payment.received !== null) ? summary.fees : null,
@@ -142,7 +143,7 @@ export function buildQuarterlyCsv(data: Data): string {
         group.quarter,
         group.currency,
         String(group.payments.length),
-        summary.paid,
+        round2(summary.paid + summary.tips),
         summary.received,
         summary.fees,
         String(summary.pendingReceived),

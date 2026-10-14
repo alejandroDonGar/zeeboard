@@ -637,12 +637,20 @@ function CommissionsPage() {
     function handleKeyDown(event: KeyboardEvent) {
       const target = event.target as HTMLElement;
 
-      if (
-        viewMode !== "list" ||
-        focusImageId !== null ||
-        (event.key !== "ArrowDown" && event.key !== "ArrowUp") ||
-        target.closest("input, textarea, select, [contenteditable]")
-      ) {
+      if (viewMode !== "list" || focusImageId !== null || target.closest("input, textarea, select, [contenteditable]")) {
+        return;
+      }
+
+      // ← → move between the stages of the open commission
+      if ((event.key === "ArrowLeft" || event.key === "ArrowRight") && activeCommission && visibleStages.length > 0) {
+        event.preventDefault();
+        const index = viewedStage ? visibleStages.indexOf(viewedStage) : -1;
+        const nextStage = visibleStages[Math.min(Math.max(index + (event.key === "ArrowRight" ? 1 : -1), 0), visibleStages.length - 1)];
+        setViewStageId(nextStage.id);
+        return;
+      }
+
+      if (event.key !== "ArrowDown" && event.key !== "ArrowUp") {
         return;
       }
 

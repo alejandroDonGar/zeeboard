@@ -9,12 +9,13 @@ import {
   type PaymentPlatform,
   type CommissionPayment,
 } from "../lib/database";
-import { formatMoney, parsePrice, paymentSummary, receivedAfterFees, PAYMENT_STATUS_STYLE } from "../lib/commissionHelpers";
+import { formatMoney, isoDay, parsePrice, paymentSummary, receivedAfterFees, PAYMENT_STATUS_STYLE } from "../lib/commissionHelpers";
 import { undoToast } from "../lib/undo";
 import { useToast } from "../context/ToastContext";
 import Money from "./Money";
 
-const today = () => new Date().toISOString().slice(0, 10);
+// Local day (toISOString would give yesterday after midnight)
+const today = () => isoDay(new Date());
 
 function parsePriceOrNull(text: string): number | null {
   try {
@@ -46,14 +47,16 @@ function CommissionPayments({
   const [note, setNote] = useState("");
   const [platforms, setPlatforms] = useState<PaymentPlatform[]>([]);
   const [platformId, setPlatformId] = useState<number | null>(null);
+  // What the form adds: a payment towards the price or a tip on top of it
+  const [tip, setTip] = useState(false);
 
   useEffect(() => {
     getPaymentPlatforms().then(setPlatforms).catch(console.error);
   }, []);
 
   const platform = platforms.find((item) => item.id === platformId) ?? null;
-  // What the client paid (or the remainder) minus the chosen platform's fee
-  const clientPaidDraft = amount === "" ? summary.remaining : parsePriceOrNull(amount);
+  // What the client paid (or the remainder, for a payment) minus the chosen platform's fee
+  const clientPaidDraft = amount === "" ? (tip ? null : summary.remaining) : parsePriceOrNull(amount);
   const suggestedReceived =
     platform && clientPaidDraft ? receivedAfterFees(clientPaidDraft, platform) : null;
   const [open, setOpen] = useState(false);
@@ -70,14 +73,14 @@ function CommissionPayments({
 
   function handleAdd() {
     run(async () => {
-      const clientPaid = parsePrice(amount === "" ? String(summary.remaining) : amount);
+      const clientPaid = parsePrice(amount === "" && !tip ? String(summary.remaining) : amount);
 
       if (!clientPaid) {
         throw new Error(t("Enter what the client paid"));
       }
 
       // Without a typed "received", use the fee-based estimate (if any)
-      await addPayment(commission.id, clientPaid, parsePrice(received) ?? suggestedReceived, paidAt, note);
+      await addPayment(commission.id, clientPaid, parsePrice(received) ?? suggestedReceived, paidAt, note, tip);
       setAmount("");
       setReceived("");
       setNote("");
@@ -88,6 +91,41 @@ function CommissionPayments({
   const status = PAYMENT_STATUS_STYLE[summary.status];
   const field = "min-w-0 rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
   const paidShare = commission.price ? Math.min(100, (summary.paid / commission.price) * 100) : summary.paid > 0 ? 100 : 0;
+
+  const renderRow = (payment: CommissionPayment) => (
+    <div key={payment.id} className="group grid grid-cols-[minmax(0,1.1fr)_1fr_1fr_24px] items-center gap-x-2 py-1.5">
+      <span className="text-xs">{dateFormatter.format(new Date(`${payment.paid_at}T00:00:00`))}</span>
+      <span className="font-semibold">{formatMoney(payment.amount, currency)}</span>
+
+      {/* Received is entered when it arrives: Enter or blur */}
+      <input
+        defaultValue={payment.received !== null ? String(payment.received).replace(".", ",") : ""}
+        placeholder={t("Not yet")}
+        inputMode="decimal"
+        data-private
+        onBlur={(event) => {
+          if (event.target.value !== (payment.received !== null ? String(payment.received).replace(".", ",") : "")) {
+            run(() => updatePaymentReceived(payment.id, parsePrice(event.target.value)));
+          }
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }}
+        className={`${field} border-transparent bg-transparent hover:border-line`}
+      />
+
+      <button
+        type="button"
+        title={t("Remove payment")}
+        onClick={() => run(async () => undoToast(showToast, "Payment removed.", await deletePayment(payment.id)))}
+        className="rounded-sm text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
+      >
+        ×
+      </button>
+
+      {payment.note && <span className="col-span-full truncate text-xs text-muted">{payment.note}</span>}
+    </div>
+  );
 
   return (
     <div className="shrink-0">
@@ -124,6 +162,11 @@ function CommissionPayments({
           {summary.pendingReceived > 0 && ` · ${t("{n} not entered", { n: summary.pendingReceived })}`}
           {summary.fees > 0 && ` · ${t("Fees {amount}", { amount: formatMoney(summary.fees, currency) })}`}
         </span>
+        {summary.tips > 0 && (
+          <span className="w-full text-right">
+            {t("Tips")} <b className="text-ink">+{formatMoney(summary.tips, currency)}</b>
+          </span>
+        )}
       </div>
 
       {open && (
@@ -136,69 +179,37 @@ function CommissionPayments({
               <span />
             </div>
 
-            {payments.map((payment) => (
-              <div key={payment.id} className="group grid grid-cols-[minmax(0,1.1fr)_1fr_1fr_24px] items-center gap-x-2 py-1.5">
-                <span className="text-xs">{dateFormatter.format(new Date(`${payment.paid_at}T00:00:00`))}</span>
-                <span className="font-semibold">{formatMoney(payment.amount, currency)}</span>
-
-                {/* Received is entered when it arrives: Enter or blur */}
-                <input
-                  defaultValue={payment.received !== null ? String(payment.received).replace(".", ",") : ""}
-                  placeholder={t("Not yet")}
-                  inputMode="decimal"
-                  data-private
-                  onBlur={(event) => {
-                    if (event.target.value !== (payment.received !== null ? String(payment.received).replace(".", ",") : "")) {
-                      run(() => updatePaymentReceived(payment.id, parsePrice(event.target.value)));
-                    }
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter") event.currentTarget.blur();
-                  }}
-                  className={`${field} border-transparent bg-transparent hover:border-line`}
-                />
-
-                <button
-                  type="button"
-                  title={t("Remove payment")}
-                  onClick={() => run(async () => undoToast(showToast, "Payment removed.", await deletePayment(payment.id)))}
-                  className="rounded-sm text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
-                >
-                  ×
-                </button>
-
-                {payment.note && <span className="col-span-full truncate text-xs text-muted">{payment.note}</span>}
-              </div>
-            ))}
+            {payments.filter((payment) => !payment.tip).map(renderRow)}
           </div>
 
-          {/* New payment: Enter adds it */}
+          {payments.some((payment) => payment.tip) && (
+            <>
+              <p className="mt-3 mb-1 text-xs font-semibold text-muted">{t("Tips")}</p>
+              <div className="divide-y divide-line border-y border-line">{payments.filter((payment) => payment.tip).map(renderRow)}</div>
+            </>
+          )}
+
+          {/* New payment or tip: Enter adds it */}
           <div
             className="mt-3 grid grid-cols-2 gap-2"
             onKeyDown={(event) => {
               if (event.key === "Enter") handleAdd();
             }}
           >
+            <div role="group" className="col-span-2 inline-flex w-fit rounded-md border border-line bg-paper p-0.5">
+              {[false, true].map((kind) => (
+                <button
+                  key={String(kind)}
+                  type="button"
+                  aria-pressed={tip === kind}
+                  onClick={() => setTip(kind)}
+                  className={`rounded-sm px-3 py-1 text-xs ${tip === kind ? "bg-highlight font-bold text-ink" : "font-semibold text-muted hover:text-ink"}`}
+                >
+                  {kind ? t("Tip") : t("Payment")}
+                </button>
+              ))}
+            </div>
             <input type="date" value={paidAt} onChange={(event) => setPaidAt(event.target.value)} aria-label={t("Date")} className={field} />
-            <input
-              value={amount}
-              onChange={(event) => setAmount(event.target.value)}
-              placeholder={summary.remaining > 0 ? String(summary.remaining).replace(".", ",") : "0"}
-              aria-label={t("Client paid")}
-              inputMode="decimal"
-              data-private
-              className={field}
-            />
-            <input
-              value={received}
-              onChange={(event) => setReceived(event.target.value)}
-              placeholder={suggestedReceived !== null ? String(suggestedReceived).replace(".", ",") : t("Later")}
-              aria-label={t("You received")}
-              title={platform ? `${platform.name}: ${platform.percent}% + ${platform.fixed}` : undefined}
-              inputMode="decimal"
-              data-private
-              className={field}
-            />
             {platforms.length > 0 ? (
               <select
                 value={platformId ?? ""}
@@ -208,6 +219,7 @@ function CommissionPayments({
                   if (note === "" || note === platform?.name) setNote(next?.name ?? "");
                   setPlatformId(next?.id ?? null);
                 }}
+                aria-label={t("Platform")}
                 className={field}
               >
                 <option value="">{t("No fees")}</option>
@@ -220,9 +232,29 @@ function CommissionPayments({
             ) : (
               <span />
             )}
+            <input
+              value={amount}
+              onChange={(event) => setAmount(event.target.value)}
+              placeholder={!tip && summary.remaining > 0 ? String(summary.remaining).replace(".", ",") : t("Client paid")}
+              aria-label={t("Client paid")}
+              title={t("Client paid")}
+              inputMode="decimal"
+              data-private
+              className={field}
+            />
+            <input
+              value={received}
+              onChange={(event) => setReceived(event.target.value)}
+              placeholder={suggestedReceived !== null ? String(suggestedReceived).replace(".", ",") : t("Later")}
+              aria-label={t("You received")}
+              title={platform ? `${t("You received")} · ${platform.name}: ${platform.percent}% + ${platform.fixed}` : t("You received")}
+              inputMode="decimal"
+              data-private
+              className={field}
+            />
             <input value={note} onChange={(event) => setNote(event.target.value)} placeholder={t("Note: PayPal, deposit…")} aria-label={t("Note: PayPal, deposit…")} className={field} />
             <button type="button" onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
-              {t("Add payment")}
+              {tip ? t("Add tip") : t("Add payment")}
             </button>
           </div>
         </div>
