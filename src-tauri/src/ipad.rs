@@ -158,6 +158,16 @@ fn handle(app: AppHandle, request: Request, token: String, snapshot: Arc<Mutex<S
             },
             None => send(request, 404, "text/plain; charset=utf-8", "No encontrado"),
         },
+        // Full-size references, to save them on the iPad: only images the snapshot lists are served
+        (Method::Get, "/image") => {
+            let listed = params.get("p").filter(|path| {
+                snapshot.lock().is_ok_and(|json| json.contains(&format!("\"image\":\"{path}\"")))
+            });
+            match listed.and_then(|path| images::read_image(&app, path)) {
+                Some(bytes) => send(request, 200, "image/webp", bytes),
+                None => send(request, 404, "text/plain; charset=utf-8", "No encontrado"),
+            }
+        }
         (Method::Post, "/upload") => upload(&app, request, &params),
         _ => send(request, 404, "text/plain; charset=utf-8", "No encontrado"),
     }

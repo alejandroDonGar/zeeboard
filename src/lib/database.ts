@@ -1575,6 +1575,28 @@ export async function deleteCharacterReference(
   }
 }
 
+/**
+ * References for the iPad page: every character of the commission's client, plus the ones linked to it from other
+ * clients (collaborations), with the character's name.
+ */
+export async function getCommissionReferences(
+  commissionId: number,
+): Promise<{ character: string; label: string; image_data_url: string }[]> {
+  const database = await getDatabase();
+
+  return await database.select(
+    `
+    SELECT client_characters.name AS character, character_references.label, character_references.image_data_url
+    FROM client_characters
+    JOIN character_references ON character_references.character_id = client_characters.id
+    WHERE client_characters.client_id = (SELECT client_id FROM commissions WHERE id = ?)
+      OR client_characters.id IN (SELECT character_id FROM commission_characters WHERE commission_id = ?)
+    ORDER BY client_characters.name, character_references.id;
+    `,
+    [commissionId, commissionId],
+  );
+}
+
 export async function getCommissionCharacterIds(
   commissionId: number,
 ): Promise<number[]> {

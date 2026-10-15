@@ -286,6 +286,7 @@ Skip the email: draw on the iPad and send the images straight to a commission st
 2. Open the link on the iPad (scan the QR with the camera, then add the page to the Home Screen if you like). ZeeBoard must be open on the PC.
 3. Pick the **commission** (**‹ Change commission**, or the iPad's back gesture, returns to the list to send to another one), the **stage** (the current one by default) and what the image is: a **new alternative** (default) or a **new version** of one of the stage's alternatives, shown with its thumbnail.
 4. Choose the images and send. They go through the same processing as any image and appear in the commission straight away.
+5. Below, **References** shows the reference images of the client's characters (and of any character from another client linked to the commission). Tap one to open it full size and press and hold to save it to Photos.
 
 - **Same Wi-Fi or not**: on the same network the link works as is. To send from **mobile data** (or any other network), install [Tailscale](https://tailscale.com/download) on the PC and the iPad and sign in with the same account; ZeeBoard detects it and shows the Tailscale address.
 - **Safety**: the server exists only while the switch is on, every request needs the secret key in the link, and it only accepts images (up to 200 MB). **New key** invalidates old links, and the link is hidden in [private mode](#private-mode). The first time, Windows asks to allow ZeeBoard through the firewall: allow it on private networks.

@@ -3,7 +3,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { groupAlternatives, loadOpenCommissions } from "./commissionHelpers";
-import { createCommissionStageImage, createImageVersion, getCommissionStageImages, getTemplateStages } from "./database";
+import { createCommissionStageImage, createImageVersion, getCommissionReferences, getCommissionStageImages, getTemplateStages } from "./database";
 import { getThumbPath, isProcessedImage } from "./images";
 import { latestOfAlternative } from "./ipadLink";
 import { hide } from "./privacy";
@@ -63,6 +63,9 @@ export async function pushSnapshot(): Promise<void> {
   const imagesByCommission = new Map(
     await Promise.all(withTemplate.map(async (commission) => [commission.id, await getCommissionStageImages(commission.id)] as const)),
   );
+  const referencesByCommission = new Map(
+    await Promise.all(withTemplate.map(async (commission) => [commission.id, await getCommissionReferences(commission.id)] as const)),
+  );
 
   const json = JSON.stringify({
     commissions: withTemplate.map((commission) => ({
@@ -70,6 +73,15 @@ export async function pushSnapshot(): Promise<void> {
       title: commission.title,
       client: hide(commission.client_name ?? ""),
       currentStageId: commission.current_stage_id,
+      // Character references, to keep them on the iPad: the server only hands out images listed here
+      refs: (referencesByCommission.get(commission.id) ?? [])
+        .filter((reference) => isProcessedImage(reference.image_data_url))
+        .map((reference) => ({
+          character: reference.character,
+          label: reference.label,
+          image: reference.image_data_url,
+          thumb: getThumbPath(reference.image_data_url),
+        })),
       stages: (stagesByTemplate.get(commission.template_id as number) ?? []).map((stage) => ({
         id: stage.id,
         name: stage.name,
