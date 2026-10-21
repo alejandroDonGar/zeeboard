@@ -18,7 +18,7 @@ import { REQUESTS_CHANGED, syncFormResponses } from "./lib/formSync";
 import { getRequests } from "./lib/database";
 import { announceRestored, DATA_RESTORED } from "./lib/undo";
 import { t } from "./lib/i18n";
-import { ipadSettings, listenIpadImages, pushSnapshot, saveIpadImage, startIpad } from "./lib/ipad";
+import { finishFromIpad, ipadSettings, listenIpadFinish, listenIpadImages, pushSnapshot, saveIpadImage, startIpad } from "./lib/ipad";
 import Logo from "./components/Logo";
 import AmbientBackground from "./components/AmbientBackground";
 import { setAmbientPage } from "./lib/ambient";
@@ -136,19 +136,40 @@ function IpadReceiver() {
 
   useEffect(() => {
     let cancelled = false;
-    let unlisten: (() => void) | undefined;
+    const unlisten: (() => void)[] = [];
+    // One after another, in arrival order: the final images of a commission are saved before it is marked as finished
+    let queue: Promise<unknown> = Promise.resolve();
+    const enqueue = (job: () => Promise<unknown>) => (queue = queue.then(job, job));
+
+    const track = (stop: () => void) => (cancelled ? stop() : unlisten.push(stop));
 
     listenIpadImages((image) => {
-      saveIpadImage(image)
-        .then((asRequested) => {
-          showToast(asRequested ? "Image received from the iPad." : "That alternative no longer exists: the image was added as a new one.", "success");
-          pushSnapshot().catch(console.error);
-        })
-        .catch((error) => {
-          console.error(error);
-          showToast(t("Could not save the image from the iPad: {error}", { error: String(error) }), "error");
-        });
-    }).then((stop) => (cancelled ? stop() : (unlisten = stop)));
+      enqueue(() =>
+        saveIpadImage(image)
+          .then((asRequested) => {
+            showToast(asRequested ? "Image received from the iPad." : "That alternative no longer exists: the image was added as a new one.", "success");
+            pushSnapshot().catch(console.error);
+          })
+          .catch((error) => {
+            console.error(error);
+            showToast(t("Could not save the image from the iPad: {error}", { error: String(error) }), "error");
+          }),
+      );
+    }).then(track);
+
+    listenIpadFinish((finish) => {
+      enqueue(() =>
+        finishFromIpad(finish)
+          .then(() => {
+            showToast("Commission finished from the iPad.", "success");
+            pushSnapshot().catch(console.error);
+          })
+          .catch((error) => {
+            console.error(error);
+            showToast(t("Could not finish the commission from the iPad: {error}", { error: String(error) }), "error");
+          }),
+      );
+    }).then(track);
 
     // Left on in the last session: back on with the app
     if (!ipadStarted && ipadSettings().enabled) {
@@ -163,7 +184,7 @@ function IpadReceiver() {
 
     return () => {
       cancelled = true;
-      unlisten?.();
+      unlisten.forEach((stop) => stop());
       clearInterval(timer);
     };
   }, [showToast]);

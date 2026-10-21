@@ -53,6 +53,7 @@ Dividir cada pantalla en componentes y aplicar el nuevo diseño.
 ## Fase 5 · ZeeBoard en el iPad (por Tailscale o wifi, sin nube)
 - [x] Servidor local en la app + código QR para abrirla desde el iPad (interruptor en Ajustes, enlace con clave; con Tailscale funciona también con datos del móvil)
 - [x] Enviar imágenes de progreso desde el iPad a una comisión (como alternativa nueva o como nueva versión de una alternativa)
+- [x] Terminar una comisión desde el iPad: fecha de entrega, horas, notas e imágenes finales
 - [ ] Vista del tablero adaptada al iPad
 
 ## Fase 6 · Rediseño de cristal

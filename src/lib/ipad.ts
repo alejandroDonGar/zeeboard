@@ -3,7 +3,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { groupAlternatives, loadOpenCommissions } from "./commissionHelpers";
-import { createCommissionStageImage, createImageVersion, getCommissionReferences, getCommissionStageImages, getTemplateStages } from "./database";
+import { createCommissionStageImage, createImageVersion, finishCommission, getCommissionReferences, getCommissionStageImages, getCommissions, getTemplateStages } from "./database";
 import { getThumbPath, isProcessedImage } from "./images";
 import { latestOfAlternative } from "./ipadLink";
 import { hide } from "./privacy";
@@ -51,11 +51,14 @@ export function ipadSettings(): IpadSettings {
 export async function pushSnapshot(): Promise<void> {
   const commissions = await loadOpenCommissions();
   const stagesByTemplate = new Map<number, { id: number; name: string }[]>();
+  // The hidden last stage ("delivery"): where the final images of a finished commission go
+  const lastStageByTemplate = new Map<number, number>();
 
   for (const commission of commissions) {
     if (commission.template_id !== null && !stagesByTemplate.has(commission.template_id)) {
       const stages = await getTemplateStages(commission.template_id);
       stagesByTemplate.set(commission.template_id, stages.length > 1 ? stages.slice(0, -1) : stages);
+      if (stages.length > 0) lastStageByTemplate.set(commission.template_id, stages[stages.length - 1].id);
     }
   }
 
@@ -73,6 +76,7 @@ export async function pushSnapshot(): Promise<void> {
       title: commission.title,
       client: hide(commission.client_name ?? ""),
       currentStageId: commission.current_stage_id,
+      lastStageId: lastStageByTemplate.get(commission.template_id as number) ?? null,
       // Character references, to keep them on the iPad: the server only hands out images listed here
       refs: (referencesByCommission.get(commission.id) ?? [])
         .filter((reference) => isProcessedImage(reference.image_data_url))
@@ -145,4 +149,32 @@ export async function saveIpadImage(image: IpadImage): Promise<boolean> {
   window.dispatchEvent(new Event(IPAD_IMAGE_ADDED));
 
   return asRequested;
+}
+
+export type IpadFinish = { commissionId: number; deliveredAt: string; hours: number | null; notes: string };
+
+export const listenIpadFinish = (onFinish: (finish: IpadFinish) => void) =>
+  listen<IpadFinish>("ipad-finish", (event) => onFinish(event.payload));
+
+/**
+ * "Mark as finished" sent from the iPad: the same as the button on the commission (last stage, delivery date, hours and
+ * notes). The final images arrived before, as ordinary images of that last stage. The server already validated the data.
+ */
+export async function finishFromIpad(finish: IpadFinish): Promise<void> {
+  const commission = (await getCommissions()).find((item) => item.id === finish.commissionId);
+
+  if (!commission || commission.template_id === null) {
+    throw new Error("The commission no longer exists or has no template");
+  }
+
+  const stages = await getTemplateStages(commission.template_id);
+  const last = stages[stages.length - 1];
+
+  if (!last) {
+    throw new Error("The commission's template has no stages");
+  }
+
+  await finishCommission(commission.id, last.id, { deliveredAt: finish.deliveredAt, hours: finish.hours, notes: finish.notes });
+  // The commissions screen re-reads without remounting (a form may be open)
+  window.dispatchEvent(new Event(IPAD_IMAGE_ADDED));
 }

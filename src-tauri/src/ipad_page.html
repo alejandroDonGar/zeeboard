@@ -33,6 +33,14 @@
   #refs img { width: 100%; height: 100%; object-fit: cover; display: block; }
   #refs h3 { grid-column: 1 / -1; margin: 6px 0 0; font-size: 15px; }
   .hint { font-size: 14px; margin-top: 8px; }
+  .field { display: block; margin-bottom: 12px; }
+  .field span { display: block; font-size: 15px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  input[type=date], input[type=text], textarea { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--glass); color: var(--ink); font: inherit; }
+  textarea { resize: vertical; }
+  #finish-box { margin-top: 30px; padding-top: 6px; border-top: 1px solid var(--line); }
+  #f-queue { list-style: none; padding: 0; margin: 10px 0 14px; } #f-queue li { padding: 6px 0; font-size: 15px; word-break: break-all; }
+  #f-queue li.ok { color: var(--ok); } #f-queue li.bad { color: var(--bad); }
+  #f-msg.bad { color: var(--bad); } #f-msg.ok { color: var(--ok); font-weight: 700; }
   #queue { list-style: none; padding: 0; margin: 14px 0 0; }
   #queue li { padding: 8px 0; border-bottom: 1px solid var(--line); word-break: break-all; font-size: 15px; }
   #queue li.ok { color: var(--ok); } #queue li.bad { color: var(--bad); }
@@ -71,12 +79,30 @@
       <div id="refs"></div>
       <p class="hint" id="t-refs-hint"></p>
     </div>
+
+    <div id="finish-box">
+      <h2 id="t-finish"></h2>
+      <button class="btn" id="finish-open"></button>
+      <div id="finish-form" hidden>
+        <label class="field"><span id="t-date"></span><input type="date" id="f-date"></label>
+        <label class="field"><span id="t-hours"></span><input type="text" id="f-hours" inputmode="decimal" placeholder="7,5" autocomplete="off"></label>
+        <label class="field"><span id="t-fnotes"></span><textarea id="f-notes" rows="3"></textarea></label>
+        <h2 id="t-final"></h2>
+        <label class="btn" id="f-pick" for="f-files"></label>
+        <input id="f-files" type="file" accept="image/*" multiple>
+        <ul id="f-queue"></ul>
+        <button class="btn primary" id="f-confirm"></button>
+        <p class="hint" id="f-msg"></p>
+      </div>
+    </div>
   </section>
 </main>
 
 <script>
-const es = { commission: "Elige la comisión", sending: "Enviando a", stage: "Etapa", target: "Añadir como", photos: "Imágenes", pick: "Elegir imágenes", back: "Cambiar de comisión", newAlt: "Nueva alternativa", newAltSub: "otra opción para el cliente", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No hay comisiones abiertas.", refs: "Referencias", refsHint: "Toca una para verla en grande y mantén pulsado para guardarla en Fotos.", offline: "No se pudo conectar con ZeeBoard. ¿Está abierto en el PC y con el interruptor activado?" };
-const en = { commission: "Pick the commission", sending: "Sending to", stage: "Stage", target: "Add as", photos: "Images", pick: "Choose images", back: "Change commission", newAlt: "New alternative", newAltSub: "another option for the client", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No open commissions.", refs: "References", refsHint: "Tap one to see it full size, then press and hold to save it to Photos.", offline: "Could not reach ZeeBoard. Is it open on the PC with the switch on?" };
+const es = { commission: "Elige la comisión", sending: "Enviando a", stage: "Etapa", target: "Añadir como", photos: "Imágenes", pick: "Elegir imágenes", back: "Cambiar de comisión", newAlt: "Nueva alternativa", newAltSub: "otra opción para el cliente", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No hay comisiones abiertas.", refs: "Referencias", refsHint: "Toca una para verla en grande y mantén pulsado para guardarla en Fotos.", offline: "No se pudo conectar con ZeeBoard. ¿Está abierto en el PC y con el interruptor activado?",
+  finish: "Terminar", finishOpen: "Terminar esta comisión…", date: "Fecha de entrega", hours: "Horas dedicadas", fnotes: "Notas finales (enlace a la publicación, cómo fue…)", final: "Imagen final", pickFinal: "Elegir imagen final", confirm: "Marcar como terminada", hoursBad: "Escribe las horas como un número, por ejemplo 7,5", imagesFailed: "No se pudieron enviar las imágenes. Revisa la lista y vuelve a intentarlo.", finishFailed: "No se pudo terminar la comisión.", finished: "Comisión terminada", selected: (n) => n + (n === 1 ? " imagen lista para enviar" : " imágenes listas para enviar") };
+const en = { commission: "Pick the commission", sending: "Sending to", stage: "Stage", target: "Add as", photos: "Images", pick: "Choose images", back: "Change commission", newAlt: "New alternative", newAltSub: "another option for the client", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No open commissions.", refs: "References", refsHint: "Tap one to see it full size, then press and hold to save it to Photos.", offline: "Could not reach ZeeBoard. Is it open on the PC with the switch on?",
+  finish: "Finish", finishOpen: "Finish this commission…", date: "Delivery date", hours: "Hours spent", fnotes: "Final notes (link to the post, how it went…)", final: "Final image", pickFinal: "Choose final image", confirm: "Mark as finished", hoursBad: "Enter the hours as a number, like 7.5", imagesFailed: "The images could not be sent. Check the list and try again.", finishFailed: "Could not finish the commission.", finished: "Commission finished", selected: (n) => n + (n === 1 ? " image ready to send" : " images ready to send") };
 const spanish = navigator.language.toLowerCase().startsWith("es");
 const L = spanish ? es : en;
 document.documentElement.lang = spanish ? "es" : "en";
@@ -87,6 +113,9 @@ let data = { commissions: [] };
 let chosen = null;
 // null = a new alternative; a number = a new version of that alternative of the stage
 let target = null;
+// Finished from this page: hidden at once, before the app refreshes the list
+const finishedHere = new Set();
+let finalFiles = [];
 
 $("t-commission").textContent = L.commission;
 $("t-sending").textContent = L.sending;
@@ -98,6 +127,14 @@ $("pick").htmlFor = "files";
 $("back").textContent = "‹ " + L.back;
 $("t-refs").textContent = L.refs;
 $("t-refs-hint").textContent = L.refsHint;
+$("t-finish").textContent = L.finish;
+$("finish-open").textContent = L.finishOpen;
+$("t-date").textContent = L.date;
+$("t-hours").textContent = L.hours;
+$("t-fnotes").textContent = L.fnotes;
+$("t-final").textContent = L.final;
+$("f-pick").textContent = L.pickFinal;
+$("f-confirm").textContent = L.confirm;
 
 async function fetchData() {
   const response = await fetch("/api/commissions?k=" + encodeURIComponent(key), { cache: "no-store" });
@@ -118,8 +155,9 @@ async function load() {
 function renderList() {
   const box = $("commissions");
   box.innerHTML = "";
-  if (!data.commissions.length) { box.textContent = L.none; return; }
-  for (const commission of data.commissions) {
+  const open = data.commissions.filter((commission) => !finishedHere.has(commission.id));
+  if (!open.length) { box.textContent = L.none; return; }
+  for (const commission of open) {
     const button = document.createElement("button");
     button.className = "item";
     const title = document.createElement("b");
@@ -150,6 +188,39 @@ function choose(commission) {
   }
   renderTargets();
   renderRefs();
+  resetFinish();
+}
+
+function today() {
+  const now = new Date();
+  const two = (n) => String(n).padStart(2, "0");
+  return now.getFullYear() + "-" + two(now.getMonth() + 1) + "-" + two(now.getDate());
+}
+
+function resetFinish() {
+  finalFiles = [];
+  $("finish-form").hidden = true;
+  $("f-date").value = today();
+  $("f-hours").value = "";
+  $("f-notes").value = "";
+  $("f-queue").innerHTML = "";
+  $("f-msg").textContent = "";
+  $("f-confirm").disabled = false;
+  renderFinalFiles();
+}
+
+function say(text, kind) {
+  const message = $("f-msg");
+  message.textContent = text;
+  message.className = "hint" + (kind ? " " + kind : "");
+}
+
+function renderFinalFiles() {
+  $("f-queue").innerHTML = "";
+  if (!finalFiles.length) return;
+  const row = document.createElement("li");
+  row.textContent = L.selected(finalFiles.length);
+  $("f-queue").appendChild(row);
 }
 
 // The characters' references, full size on tap (to save them to Photos)
@@ -235,14 +306,17 @@ async function refreshAfterSend() {
 }
 
 // One at a time: a big canvas is already a lot to hold in memory
-function upload(file) {
+// `opts.stage` and `opts.list` send the final images of a commission to its last stage, as new alternatives, listed apart.
+// Resolves to whether it arrived.
+function upload(file, opts = {}) {
   return new Promise((resolve) => {
     const row = document.createElement("li");
     row.textContent = file.name + " · 0 %";
-    $("queue").prepend(row);
+    (opts.list || $("queue")).prepend(row);
 
+    const final = opts.stage !== undefined;
     const request = new XMLHttpRequest();
-    request.open("POST", "/upload?k=" + encodeURIComponent(key) + "&commission=" + chosen.id + "&stage=" + $("stage").value + (target === null ? "" : "&alt=" + target));
+    request.open("POST", "/upload?k=" + encodeURIComponent(key) + "&commission=" + chosen.id + "&stage=" + (final ? opts.stage : $("stage").value) + (final || target === null ? "" : "&alt=" + target));
     request.upload.onprogress = (event) => {
       if (event.lengthComputable) row.textContent = file.name + " · " + Math.round((event.loaded / event.total) * 100) + " %";
     };
@@ -250,13 +324,58 @@ function upload(file) {
       const ok = request.status === 200;
       row.textContent = (ok ? "✓ " : "✗ ") + file.name + (ok ? "" : " · " + (request.responseText || request.status));
       row.className = ok ? "ok" : "bad";
-      if (ok) setTimeout(refreshAfterSend, 1500);
-      resolve();
+      if (ok && !final) setTimeout(refreshAfterSend, 1500);
+      resolve(ok);
     };
-    request.onerror = () => { row.textContent = "✗ " + file.name + " · " + L.offline; row.className = "bad"; resolve(); };
+    request.onerror = () => { row.textContent = "✗ " + file.name + " · " + L.offline; row.className = "bad"; resolve(false); };
     request.send(file);
   });
 }
+
+$("finish-open").onclick = () => { $("finish-form").hidden = !$("finish-form").hidden; };
+["f-date", "f-hours", "f-notes"].forEach((id) => { $(id).oninput = () => say(""); });
+$("f-files").onchange = (event) => {
+  finalFiles.push(...event.target.files);
+  event.target.value = "";
+  renderFinalFiles();
+};
+
+$("f-confirm").onclick = async () => {
+  const text = $("f-hours").value.trim().replace(",", ".");
+  const hours = text === "" ? null : Number(text);
+  if (hours !== null && (!Number.isFinite(hours) || hours < 0)) return say(L.hoursBad, "bad");
+  if (!$("f-date").value) return;
+
+  const button = $("f-confirm");
+  button.disabled = true;
+  say("");
+  $("f-queue").innerHTML = "";
+
+  // The images go first: if one fails nothing is finished and it can be retried
+  if (finalFiles.length && chosen.lastStageId == null) { button.disabled = false; return say(L.finishFailed, "bad"); }
+  for (const file of [...finalFiles]) {
+    if (!(await upload(file, { stage: chosen.lastStageId, list: $("f-queue") }))) { button.disabled = false; return say(L.imagesFailed, "bad"); }
+    finalFiles = finalFiles.filter((item) => item !== file); // already sent: not sent twice on a retry
+  }
+
+  let response = null;
+  try {
+    response = await fetch("/finish?k=" + encodeURIComponent(key), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commission: chosen.id, deliveredAt: $("f-date").value, hours, notes: $("f-notes").value }),
+    });
+  } catch (error) { /* offline */ }
+
+  if (response && response.ok) {
+    finishedHere.add(chosen.id);
+    say("✓ " + L.finished, "ok");
+    setTimeout(() => (history.state ? history.back() : showList()), 1600);
+  } else {
+    button.disabled = false;
+    say(L.finishFailed + (response ? " · " + (await response.text()) : " " + L.offline), "bad");
+  }
+};
 
 load();
 </script>

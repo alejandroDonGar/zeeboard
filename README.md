@@ -287,6 +287,9 @@ Skip the email: draw on the iPad and send the images straight to a commission st
 3. Pick the **commission** (**‹ Change commission**, or the iPad's back gesture, returns to the list to send to another one), the **stage** (the current one by default) and what the image is: a **new alternative** (default) or a **new version** of one of the stage's alternatives, shown with its thumbnail.
 4. Choose the images and send. They go through the same processing as any image and appear in the commission straight away.
 5. Below, **References** shows the reference images of the client's characters (and of any character from another client linked to the commission). Tap one to open it full size and press and hold to save it to Photos.
+6. At the bottom, **Finish this commission…** marks it as finished right from the iPad: the **delivery date** (today by default), the **hours spent**, the **final notes** and the **final images**, which are sent first to the commission's last stage. When everything has arrived the commission moves to *Finished*, exactly as with **Mark as finished** on the PC. If an image fails, nothing is finished and you can try again.
+
+<img src="docs/images/ipad-finish.png" alt="The iPad page's Finish block: delivery date, hours, final notes and final image" width="420">
 
 - **Same Wi-Fi or not**: on the same network the link works as is. To send from **mobile data** (or any other network), install [Tailscale](https://tailscale.com/download) on the PC and the iPad and sign in with the same account; ZeeBoard detects it and shows the Tailscale address.
 - **Safety**: the server exists only while the switch is on, every request needs the secret key in the link, and it only accepts images (up to 200 MB). **New key** invalidates old links, and the link is hidden in [private mode](#private-mode). The first time, Windows asks to allow ZeeBoard through the firewall: allow it on private networks.

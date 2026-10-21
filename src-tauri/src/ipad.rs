@@ -15,7 +15,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Emitter, State};
 use tiny_http::{Header, Method, Request, Response, Server};
 
@@ -68,6 +68,68 @@ struct IpadImage {
     /// Set when the image is a new version of that alternative of the stage; none = a new alternative
     alt: Option<i64>,
     stored: StoredImage,
+}
+
+/// What the iPad sends to mark a commission as finished (its final images were uploaded before, to the last stage)
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct FinishRequest {
+    commission: i64,
+    delivered_at: String,
+    hours: Option<f64>,
+    notes: String,
+}
+
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct IpadFinish {
+    commission_id: i64,
+    delivered_at: String,
+    hours: Option<f64>,
+    notes: String,
+}
+
+const MAX_FINISH_BODY: u64 = 32 * 1024;
+
+/// Validates what comes from the network before the app saves it: a real date, sane hours, notes not huge
+fn parse_finish(body: &[u8]) -> Result<IpadFinish, &'static str> {
+    let finish: FinishRequest = serde_json::from_slice(body).map_err(|_| "Datos no válidos")?;
+    let date = finish.delivered_at.as_bytes();
+    let well_formed = date.len() == 10
+        && date.iter().enumerate().all(|(i, byte)| if i == 4 || i == 7 { *byte == b'-' } else { byte.is_ascii_digit() });
+    let month: u32 = finish.delivered_at.get(5..7).and_then(|month| month.parse().ok()).unwrap_or(0);
+    let day: u32 = finish.delivered_at.get(8..10).and_then(|day| day.parse().ok()).unwrap_or(0);
+
+    if !well_formed || !(1..=12).contains(&month) || !(1..=31).contains(&day) {
+        return Err("Fecha de entrega no válida");
+    }
+    if finish.hours.is_some_and(|hours| !hours.is_finite() || !(0.0..=1000.0).contains(&hours)) {
+        return Err("Horas no válidas");
+    }
+    if finish.notes.chars().count() > 5000 {
+        return Err("Las notas son demasiado largas");
+    }
+
+    Ok(IpadFinish { commission_id: finish.commission, delivered_at: finish.delivered_at, hours: finish.hours, notes: finish.notes.trim().to_string() })
+}
+
+fn finish(app: &AppHandle, mut request: Request) {
+    if request.body_length().is_some_and(|length| length as u64 > MAX_FINISH_BODY) {
+        return send(request, 413, "text/plain; charset=utf-8", "Demasiado grande");
+    }
+
+    let mut body = Vec::new();
+    if request.as_reader().take(MAX_FINISH_BODY + 1).read_to_end(&mut body).is_err() || body.len() as u64 > MAX_FINISH_BODY {
+        return send(request, 400, "text/plain; charset=utf-8", "No se pudo leer la petición");
+    }
+
+    match parse_finish(&body) {
+        Ok(finish) => {
+            let _ = app.emit("ipad-finish", finish);
+            send(request, 200, "application/json", r#"{"ok":true}"#);
+        }
+        Err(error) => send(request, 422, "text/plain; charset=utf-8", error),
+    }
 }
 
 fn send(request: Request, status: u16, content_type: &str, body: impl Into<Vec<u8>>) {
@@ -169,6 +231,7 @@ fn handle(app: AppHandle, request: Request, token: String, snapshot: Arc<Mutex<S
             }
         }
         (Method::Post, "/upload") => upload(&app, request, &params),
+        (Method::Post, "/finish") => finish(&app, request),
         _ => send(request, 404, "text/plain; charset=utf-8", "No encontrado"),
     }
 }
@@ -261,6 +324,25 @@ mod tests {
             assert!(!peer(no), "{no} should be refused");
         }
         assert!(!allowed_peer(None));
+    }
+
+    #[test]
+    fn finish_is_validated_before_the_app_sees_it() {
+        let ok = parse_finish(br#"{"commission":7,"deliveredAt":"2026-10-21","hours":7.5,"notes":"  posted  "}"#).unwrap();
+        assert_eq!((ok.commission_id, ok.hours, ok.notes.as_str()), (7, Some(7.5), "posted"));
+        assert!(parse_finish(br#"{"commission":7,"deliveredAt":"2026-10-21","hours":null,"notes":""}"#).is_ok(), "hours are optional");
+        for bad in [
+            r#"{"commission":7,"deliveredAt":"21/10/2026","hours":1,"notes":""}"#,
+            r#"{"commission":7,"deliveredAt":"2026-13-01","hours":1,"notes":""}"#,
+            r#"{"commission":7,"deliveredAt":"2026-10-21","hours":-2,"notes":""}"#,
+            r#"{"commission":7,"deliveredAt":"2026-10-21","hours":5000,"notes":""}"#,
+            r#"{"commission":"7","deliveredAt":"2026-10-21","hours":1,"notes":""}"#,
+            "not json",
+        ] {
+            assert!(parse_finish(bad.as_bytes()).is_err(), "{bad} should be refused");
+        }
+        let long = format!(r#"{{"commission":7,"deliveredAt":"2026-10-21","hours":1,"notes":"{}"}}"#, "a".repeat(5001));
+        assert!(parse_finish(long.as_bytes()).is_err());
     }
 
     #[test]

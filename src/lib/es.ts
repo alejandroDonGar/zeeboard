@@ -207,6 +207,8 @@ export const es: Record<string, string> = {
   "Other addresses of this PC: {list}": "Otras direcciones de este PC: {list}",
   "The first time, Windows asks to allow ZeeBoard through the firewall: allow it on private networks.": "La primera vez, Windows pregunta si permites ZeeBoard en el firewall: permítelo en redes privadas.",
   "Image received from the iPad.": "Imagen recibida desde el iPad.",
+  "Commission finished from the iPad.": "Comisión terminada desde el iPad.",
+  "Could not finish the commission from the iPad: {error}": "No se pudo terminar la comisión desde el iPad: {error}",
   "That alternative no longer exists: the image was added as a new one.": "Esa alternativa ya no existe: la imagen se ha añadido como una nueva.",
   "Could not save the image from the iPad: {error}": "No se pudo guardar la imagen del iPad: {error}",
   "Mark as not done": "Marcar como pendiente",
