@@ -354,14 +354,12 @@ npm run tauri dev      # development
 npm run tauri build    # builds the installer in src-tauri/target/release/bundle/nsis
 ```
 
-Quick checks of the business logic (no framework, each prints "ok"):
+Tests (Vitest for the logic in `src/lib`, `cargo test` for Rust). GitHub Actions runs them on every push:
 
 ```bash
-npx tsx scripts/check-payments.ts   # also: check-reminders, check-export, check-form-import,
-                                    # check-avatars, check-paypal, check-search, check-i18n,
-                                    # check-stats, check-trash, check-ipad, check-fresh-db,
-                                    # check-permissions, check-ambient
-cd src-tauri && cargo test
+npm test             # all the TypeScript tests in tests/
+npm run coverage     # the same, with coverage of src/lib
+npm run test:rust    # the Rust tests
 ```
 
 | Part | Technology |
@@ -380,11 +378,11 @@ src/
 ├── components/          shared pieces (search palette, payments, filters…)
 └── lib/                 database, images, backups, imports, reminders, i18n…
 src-tauri/               Rust side, icons and configuration
-scripts/                 quick logic checks
+tests/                   Vitest tests of the logic
 docs/images/             the screenshots in this README
 ```
 
-Text in the interface is written in English and translated through a dictionary (`src/lib/es.ts`); `scripts/check-i18n.ts` verifies that every text has its translation.
+Text in the interface is written in English and translated through a dictionary (`src/lib/es.ts`); `tests/i18n.test.ts` verifies that every text has its translation.
 
 ## Roadmap
 

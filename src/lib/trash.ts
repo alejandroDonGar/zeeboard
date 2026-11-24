@@ -1,4 +1,4 @@
-// Pure helpers for the trash (no database here, so scripts/check-trash.ts can run them)
+// Pure helpers for the trash (no database here, so tests/trash.test.ts can run them)
 
 /** Days an item stays in the trash before it is removed for good */
 export const TRASH_DAYS = 30;

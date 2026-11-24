@@ -1,5 +1,5 @@
 // Catalog: the commission type (template) carries the colour; tags are for extras.
-// Pure helpers (no database here, so scripts/check-catalog.ts can run them)
+// Pure helpers (no database here, so tests/catalog.test.ts can run them)
 
 /** Colours that read well under white text and match the app */
 export const PALETTE = [
