@@ -184,8 +184,8 @@ export async function updateSettings(changes: Partial<AppSettings>): Promise<voi
   settings = next;
 }
 
-export async function initializeDatabase() {
-  const database = await getDatabase();
+/** Migration 1: the schema as it was before versions. Runs once on new databases and on ones from earlier versions. */
+async function baseline(database: ZeeDatabase): Promise<void> {
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS settings (
@@ -194,21 +194,21 @@ export async function initializeDatabase() {
       theme TEXT NOT NULL DEFAULT 'zebra-light'
     );
   `);
-  await database.execute(`ALTER TABLE settings ADD COLUMN default_currency TEXT NOT NULL DEFAULT 'EUR';`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN extra_character_rate REAL NOT NULL DEFAULT 0.5;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN auto_backup_enabled INTEGER NOT NULL DEFAULT 0;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN auto_backup_folder TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN auto_backup_keep INTEGER NOT NULL DEFAULT 7;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN last_auto_backup TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN promise_max_days INTEGER NOT NULL DEFAULT 60;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN reminders_enabled INTEGER NOT NULL DEFAULT 1;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN reminder_days_before INTEGER NOT NULL DEFAULT 3;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN stalled_enabled INTEGER NOT NULL DEFAULT 1;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN stalled_days INTEGER NOT NULL DEFAULT 21;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN slots_open INTEGER NOT NULL DEFAULT 0;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN slots_total INTEGER NOT NULL DEFAULT 5;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN responses_file TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE settings ADD COLUMN last_form_sync TEXT;`).catch(() => {});
+  await addColumn(database, "settings", "default_currency TEXT NOT NULL DEFAULT 'EUR'");
+  await addColumn(database, "settings", "extra_character_rate REAL NOT NULL DEFAULT 0.5");
+  await addColumn(database, "settings", "auto_backup_enabled INTEGER NOT NULL DEFAULT 0");
+  await addColumn(database, "settings", "auto_backup_folder TEXT");
+  await addColumn(database, "settings", "auto_backup_keep INTEGER NOT NULL DEFAULT 7");
+  await addColumn(database, "settings", "last_auto_backup TEXT");
+  await addColumn(database, "settings", "promise_max_days INTEGER NOT NULL DEFAULT 60");
+  await addColumn(database, "settings", "reminders_enabled INTEGER NOT NULL DEFAULT 1");
+  await addColumn(database, "settings", "reminder_days_before INTEGER NOT NULL DEFAULT 3");
+  await addColumn(database, "settings", "stalled_enabled INTEGER NOT NULL DEFAULT 1");
+  await addColumn(database, "settings", "stalled_days INTEGER NOT NULL DEFAULT 21");
+  await addColumn(database, "settings", "slots_open INTEGER NOT NULL DEFAULT 0");
+  await addColumn(database, "settings", "slots_total INTEGER NOT NULL DEFAULT 5");
+  await addColumn(database, "settings", "responses_file TEXT");
+  await addColumn(database, "settings", "last_form_sync TEXT");
 
   // Commission requests that aren't commissions yet: new, waitlisted, accepted or declined
   await database.execute(`
@@ -226,15 +226,14 @@ export async function initializeDatabase() {
     );
   `);
   // Where an imported request came from (to avoid importing it twice) and its email
-  await database.execute(`ALTER TABLE commission_requests ADD COLUMN external_id TEXT;`).catch(() => {});
+  await addColumn(database, "commission_requests", "external_id TEXT");
   // Form responses removed from the list: the CSV still has them and they must not come back
   await database.execute(`CREATE TABLE IF NOT EXISTS ignored_requests (external_id TEXT PRIMARY KEY);`);
-  await database.execute(`ALTER TABLE commission_requests ADD COLUMN email TEXT;`).catch(() => {});
+  await addColumn(database, "commission_requests", "email TEXT");
   // Whom to tag when posting: on the request, and on the client once accepted
-  await database.execute(`ALTER TABLE commission_requests ADD COLUMN tag_platform TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE commission_requests ADD COLUMN tag_handle TEXT;`).catch(() => {});
+  await addColumn(database, "commission_requests", "tag_platform TEXT");
+  await addColumn(database, "commission_requests", "tag_handle TEXT");
   await database.execute(`INSERT OR IGNORE INTO settings (id) VALUES (1);`);
-  await loadSettings();
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS clients (
@@ -254,10 +253,7 @@ export async function initializeDatabase() {
       color TEXT NOT NULL
     );
   `);
-  await database.execute(`
-    ALTER TABLE tags
-    ADD COLUMN category TEXT DEFAULT 'General';
-  `).catch(() => {});
+  await addColumn(database, "tags", "category TEXT DEFAULT 'General'");
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS templates (
@@ -266,11 +262,11 @@ export async function initializeDatabase() {
     );
   `);
 
-  await database.execute(`ALTER TABLE templates ADD COLUMN base_price REAL;`).catch(() => {});
-  await database.execute(`ALTER TABLE templates ADD COLUMN revisions_included INTEGER;`).catch(() => {});
+  await addColumn(database, "templates", "base_price REAL");
+  await addColumn(database, "templates", "revisions_included INTEGER");
   // The template is the commission type and carries its colour. Templates without one get it once:
   // the colour of their old "Commission Type" tag, else one from the palette. Only adds data; tags stay as they are.
-  await database.execute(`ALTER TABLE templates ADD COLUMN color TEXT;`).catch(() => {});
+  await addColumn(database, "templates", "color TEXT");
   const uncoloured = await database.select<{ id: number; name: string; color: string | null }[]>(
     `SELECT id, name, color FROM templates WHERE color IS NULL;`,
   );
@@ -295,11 +291,11 @@ export async function initializeDatabase() {
     );
   `);
   // A pin on an image version: which image and where (x, y as 0..1 of its width and height)
-  await database.execute(`ALTER TABLE commission_corrections ADD COLUMN image_id INTEGER;`).catch(() => {});
-  await database.execute(`ALTER TABLE commission_corrections ADD COLUMN x REAL;`).catch(() => {});
-  await database.execute(`ALTER TABLE commission_corrections ADD COLUMN y REAL;`).catch(() => {});
+  await addColumn(database, "commission_corrections", "image_id INTEGER");
+  await addColumn(database, "commission_corrections", "x REAL");
+  await addColumn(database, "commission_corrections", "y REAL");
   // When the client's request was dealt with (null = still pending)
-  await database.execute(`ALTER TABLE commission_corrections ADD COLUMN done_at TEXT;`).catch(() => {});
+  await addColumn(database, "commission_corrections", "done_at TEXT");
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS template_stages (
@@ -324,20 +320,11 @@ export async function initializeDatabase() {
     );
   `);
 
-  await database.execute(`
-    ALTER TABLE commissions
-    ADD COLUMN client_name TEXT;
-  `).catch(() => {});
+  await addColumn(database, "commissions", "client_name TEXT");
 
-  await database.execute(`
-    ALTER TABLE commissions
-    ADD COLUMN platform TEXT;
-  `).catch(() => {});
+  await addColumn(database, "commissions", "platform TEXT");
 
-  await database.execute(`
-    ALTER TABLE commissions
-    ADD COLUMN currency TEXT DEFAULT 'EUR';
-  `).catch(() => {});
+  await addColumn(database, "commissions", "currency TEXT DEFAULT 'EUR'");
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS commission_tags (
@@ -347,20 +334,11 @@ export async function initializeDatabase() {
     );
   `);
 
-  await database.execute(`
-    ALTER TABLE clients
-    ADD COLUMN platform TEXT;
-  `).catch(() => {});
+  await addColumn(database, "clients", "platform TEXT");
 
-  await database.execute(`
-    ALTER TABLE clients
-    ADD COLUMN handle TEXT;
-  `).catch(() => {});
+  await addColumn(database, "clients", "handle TEXT");
 
-  await database.execute(`
-    ALTER TABLE clients
-    ADD COLUMN avatar_url TEXT;
-  `).catch(() => {});
+  await addColumn(database, "clients", "avatar_url TEXT");
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS commission_stage_images (
@@ -375,16 +353,6 @@ export async function initializeDatabase() {
 
   // Old table that was never used
   await database.execute(`DROP TABLE IF EXISTS commission_references;`);
-
-  await database.execute(`
-    ALTER TABLE commission_stage_images
-    ADD COLUMN id INTEGER;
-  `).catch(() => {});
-
-  await database.execute(`
-    ALTER TABLE commission_stage_images
-    ADD COLUMN label TEXT NOT NULL DEFAULT 'Alt 1';
-  `).catch(() => {});
 
   await database.execute(`
     CREATE TABLE IF NOT EXISTS client_characters (
@@ -415,7 +383,7 @@ export async function initializeDatabase() {
   `);
 
   // How many characters each price is for. Older rows: what the request said, else the "N Characters" tag, else the linked ones.
-  await database.execute(`ALTER TABLE commissions ADD COLUMN character_count INTEGER;`).catch(() => {});
+  await addColumn(database, "commissions", "character_count INTEGER");
   await database.execute(`
     UPDATE commissions
     SET character_count = MAX(
@@ -465,17 +433,17 @@ export async function initializeDatabase() {
 
   // Columns of tables created above. They go after every CREATE TABLE: on a fresh database an ALTER that runs before its
   // table exists fails silently, and the UPDATE below would stop the whole start-up.
-  await database.execute(`ALTER TABLE clients ADD COLUMN tag_platform TEXT;`).catch(() => {});
+  await addColumn(database, "clients", "tag_platform TEXT");
   // PayPal transaction id: prevents importing the same payment twice
-  await database.execute(`ALTER TABLE commission_payments ADD COLUMN external_id TEXT;`).catch(() => {});
+  await addColumn(database, "commission_payments", "external_id TEXT");
   // A tip: counts as money received (and its fees) but not towards the price
-  await database.execute(`ALTER TABLE commission_payments ADD COLUMN tip INTEGER NOT NULL DEFAULT 0;`).catch(() => {});
-  await database.execute(`ALTER TABLE clients ADD COLUMN tag_handle TEXT;`).catch(() => {});
+  await addColumn(database, "commission_payments", "tip INTEGER NOT NULL DEFAULT 0");
+  await addColumn(database, "clients", "tag_handle TEXT");
   // When a commission last changed stage: counts as activity for the stalled alert
-  await database.execute(`ALTER TABLE commissions ADD COLUMN stage_changed_at TEXT;`).catch(() => {});
+  await addColumn(database, "commissions", "stage_changed_at TEXT");
   // Alternatives and versions of a stage image (older rows: each one is its own alternative, version 1)
-  await database.execute(`ALTER TABLE commission_stage_images ADD COLUMN alt INTEGER;`).catch(() => {});
-  await database.execute(`ALTER TABLE commission_stage_images ADD COLUMN version INTEGER NOT NULL DEFAULT 1;`).catch(() => {});
+  await addColumn(database, "commission_stage_images", "alt INTEGER");
+  await addColumn(database, "commission_stage_images", "version INTEGER NOT NULL DEFAULT 1");
   await database.execute(`
     UPDATE commission_stage_images
     SET alt = (
@@ -486,9 +454,40 @@ export async function initializeDatabase() {
     )
     WHERE alt IS NULL;
   `);
-  await database.execute(`ALTER TABLE commissions ADD COLUMN delivered_at TEXT;`).catch(() => {});
-  await database.execute(`ALTER TABLE commissions ADD COLUMN hours REAL;`).catch(() => {});
-  await database.execute(`ALTER TABLE commissions ADD COLUMN final_notes TEXT;`).catch(() => {});
+  await addColumn(database, "commissions", "delivered_at TEXT");
+  await addColumn(database, "commissions", "hours REAL");
+  await addColumn(database, "commissions", "final_notes TEXT");
+}
+
+/** Adds a column if the table doesn't have it yet; any other failure stops the start (a half-updated database is worse). */
+async function addColumn(database: ZeeDatabase, table: string, definition: string): Promise<void> {
+  const name = definition.split(" ")[0];
+  const columns = await database.select<{ name: string }[]>(`PRAGMA table_info(${table});`);
+
+  if (!columns.some((column) => column.name === name)) {
+    await database.execute(`ALTER TABLE ${table} ADD COLUMN ${definition};`);
+  }
+}
+
+/**
+ * Schema changes in order. Each runs once and the database remembers how far it got (PRAGMA user_version).
+ * A new change is a new function at the end; one that has shipped is never edited. Each must be safe to run twice:
+ * there is no transaction (the plugin's pool doesn't guarantee one connection), so a crash before the version is saved repeats it.
+ */
+const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline];
+
+export const SCHEMA_VERSION = MIGRATIONS.length;
+
+export async function initializeDatabase(): Promise<void> {
+  const database = await getDatabase();
+  const [{ user_version: current }] = await database.select<{ user_version: number }[]>(`PRAGMA user_version;`);
+
+  for (let version = current; version < MIGRATIONS.length; version++) {
+    await MIGRATIONS[version](database);
+    await database.execute(`PRAGMA user_version = ${version + 1};`);
+  }
+
+  await loadSettings();
 }
 
 export async function getTemplates(): Promise<Template[]> {

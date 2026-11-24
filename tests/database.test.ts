@@ -1,7 +1,8 @@
 // The real database.ts against an in-memory SQLite: what the app does with commissions, clients, payments and the trash.
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { DatabaseSync } from "node:sqlite";
-import { rawDatabase, resetDatabase } from "./support/tauri-sql";
+import { rawDatabase, resetDatabase, resetStatementCount, statementCount } from "./support/tauri-sql";
+import { readFileSync, readdirSync } from "node:fs";
 import { TYPE_CATEGORY } from "../src/lib/catalog";
 
 vi.mock("@tauri-apps/plugin-sql", async () => {
@@ -941,10 +942,88 @@ describe("around the data: undo, form sync, backups and the iPad", () => {
   });
 });
 
+describe("schema versions", () => {
+  const version = () => (rawDatabase().prepare("PRAGMA user_version").get() as { user_version: number }).user_version;
+  const columns = (table: string) => (rawDatabase().prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((column) => column.name);
+
+  test("a new database ends at the latest version", () => {
+    expect(db.SCHEMA_VERSION).toBeGreaterThanOrEqual(1);
+    expect(version()).toBe(db.SCHEMA_VERSION);
+  });
+
+  test("opening the app again runs no migration: only reading the version and the settings", async () => {
+    resetStatementCount();
+    await reopen();
+    expect(statementCount()).toBeLessThanOrEqual(3);
+  });
+
+  test("a database from before versions keeps its data and gets every new column, once", async () => {
+    resetDatabase();
+    rawDatabase().exec(`
+      CREATE TABLE settings (id INTEGER PRIMARY KEY, language TEXT NOT NULL DEFAULT 'en', theme TEXT NOT NULL DEFAULT 'zebra-light');
+      INSERT INTO settings (id) VALUES (1);
+      CREATE TABLE templates (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);
+      INSERT INTO templates (name) VALUES ('Bust');
+      CREATE TABLE commissions (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, client_id INTEGER, template_id INTEGER,
+        current_stage_id INTEGER, price REAL, deadline TEXT, notes TEXT, created_at TEXT NOT NULL);
+      INSERT INTO commissions (title, template_id, price, created_at) VALUES ('Old bust', 1, 60, '2025-05-01T10:00:00.000Z');
+      CREATE TABLE commission_stage_images (id INTEGER PRIMARY KEY AUTOINCREMENT, commission_id INTEGER NOT NULL, stage_id INTEGER NOT NULL,
+        label TEXT NOT NULL DEFAULT 'Alt 1', image_data_url TEXT NOT NULL, created_at TEXT NOT NULL);
+      INSERT INTO commission_stage_images (commission_id, stage_id, image_data_url, created_at) VALUES (1, 5, 'a.png', 'x'), (1, 5, 'b.png', 'y');
+    `);
+
+    await reopen();
+
+    expect(version()).toBe(db.SCHEMA_VERSION);
+    expect(await db.getCommissions()).toMatchObject([{ title: "Old bust", price: 60, currency: "EUR", character_count: 1 }]);
+    expect((await db.getTemplates())[0].color).toMatch(/^#[0-9a-f]{6}$/i);
+    expect((await db.getCommissionStageImages(1)).map(({ alt, version: v }) => [alt, v])).toEqual([[1, 1], [2, 1]]);
+    expect(columns("commissions")).toEqual(expect.arrayContaining(["delivered_at", "hours", "final_notes", "stage_changed_at"]));
+  });
+
+  test("a database that can't be brought up to date stops the start with its error, and keeps its version", async () => {
+    resetDatabase();
+    rawDatabase().exec("CREATE VIEW commissions AS SELECT 1 AS id"); // a column can't be added to a view
+
+    await expect(reopen()).rejects.toThrow("view");
+    expect(version()).toBe(0);
+  });
+
+  test("every column the code writes exists in a new database", () => {
+    const files = readdirSync(new URL("../src/lib/", import.meta.url)).filter((name) => name.endsWith(".ts"));
+    const missing: string[] = [];
+    let checked = 0;
+
+    for (const name of files) {
+      const text = readFileSync(new URL(`../src/lib/${name}`, import.meta.url), "utf8");
+      const writes = [
+        ...[...text.matchAll(/INSERT(?: OR \w+)? INTO (\w+)\s*\(([^)]*)\)/g)].map(([, table, list]) => [table, list.split(",").map((c) => c.trim())] as const),
+        ...[...text.matchAll(/UPDATE (\w+)\s+SET\s+([^;`]*?)\s+WHERE/gs)].map(([, table, sets]) => [table, [...sets.matchAll(/(\w+)\s*=/g)].map((m) => m[1])] as const),
+      ];
+      for (const [table, written] of writes) {
+        const have = columns(table);
+        if (have.length === 0) continue; // a word in a comment, not a table
+        for (const column of written) {
+          checked += 1;
+          if (!have.includes(column)) missing.push(`${name}: ${table}.${column}`);
+        }
+      }
+    }
+
+    expect(missing).toEqual([]);
+    expect(checked).toBeGreaterThan(100); // the pattern still finds the statements
+  });
+});
+
 describe("data left by older versions, and empty fields", () => {
-  test("templates without a colour get the colour of their old type tag, or one from the palette", async () => {
-    await db.createTag("Bust", "#abcdef", TYPE_CATEGORY);
-    rawDatabase().exec(`INSERT INTO templates (name, color) VALUES ('Bust', NULL), ('Sticker', NULL);`);
+  test("templates from before colours get the colour of their old type tag, or one from the palette", async () => {
+    resetDatabase(); // a database from the version where the type was a tag and templates had no colour
+    rawDatabase().exec(`
+      CREATE TABLE tags (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, color TEXT NOT NULL, category TEXT DEFAULT 'General');
+      INSERT INTO tags (name, color, category) VALUES ('Bust', '#abcdef', '${TYPE_CATEGORY}');
+      CREATE TABLE templates (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);
+      INSERT INTO templates (name) VALUES ('Bust'), ('Sticker');
+    `);
 
     await reopen();
 

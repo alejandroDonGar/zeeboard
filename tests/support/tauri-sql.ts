@@ -7,7 +7,11 @@ const toSql = (params: unknown[] = []) =>
   params.map((value) => (value === undefined ? null : typeof value === "boolean" ? Number(value) : value)) as SQLInputValue[];
 
 // On globalThis: vi.resetModules() loads this module again, and the "file" has to survive that
-const store = globalThis as { zeeboardTestDb?: DatabaseSync };
+const store = globalThis as { zeeboardTestDb?: DatabaseSync; zeeboardStatements?: number };
+
+/** How many statements the app has run since the last reset (to check what opening the app costs) */
+export const statementCount = () => store.zeeboardStatements ?? 0;
+export const resetStatementCount = () => void (store.zeeboardStatements = 0);
 
 /** A new empty "file": call it before each test. Until the next call, closing and loading again keeps the data. */
 export function resetDatabase() {
@@ -23,10 +27,12 @@ export function loadDatabase() {
   const db = (store.zeeboardTestDb ??= new DatabaseSync(":memory:"));
   return {
     async execute(sql: string, params?: unknown[]) {
+      store.zeeboardStatements = statementCount() + 1;
       const result = db.prepare(sql).run(...toSql(params));
       return { rowsAffected: Number(result.changes), lastInsertId: Number(result.lastInsertRowid) };
     },
     async select<T>(sql: string, params?: unknown[]): Promise<T> {
+      store.zeeboardStatements = statementCount() + 1;
       return db.prepare(sql).all(...toSql(params)) as T;
     },
     // Like closing a file: the data stays for the next load
