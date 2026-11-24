@@ -7,6 +7,9 @@ vi.mock("@tauri-apps/plugin-sql", async () => {
   const { loadDatabase } = await import("./support/tauri-sql");
   return { default: { load: async () => loadDatabase() } };
 });
+// The save dialog and the Rust command that writes the file, for the CSV export
+vi.mock("@tauri-apps/plugin-dialog", () => ({ save: vi.fn() }));
+vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
 // Image files live on disk through Rust; here only the database side matters
 vi.mock("../src/lib/images", () => ({
   deleteImageFiles: vi.fn(async () => 0),
@@ -579,6 +582,55 @@ describe("helpers that read the database", () => {
     const loaded = await helpers.loadStageImagesForCommissions(await db.getCommissions());
     expect(loaded[withImage].map((image) => image.image_data_url)).toEqual(["images/1.webp"]);
     expect(loaded[without]).toEqual([]);
+  });
+});
+
+describe("CSV export to a file", () => {
+  test("each export asks where to save and writes the CSV with a BOM for Excel", async () => {
+    const { exportCsv } = await import("../src/lib/export");
+    const { save } = await import("@tauri-apps/plugin-dialog");
+    const { invoke } = await import("@tauri-apps/api/core");
+    await newCommission("Bust", null, null);
+    vi.mocked(save).mockResolvedValue("C:/exports/out.csv");
+
+    for (const [kind, header] of [["commissions", "Title;"], ["payments", "Date;"], ["quarterly", "Quarter;"]] as const) {
+      expect(await exportCsv(kind)).toBe("C:/exports/out.csv");
+      const { path, contents } = vi.mocked(invoke).mock.lastCall![1] as { path: string; contents: string };
+      expect(path).toBe("C:/exports/out.csv");
+      expect(contents.startsWith(`\uFEFF${header}`)).toBe(true);
+    }
+  });
+
+  test("closing the save dialog writes nothing", async () => {
+    const { exportCsv } = await import("../src/lib/export");
+    const { save } = await import("@tauri-apps/plugin-dialog");
+    const { invoke } = await import("@tauri-apps/api/core");
+    vi.mocked(save).mockResolvedValue(null);
+
+    expect(await exportCsv("payments")).toBeNull();
+    expect(invoke).not.toHaveBeenCalled();
+  });
+});
+
+describe("what needs attention", () => {
+  test("late, unpaid after the sketch and stalled commissions are found in the database", async () => {
+    const { loadAttention } = await import("../src/lib/reminders");
+    vi.useFakeTimers({ toFake: ["Date"] });
+    try {
+      await db.updateSettings({ promise_max_days: 365 });
+      const { id: templateId, stages } = await template("Bust", ["Sketch", "Lineart", "Colour"]);
+      vi.setSystemTime(new Date("2026-01-01T10:00:00"));
+      await newCommission("Stalled", null, templateId);
+      vi.setSystemTime(new Date("2026-03-01T10:00:00"));
+      await db.createCommission("Late", null, "Ana", "X", templateId, 60, "EUR", "2026-02-20", "", 1);
+      const unpaid = await newCommission("Unpaid", null, templateId);
+      await db.updateCommissionStage(unpaid, stages[1].id);
+
+      const kinds = Object.fromEntries((await loadAttention(new Date("2026-03-01T12:00:00"))).map((item) => [item.commission.title, item.kind]));
+      expect(kinds).toEqual({ Late: "overdue", Unpaid: "payment", Stalled: "stalled" });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 

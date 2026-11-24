@@ -1,9 +1,14 @@
 // Real-world inputs the main tests don't cover: short CSV rows, missing values, ties.
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
+import { sendNotification } from "@tauri-apps/plugin-notification";
+import { computeAttention, notifyNew } from "../src/lib/reminders";
+
+vi.mock("@tauri-apps/plugin-notification", () => ({ sendNotification: vi.fn() }));
 import { normalizeHandle, parseResponses } from "../src/lib/formImport";
 import { latestOfAlternative } from "../src/lib/ipadLink";
 import { search } from "../src/lib/search";
 import { matchPaypalRows, parsePaypalCsv, parsePaypalDate } from "../src/lib/paypalImport";
+import { buildCommissionsCsv, buildPaymentsCsv, buildQuarterlyCsv } from "../src/lib/export";
 import { computeStats } from "../src/lib/stats";
 import type { Commission, CommissionPayment, CommissionStageImage, TemplateStage } from "../src/lib/database";
 
@@ -73,6 +78,86 @@ describe("PayPal activity CSV", () => {
     const row = { txId: "TX1", date: "2026-10-04", currency: "", gross: 50, net: 48, email: "ana@example.com" };
     const [match] = matchPaypalRows([row], [{ id: 1, email: "ana@example.com" }], [{ id: 10, client_id: 1, price: 100, currency: null }], []);
     expect(match).toMatchObject({ status: "ready", commissionId: 10 });
+  });
+});
+
+describe("reminders", () => {
+  const options = { promise_max_days: 60, reminders_enabled: true, reminder_days_before: 3, stalled_enabled: true, stalled_days: 21 };
+  const now = new Date(2026, 9, 6, 12);
+
+  test("with no recorded activity, a commission counts as idle since it was accepted", () => {
+    const old = { id: 1, title: "Old", created_at: new Date(2026, 8, 1, 10).toISOString(), deadline: "2026-12-31" };
+    expect(computeAttention([old], {}, options, now).map((item) => [item.kind, item.days])).toEqual([["stalled", 35]]);
+  });
+
+  test("among late ones, the latest goes first", () => {
+    const late = (id: number, deadline: string) => ({ id, title: `C${id}`, created_at: new Date(2026, 9, 1).toISOString(), deadline });
+    const items = computeAttention([late(1, "2026-10-04"), late(2, "2026-10-01")], {}, options, now);
+    expect(items.map((item) => item.commission.id)).toEqual([2, 1]);
+  });
+});
+
+describe("Windows notifications", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.mocked(sendNotification).mockClear();
+  });
+  const item = (key: string) => ({ key, text: `Alert ${key}` }) as Parameters<typeof notifyNew>[0][number];
+  const storage = (broken = false) => {
+    const data: Record<string, string> = {};
+    const fail = () => {
+      throw new Error("storage disabled");
+    };
+    vi.stubGlobal("localStorage", {
+      getItem: broken ? fail : (key: string) => data[key] ?? null,
+      setItem: broken ? fail : (key: string, value: string) => void (data[key] = value),
+    });
+  };
+
+  test("each alert is sent once", () => {
+    storage();
+    expect(notifyNew([item("a"), item("b")])).toBe(2);
+    expect(vi.mocked(sendNotification).mock.calls.map(([options]) => (options as { body: string }).body)).toEqual(["Alert a", "Alert b"]);
+    expect(notifyNew([item("a"), item("b")])).toBe(0);
+  });
+
+  test("more than three at once become one summary", () => {
+    storage();
+    expect(notifyNew(["a", "b", "c", "d"].map(item))).toBe(4);
+    expect(sendNotification).toHaveBeenCalledOnce();
+    expect(sendNotification).toHaveBeenCalledWith({ title: "ZeeBoard", body: "4 commissions need your attention" });
+  });
+
+  test("without storage it still alerts (better to repeat than to miss one)", () => {
+    storage(true);
+    expect(notifyNew([item("a")])).toBe(1);
+    expect(notifyNew([item("a")])).toBe(1);
+  });
+});
+
+describe("CSV export", () => {
+  const queued = {
+    id: 1, title: "Queued", client_name: null, platform: null, template_id: null, current_stage_id: null, price: null,
+    currency: null, created_at: "2026-11-01T10:00:00.000Z", deadline: null,
+  } as Commission;
+  const orphan = { id: 9, commission_id: 99, amount: 20, received: null, paid_at: "2026-11-02", note: null } as CommissionPayment;
+  const data = { commissions: [queued], payments: [orphan], templates: [], stages: {} };
+
+  test("a commission in the queue, without a template, price or currency, still exports", () => {
+    const [, row] = buildCommissionsCsv(data).split("\r\n");
+    expect(row).toBe("Queued;;;;;Queue;;EUR;0,00;;;Unpaid;2026-11-01;");
+  });
+
+  test("a commission at the last stage of its template exports as finished", () => {
+    const stages = { 1: [{ id: 10, template_id: 1, name: "Delivery", stage_order: 1 }] };
+    const finished = { ...queued, template_id: 1, current_stage_id: 10 };
+    const [, row] = buildCommissionsCsv({ ...data, commissions: [finished], stages }).split("\r\n");
+    expect(row.split(";").slice(4, 6)).toEqual(["Delivery", "Finished"]);
+  });
+
+  test("a payment whose commission is gone exports with empty title and in euros", () => {
+    expect(buildPaymentsCsv(data).split("\r\n")[1]).toBe("2026-11-02;;;EUR;20,00;;;");
+    expect(buildQuarterlyCsv(data).split("\r\n")[1]).toMatch(/^2026.*4;EUR;1;20,00;0,00;0,00;1$/);
   });
 });
 
