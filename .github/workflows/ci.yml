@@ -1,0 +1,44 @@
+# Comprueba cada push y cada pull request: tipos, tests de la lógica (TypeScript) y tests de Rust.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  web:
+    name: TypeScript (tipos y tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24 # node:sqlite, que usa el test de la base de datos nueva
+          cache: npm
+      - run: npm ci
+      - run: npx tsc --noEmit
+      - run: npm run coverage
+
+  rust:
+    name: Rust (clippy y tests)
+    # Windows: es la plataforma de la app y no necesita instalar las librerías de WebKit de Linux
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # Tauri incrusta dist/ al compilar, y dist/ no está en git
+      - run: npm ci
+      - run: npm run build
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: cargo clippy --all-targets -- -D warnings
+        working-directory: src-tauri
+      - run: cargo test
+        working-directory: src-tauri
