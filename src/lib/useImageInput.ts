@@ -46,8 +46,9 @@ export function useImageInput({
         if (payload.type === "drop") {
           setDragZoneId(null);
 
+          // Extension after the last dot (a name without one gives the whole name, which matches nothing)
           const images = payload.paths.filter((path) =>
-            IMAGE_EXTENSIONS.includes(path.split(".").pop()?.toLowerCase() ?? ""),
+            IMAGE_EXTENSIONS.includes(path.slice(path.lastIndexOf(".") + 1).toLowerCase()),
           );
 
           if (zoneId && images.length > 0) {

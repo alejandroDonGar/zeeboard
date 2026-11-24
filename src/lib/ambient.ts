@@ -138,7 +138,7 @@ export function dominantColors(pixels: Uint8ClampedArray): AmbientColors | null 
 
   // Una imagen de un solo tono: variaciones del mismo para completar los tres
   while (picked.length < 3) {
-    const base = picked[picked.length - 1] ?? ranked[0];
+    const base = picked[picked.length - 1]; // the first ranked hue is always picked
     picked.push({ ...base, hue: (base.hue + 30) % 360 });
   }
 
@@ -174,7 +174,8 @@ async function setAmbientImage(path: string | null): Promise<void> {
 
   if (!path) return publish(NEUTRAL);
 
-  if (cache.has(path)) return publish(cache.get(path) ?? NEUTRAL);
+  const cached = cache.get(path);
+  if (cached !== undefined) return publish(cached);
 
   try {
     const found = await extract(path);

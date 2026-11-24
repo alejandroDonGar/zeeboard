@@ -9,12 +9,15 @@ const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]),select:n
  */
 /** Engancha el comportamiento a un diálogo ya montado; devuelve la función que lo deshace. */
 export function bindDialog(node: HTMLElement | null, close: { current?: () => void }): () => void {
+  // Sin el diálogo en la página no hay nada que enganchar
+  if (!node) return () => {};
+
   const previous = document.activeElement as HTMLElement | null;
-  const items = () => [...(node?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? [])].filter((item) => item.offsetParent !== null);
+  const items = () => [...node.querySelectorAll<HTMLElement>(FOCUSABLE)].filter((item) => item.offsetParent !== null);
 
   // Un diálogo sin controles (la lista de atajos) recibe el foco él mismo
-  if (node && items().length === 0) node.tabIndex = -1;
-  if (node && !node.contains(document.activeElement)) (items()[0] ?? node).focus();
+  if (items().length === 0) node.tabIndex = -1;
+  if (!node.contains(document.activeElement)) (items()[0] ?? node).focus();
 
   const onKey = (event: KeyboardEvent) => {
     const dialogs = document.querySelectorAll('[role="dialog"]');
