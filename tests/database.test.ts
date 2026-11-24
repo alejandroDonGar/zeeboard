@@ -319,6 +319,19 @@ describe("clients and characters", () => {
     expect(deletedFiles()).toEqual(["images/luna1.webp"]);
   });
 
+  test("a new reference never repeats the number of one already there, even after deleting", async () => {
+    const ana = await db.createClient("Ana", "X", "ana", "");
+    await db.createClientCharacter(ana, "Luna", "");
+    const [luna] = await db.getClientCharacters(ana);
+    await db.createCharacterReference(luna.id, "images/1.webp");
+    await db.createCharacterReference(luna.id, "images/2.webp");
+
+    await db.deleteCharacterReference((await db.getCharacterReferences(luna.id))[0].id);
+    await db.createCharacterReference(luna.id, "images/3.webp");
+
+    expect((await db.getCharacterReferences(luna.id)).map((reference) => reference.label)).toEqual(["Reference 2", "Reference 3"]);
+  });
+
   test("deleting a client keeps their commissions unlinked; restoring links them again", async () => {
     const clientId = await db.createClient("Ana", "X", "ana", "");
     const id = await newCommission("Bust", clientId, null);

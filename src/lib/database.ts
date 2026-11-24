@@ -1503,22 +1503,22 @@ export async function getCharacterReferences(
   );
 }
 
+// Every reference label is written here, as "Reference N"
+const REFERENCE_LABEL = "Reference ";
+
 export async function createCharacterReference(
   characterId: number,
   imagePath: string,
 ): Promise<void> {
   const database = await getDatabase();
 
-  const existingReferences = await database.select<{ count: number }[]>(
-    `
-    SELECT COUNT(*) as count
-    FROM character_references
-    WHERE character_id = ?;
-    `,
+  // Next after the highest number, not after the count: after deleting one, the count repeats a number still in use
+  const labels = await database.select<{ label: string }[]>(
+    `SELECT label FROM character_references WHERE character_id = ?;`,
     [characterId],
   );
 
-  const referenceNumber = existingReferences[0].count + 1;
+  const referenceNumber = Math.max(0, ...labels.map(({ label }) => Number(label.slice(REFERENCE_LABEL.length)))) + 1;
 
   await database.execute(
     `
@@ -1532,7 +1532,7 @@ export async function createCharacterReference(
     `,
     [
       characterId,
-      `Reference ${referenceNumber}`,
+      `${REFERENCE_LABEL}${referenceNumber}`,
       imagePath,
       new Date().toISOString(),
     ],
