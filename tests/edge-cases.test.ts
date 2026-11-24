@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { normalizeHandle, parseResponses } from "../src/lib/formImport";
 import { latestOfAlternative } from "../src/lib/ipadLink";
 import { search } from "../src/lib/search";
+import { matchPaypalRows, parsePaypalCsv, parsePaypalDate } from "../src/lib/paypalImport";
 import { computeStats } from "../src/lib/stats";
 import type { Commission, CommissionPayment, CommissionStageImage, TemplateStage } from "../src/lib/database";
 
@@ -40,6 +41,38 @@ describe("form responses", () => {
   test("an empty handle compares as empty", () => {
     expect(normalizeHandle(null)).toBe("");
     expect(normalizeHandle(undefined)).toBe("");
+  });
+});
+
+describe("PayPal activity CSV", () => {
+  test("an empty file says so", () => {
+    expect(parsePaypalCsv("").error).toBeTruthy();
+  });
+
+  test("without status, fee or net columns, the gross is what reached you", () => {
+    const csv = "Date,Currency,Gross,From Email Address,Transaction ID\n04/10/2026,eur,\"120,00\",Ana@Example.com,TX1";
+    expect(parsePaypalCsv(csv).rows).toEqual([{ txId: "TX1", date: "2026-10-04", currency: "EUR", gross: 120, net: 120, email: "ana@example.com" }]);
+  });
+
+  test("short lines, unreadable dates or amounts, refunds and pending payments are skipped", () => {
+    const header = "Date,Status,Currency,Gross,Fee,Net,From Email Address,Transaction ID";
+    const csv = [
+      header,
+      "04/10/2026,Completed,EUR",
+      "someday,Completed,EUR,120,-4,116,ana@example.com,TX1",
+      "04/10/2026,Completed,EUR,-120,0,-120,ana@example.com,TX2",
+      "04/10/2026,Pending,EUR,120,-4,116,ana@example.com,TX3",
+      "04/10/2026,Completed,EUR,120,n/a,,ana@example.com,TX4",
+    ].join("\n");
+    // The last one: fee unreadable counts as 0, net missing is computed
+    expect(parsePaypalCsv(csv).rows).toEqual([{ txId: "TX4", date: "2026-10-04", currency: "EUR", gross: 120, net: 120, email: "ana@example.com" }]);
+    expect(parsePaypalDate("tomorrow")).toBeNull();
+  });
+
+  test("a commission or a payment without a currency matches any currency", () => {
+    const row = { txId: "TX1", date: "2026-10-04", currency: "", gross: 50, net: 48, email: "ana@example.com" };
+    const [match] = matchPaypalRows([row], [{ id: 1, email: "ana@example.com" }], [{ id: 10, client_id: 1, price: 100, currency: null }], []);
+    expect(match).toMatchObject({ status: "ready", commissionId: 10 });
   });
 });
 

@@ -65,19 +65,21 @@ export function parsePaypalCsv(text: string): { rows: PaypalRow[]; error?: strin
   const rows: PaypalRow[] = [];
 
   for (const line of lines) {
-    const gross = parseAmount(line[grossC] ?? "");
-    const fee = feeC >= 0 ? (parseAmount(line[feeC] ?? "") ?? 0) : 0;
-    const net = netC >= 0 ? parseAmount(line[netC] ?? "") : null;
-    const date = parsePaypalDate(line[dateC] ?? "");
-    const email = (line[fromC] ?? "").trim().toLowerCase();
-    const txId = (line[txC] ?? "").trim();
-    const status = statusC >= 0 ? (line[statusC] ?? "") : "completed";
+    // A short line (cells missing at the end) reads as empty cells
+    const cell = (index: number) => (line[index] ?? "").trim();
+    const gross = parseAmount(cell(grossC));
+    const fee = feeC >= 0 ? (parseAmount(cell(feeC)) ?? 0) : 0;
+    const net = netC >= 0 ? parseAmount(cell(netC)) : null;
+    const date = parsePaypalDate(cell(dateC));
+    const email = cell(fromC).toLowerCase();
+    const txId = cell(txC);
+    const status = statusC >= 0 ? cell(statusC) : "completed";
 
     if (gross === null || gross <= 0 || !date || !email || !txId || !/complet|hecho|liberad/i.test(status)) {
       continue;
     }
 
-    rows.push({ txId, date, currency: (line[currencyC] ?? "").trim().toUpperCase(), gross, net: round2(net ?? gross + fee), email });
+    rows.push({ txId, date, currency: cell(currencyC).toUpperCase(), gross, net: round2(net ?? gross + fee), email });
   }
 
   return { rows };
@@ -107,7 +109,7 @@ export function matchPaypalRows(
 ): PaypalMatch[] {
   const imported = new Set(payments.map((payment) => payment.external_id).filter(Boolean));
   // what each commission still owes; drops as payments from this same file are assigned
-  const remaining = new Map(
+  const remaining: Record<number, number> = Object.fromEntries(
     commissions.map((commission) => [
       commission.id,
       paymentSummary(commission.price, payments.filter((payment) => payment.commission_id === commission.id)).remaining,
@@ -133,17 +135,17 @@ export function matchPaypalRows(
         .filter(
           (commission) =>
             commission.client_id === client.id &&
-            (remaining.get(commission.id) ?? 0) > 0 &&
+            remaining[commission.id] > 0 &&
             (!commission.currency || !row.currency || commission.currency.toUpperCase() === row.currency),
         )
         .sort((a, b) => a.id - b.id);
-      const chosen = open.find((commission) => remaining.get(commission.id) === row.gross) ?? open[0];
+      const chosen = open.find((commission) => remaining[commission.id] === row.gross) ?? open[0];
 
       if (!chosen) {
         return { ...none, status: "nodebt", clientId: client.id };
       }
 
-      remaining.set(chosen.id, round2(Math.max((remaining.get(chosen.id) ?? 0) - row.gross, 0)));
+      remaining[chosen.id] = round2(Math.max(remaining[chosen.id] - row.gross, 0));
 
       return { row, status: "ready", clientId: client.id, commissionId: chosen.id };
     });
