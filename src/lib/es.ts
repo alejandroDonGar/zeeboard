@@ -5,7 +5,6 @@ export const es: Record<string, string> = {
   Requests: "Solicitudes",
   Clients: "Clientes",
   Tags: "Etiquetas",
-  Templates: "Plantillas",
   Finished: "Terminadas",
   Settings: "Ajustes",
   "Hide client names and prices while streaming (Ctrl+Shift+P)": "Oculta nombres de clientes y precios en directo (Ctrl+Shift+P)",
@@ -15,9 +14,7 @@ export const es: Record<string, string> = {
   Search: "Buscar",
 
   // Settings
-  "Appearance, pricing, backups and storage.": "Apariencia, precios, copias y almacenamiento.",
   Appearance: "Apariencia",
-  Pricing: "Precios",
   Delivery: "Entrega",
   Backups: "Copias de seguridad",
   "Import payments": "Importar pagos",
@@ -302,7 +299,6 @@ export const es: Record<string, string> = {
   "on the waitlist": "en lista de espera",
   unanswered: "sin responder",
   "{n} % of the decided ones were accepted": "el {n} % de las ya decididas se aceptaron",
-  "{received} received · {accepted} accepted": "{received} recibidas · {accepted} aceptadas",
   Days: "Días",
   "{n} piece": "{n} pieza",
   "{n} pieces": "{n} piezas",
@@ -315,7 +311,6 @@ export const es: Record<string, string> = {
   "{n} payment without the received amount isn't included.": "{n} pago sin el importe recibido no está incluido.",
   "{n} payments without the received amount aren't included.": "{n} pagos sin el importe recibido no están incluidos.",
   Statistics: "Estadísticas",
-  "How your commissions are doing.": "Cómo van tus comisiones.",
   "This year": "Este año",
   "Last 12 months": "Últimos 12 meses",
   "All time": "Todo",
@@ -331,7 +326,6 @@ export const es: Record<string, string> = {
   "No template": "Sin plantilla",
   "Per hour": "Por hora",
   "Commissions land here when you mark them as finished.": "Las comisiones llegan aquí cuando las marcas como terminadas.",
-  "Everything you've delivered, grouped by delivery month or by client.": "Todo lo que has entregado, agrupado por mes de entrega o por cliente.",
   "{n} piece · {hours} h": "{n} pieza · {hours} h",
   "{n} pieces · {hours} h": "{n} piezas · {hours} h",
   "Mark as finished": "Marcar como terminada",
@@ -409,9 +403,6 @@ export const es: Record<string, string> = {
   "Enter what the client paid": "Escribe lo que pagó el cliente",
 
   // Requests
-  "People who want a commission: accept them, keep them waiting, or decline.": "Gente que quiere una comisión: acéptala, déjala en espera o recházala.",
-  "+ New request": "+ Nueva solicitud",
-  "Open for commissions": "Abierto a comisiones",
   Closed: "Cerrado",
   Open: "Abierto",
   "{taken} of {total} slots taken": "{taken} de {total} plazas ocupadas",
@@ -420,8 +411,6 @@ export const es: Record<string, string> = {
   "{n} over": "{n} de más",
   slots: "plazas",
   "Every commission that isn't finished takes a slot, including the ones in the queue.": "Cada comisión sin terminar ocupa una plaza, también las que están en cola.",
-  "Form responses": "Respuestas del formulario",
-  "Not connected: pick the CSV your Google script keeps up to date.": "Sin conectar: elige el CSV que tu script de Google mantiene al día.",
   "Checked {date} · again every 30 minutes": "Comprobado {date} · de nuevo cada 30 minutos",
   "Not checked yet": "Aún sin comprobar",
   "Choose file…": "Elegir archivo…",
@@ -443,7 +432,6 @@ export const es: Record<string, string> = {
   "Remove from the list": "Quitar de la lista",
   "Choose the type…": "Elige el tipo…",
   "Choose the type first": "Elige antes el tipo",
-  "Tag when posting:": "Etiquetar al publicar:",
   "{n} character": "{n} personaje",
   "{n} characters": "{n} personajes",
   "New request": "Nueva solicitud",
@@ -488,8 +476,6 @@ export const es: Record<string, string> = {
   "Import {n}": "Importar {n}",
 
   // Clients
-  "Your clients, their characters and their commissions.": "Tus clientes, sus personajes y sus comisiones.",
-  "+ New client": "+ Nuevo cliente",
   "Search clients…": "Buscar clientes…",
   "No clients yet": "Aún no hay clientes",
   "No contact": "Sin contacto",
@@ -517,7 +503,6 @@ export const es: Record<string, string> = {
   "No references": "Sin referencias",
   "Character name": "Nombre del personaje",
   Add: "Añadir",
-  "+ Character": "+ Personaje",
   Save: "Guardar",
   "Notes: species, colours, details to remember…": "Notas: especie, colores, detalles que recordar…",
   "No notes yet.": "Aún no hay notas.",
@@ -542,25 +527,15 @@ export const es: Record<string, string> = {
   "Could not add reference image: {error}": "No se pudo añadir la imagen de referencia: {error}",
 
   // Finished
-  Archive: "Archivo",
-  "Finished commissions": "Comisiones terminadas",
   "By month": "Por mes",
   "By client": "Por cliente",
   to: "a",
-  Clear: "Quitar",
   "{n} finished · {amount}": "{n} terminadas · {amount}",
   "Nothing finished yet": "Aún no hay nada terminado",
   "Try another search or date range.": "Prueba otra búsqueda o rango de fechas.",
   "View image": "Ver imagen",
 
   // Tags
-  "+ New category": "+ Nueva categoría",
-  "Category name, e.g. Extras": "Nombre de la categoría, p. ej. Extras",
-  Create: "Crear",
-  "Start your first category": "Empieza tu primera categoría",
-  "Group tags like commission types, extras or payment status.": "Agrupa etiquetas como tipos de comisión, extras o estado de pago.",
-  "New category": "Nueva categoría",
-  "+ Add tag": "+ Añadir etiqueta",
   "Tag name": "Nombre de la etiqueta",
   "Custom colour": "Color personalizado",
   "Not used": "Sin usar",
@@ -571,7 +546,6 @@ export const es: Record<string, string> = {
   "Could not delete tag.": "No se pudo borrar la etiqueta.",
 
   // Templates
-  "+ New template": "+ Nueva plantilla",
   "No templates yet. Create one on the right.": "Aún no hay plantillas. Crea una a la derecha.",
   "Create a commission type first (Catalog), then your first commission.": "Crea primero un tipo de comisión (Catálogo) y luego tu primera comisión.",
   "Create your first template": "Crea tu primera plantilla",
@@ -585,7 +559,6 @@ export const es: Record<string, string> = {
   "Remove stage": "Quitar etapa",
   "{n} stage": "{n} etapa",
   "{n} stages": "{n} etapas",
-  "{n} in use": "{n} en uso",
   "Delete template": "Borrar plantilla",
   "Action not allowed": "Acción no permitida",
   "Can't delete template": "No se puede borrar la plantilla",
@@ -626,7 +599,6 @@ export const es: Record<string, string> = {
   "Switch to dark theme": "Cambiar al tema oscuro",
 
   // Filters shared by several screens
-  All: "Todas",
   Unpaid: "Sin pagar",
   Partial: "Parcial",
   Paid: "Pagado",
@@ -645,12 +617,9 @@ export const es: Record<string, string> = {
   Catalog: "Catálogo",
   "Commission types": "Tipos de comisión",
   "Commission type": "Tipo de comisión",
-  "Each type of commission: its stages, price and colour.": "Cada tipo de comisión: sus etapas, precio y color.",
-  "Extras you mark commissions with: rush, commercial use, number of characters…": "Extras con los que marcas las comisiones: urgente, uso comercial, número de personajes…",
   "The type now comes from the commission's template, with its own colour, so these tags are no longer shown on commissions. They are kept so nothing is lost; delete them whenever you like.":
     "El tipo sale ahora de la plantilla de la comisión, con su propio color, así que estas etiquetas ya no se muestran en las comisiones. Se conservan para no perder nada; bórralas cuando quieras.",
   Colour: "Color",
-  "the bar and chip of every commission of this type": "la barra y la etiqueta de cada comisión de este tipo",
   "Most used types and tags": "Tipos y etiquetas más usados",
   "Edit commission": "Editar comisión",
   "{n} in progress": "{n} en curso",
