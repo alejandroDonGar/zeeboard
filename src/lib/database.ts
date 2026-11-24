@@ -535,11 +535,7 @@ export async function createTemplate(name: string, stages: string[]): Promise<vo
       [templateName, PALETTE[count % PALETTE.length]],
     );
 
-    const templateId = result.lastInsertId;
-
-    if (!templateId) {
-      throw new Error("Could not get created template id");
-    }
+    const templateId = Number(result.lastInsertId);
 
     for (let index = 0; index < templateStages.length; index++) {
       await database.execute(
@@ -610,11 +606,7 @@ export async function duplicateTemplate(templateId: number): Promise<void> {
     [`${sourceTemplate.name} Copy`, sourceTemplate.base_price, sourceTemplate.revisions_included, sourceTemplate.color],
   );
 
-  const newTemplateId = result.lastInsertId;
-
-  if (!newTemplateId) {
-    throw new Error("Could not get duplicated template id");
-  }
+  const newTemplateId = Number(result.lastInsertId);
 
   for (const stage of stages) {
     await database.execute(
@@ -943,10 +935,11 @@ export async function duplicateCommission(
   const copyNumber = similarCopies[0].count + 1;
   const copyTitle = `${commission.title} Copy ${copyNumber}`;
 
-  await database.execute(
+  const result = await database.execute(
     `
     INSERT INTO commissions (
       title,
+      client_id,
       client_name,
       platform,
       template_id,
@@ -958,10 +951,11 @@ export async function duplicateCommission(
       character_count,
       created_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `,
     [
       copyTitle,
+      commission.client_id,
       commission.client_name,
       commission.platform,
       commission.template_id,
@@ -975,11 +969,8 @@ export async function duplicateCommission(
     ],
   );
 
-  const result = await database.select<{ id: number }[]>(`
-    SELECT last_insert_rowid() AS id;
-  `);
-
-  return result[0].id;
+  // From the INSERT itself: a separate SELECT last_insert_rowid() could run on another connection of the pool
+  return Number(result.lastInsertId);
 }
 
 /**
@@ -2170,7 +2161,7 @@ export async function importRequests(items: ImportedRequest[]): Promise<{ added:
   return await runSerialized(async (database) => {
     // Requests that went to the trash before this was remembered: their ids join the list now
     for (const { payload } of await database.select<{ payload: string }[]>(`SELECT payload FROM trash WHERE kind = 'request';`)) {
-      for (const row of (JSON.parse(payload) as Snapshot).commission_requests ?? []) {
+      for (const row of (JSON.parse(payload) as Snapshot).commission_requests) {
         if (row.external_id) {
           await database.execute(`INSERT OR IGNORE INTO ignored_requests (external_id) VALUES (?);`, [row.external_id]);
         }

@@ -6,8 +6,21 @@ import { DatabaseSync, type SQLInputValue } from "node:sqlite";
 const toSql = (params: unknown[] = []) =>
   params.map((value) => (value === undefined ? null : typeof value === "boolean" ? Number(value) : value)) as SQLInputValue[];
 
-export function memoryDatabase() {
-  const db = new DatabaseSync(":memory:");
+// On globalThis: vi.resetModules() loads this module again, and the "file" has to survive that
+const store = globalThis as { zeeboardTestDb?: DatabaseSync };
+
+/** A new empty "file": call it before each test. Until the next call, closing and loading again keeps the data. */
+export function resetDatabase() {
+  store.zeeboardTestDb = new DatabaseSync(":memory:");
+}
+
+/** The "file" itself, to prepare data the way an older version of the app left it */
+export function rawDatabase(): DatabaseSync {
+  return (store.zeeboardTestDb ??= new DatabaseSync(":memory:"));
+}
+
+export function loadDatabase() {
+  const db = (store.zeeboardTestDb ??= new DatabaseSync(":memory:"));
   return {
     async execute(sql: string, params?: unknown[]) {
       const result = db.prepare(sql).run(...toSql(params));
@@ -16,8 +29,7 @@ export function memoryDatabase() {
     async select<T>(sql: string, params?: unknown[]): Promise<T> {
       return db.prepare(sql).all(...toSql(params)) as T;
     },
-    async close() {
-      db.close();
-    },
+    // Like closing a file: the data stays for the next load
+    async close() {},
   };
 }
