@@ -4,6 +4,7 @@ import { newResponses, type ImportedRequest } from "./formImport";
 import { PALETTE, templateColors } from "./catalog";
 import {
   imagePathsOf,
+  integrityStatements,
   insertStatement,
   KINDS,
   planRestore,
@@ -474,7 +475,42 @@ async function addColumn(database: ZeeDatabase, table: string, definition: strin
  * A new change is a new function at the end; one that has shipped is never edited. Each must be safe to run twice:
  * there is no transaction (the plugin's pool doesn't guarantee one connection), so a crash before the version is saved repeats it.
  */
-const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline];
+const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity];
+
+/** Migration 2: an index on every column things are looked up by, so lists and deletions don't read whole tables. */
+async function indexes(database: ZeeDatabase): Promise<void> {
+  const lookups: [string, string][] = [
+    ["commissions", "client_id"],
+    ["commissions", "template_id"],
+    ["template_stages", "template_id, stage_order"],
+    ["commission_payments", "commission_id"],
+    ["commission_corrections", "commission_id"],
+    ["commission_corrections", "image_id"],
+    ["commission_stage_images", "commission_id, stage_id"],
+    ["commission_tags", "tag_id"],
+    ["commission_characters", "character_id"],
+    ["client_characters", "client_id"],
+    ["character_references", "character_id"],
+    ["commission_requests", "commission_id"],
+  ];
+
+  for (const [table, columns] of lookups) {
+    await database.execute(`CREATE INDEX IF NOT EXISTS idx_${table}_${columns.split(",")[0]} ON ${table} (${columns});`);
+  }
+}
+
+/** Migration 3: the links between tables, kept by the database (see integrityStatements in trash.ts). */
+async function integrity(database: ZeeDatabase): Promise<void> {
+  for (const statement of integrityStatements()) {
+    await database.execute(statement);
+  }
+
+  // A deleted image's pins stay as plain corrections: the text is kept, the position means nothing now
+  await database.execute(`
+    CREATE TRIGGER IF NOT EXISTS pins_when_image_deleted AFTER DELETE ON commission_stage_images
+    BEGIN UPDATE commission_corrections SET image_id = NULL, x = NULL, y = NULL WHERE image_id = OLD.id; END;
+  `);
+}
 
 export const SCHEMA_VERSION = MIGRATIONS.length;
 
@@ -565,11 +601,7 @@ export async function deleteTemplate(templateId: number): Promise<number> {
 
   const trashId = await moveToTrash("template", templateId);
 
-  await database.execute(
-    `DELETE FROM template_stages WHERE template_id = ?;`,
-    [templateId],
-  );
-
+  // Its stages go with it (database trigger)
   await database.execute(
     `DELETE FROM templates WHERE id = ?;`,
     [templateId],
@@ -1006,10 +1038,7 @@ export async function deleteCommission(
   const trashId = await moveToTrash("commission", commissionId);
   const database = await getDatabase();
 
-  for (const table of ["commission_tags", "commission_payments", "commission_corrections", "commission_stage_images", "commission_characters"]) {
-    await database.execute(`DELETE FROM ${table} WHERE commission_id = ?;`, [commissionId]);
-  }
-
+  // Tags, payments, corrections, images and characters go with it, in the same statement (database triggers)
   await database.execute(`DELETE FROM commissions WHERE id = ?;`, [commissionId]);
 
   return trashId;
@@ -1140,8 +1169,7 @@ export async function deleteTag(tagId: number): Promise<number> {
   return runSerialized(async (database) => {
     const trashId = await moveToTrash("tag", tagId);
 
-    // Also removed from the commissions that had it
-    await database.execute(`DELETE FROM commission_tags WHERE tag_id = ?;`, [tagId]);
+    // Also removed from the commissions that had it (database trigger)
     await database.execute(`DELETE FROM tags WHERE id = ?;`, [tagId]);
 
     return trashId;
@@ -1308,37 +1336,8 @@ export async function deleteClient(clientId: number): Promise<number> {
   const trashId = await moveToTrash("client", clientId);
   const database = await getDatabase();
 
-  const characters = await database.select<{ id: number }[]>(
-    `SELECT id FROM client_characters WHERE client_id = ?;`,
-    [clientId],
-  );
-
-  for (const character of characters) {
-    await database.execute(
-      `DELETE FROM character_references WHERE character_id = ?;`,
-      [character.id],
-    );
-
-    await database.execute(
-      `DELETE FROM commission_characters WHERE character_id = ?;`,
-      [character.id],
-    );
-  }
-
-  await database.execute(
-    `DELETE FROM client_characters WHERE client_id = ?;`,
-    [clientId],
-  );
-
-  await database.execute(
-    `UPDATE commissions SET client_id = NULL WHERE client_id = ?;`,
-    [clientId],
-  );
-
-  await database.execute(
-    `DELETE FROM clients WHERE id = ?;`,
-    [clientId],
-  );
+  // Their commissions stay, unlinked; their characters go with their references (database triggers)
+  await database.execute(`DELETE FROM clients WHERE id = ?;`, [clientId]);
 
   return trashId;
 }
@@ -1453,11 +1452,8 @@ export async function deleteClientCharacter(
     [characterId],
   );
 
-  await runSerialized(async (serialized) => {
-    await serialized.execute(`DELETE FROM character_references WHERE character_id = ?;`, [characterId]);
-    await serialized.execute(`DELETE FROM commission_characters WHERE character_id = ?;`, [characterId]);
-    await serialized.execute(`DELETE FROM client_characters WHERE id = ?;`, [characterId]);
-  });
+  // Its references and its links to commissions go with it (database triggers)
+  await database.execute(`DELETE FROM client_characters WHERE id = ?;`, [characterId]);
 
   // Its images are deleted from disk if nobody else uses them (the trash counts as a user)
   for (const reference of references) {
@@ -1759,8 +1755,7 @@ export async function deleteCommissionStageImage(
     `,
     [imageId],
   );
-  // Its pins stay as plain corrections: the text is kept, the position means nothing now
-  await database.execute(`UPDATE commission_corrections SET image_id = NULL, x = NULL, y = NULL WHERE image_id = ?;`, [imageId]);
+  // Its pins stay as plain corrections (database trigger)
 
   if (images.length > 0) {
     await deleteImageIfUnused(images[0].image_data_url);
@@ -1974,7 +1969,6 @@ export async function migratePaymentTags(): Promise<void> {
     }
 
     for (const tag of paymentTags) {
-      await database.execute(`DELETE FROM commission_tags WHERE tag_id = ?;`, [tag.id]);
       await database.execute(`DELETE FROM tags WHERE id = ?;`, [tag.id]);
     }
   });

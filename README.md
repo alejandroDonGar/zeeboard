@@ -384,7 +384,7 @@ docs/images/             the screenshots in this README
 
 Text in the interface is written in English and translated through a dictionary (`src/lib/es.ts`); `tests/i18n.test.ts` verifies that every text has its translation.
 
-Schema changes are numbered migrations (`MIGRATIONS` in `src/lib/database.ts`): the database stores how far it got in `PRAGMA user_version`, so each runs once. A change is a new function at the end of the list, never an edit to one that has shipped, and it must be safe to run twice.
+Schema changes are numbered migrations (`MIGRATIONS` in `src/lib/database.ts`): the database stores how far it got in `PRAGMA user_version`, so each runs once. A change is a new function at the end of the list, never an edit to one that has shipped, and it must be safe to run twice. The links between tables (what points at what, and whether deleting takes or unlinks it) are written once, in `REFS` in `src/lib/trash.ts`: the trash uses them to restore, and the database enforces them with triggers generated from the same list.
 
 ## Roadmap
 

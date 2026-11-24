@@ -1015,6 +1015,107 @@ describe("schema versions", () => {
   });
 });
 
+describe("integrity kept by the database itself", () => {
+  const raw = (sql: string, ...params: number[]) => rawDatabase().prepare(sql).run(...params);
+  const count = (table: string) => (rawDatabase().prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as { n: number }).n;
+
+  async function fullCommission() {
+    const clientId = await db.createClient("Ana", "X", "ana", "");
+    await db.createClientCharacter(clientId, "Luna", "");
+    const [luna] = await db.getClientCharacters(clientId);
+    await db.createCharacterReference(luna.id, "images/luna.webp");
+    const { id: templateId, stages } = await template("Bust", ["Sketch", "Delivery"]);
+    const id = await newCommission("Bust", clientId, templateId);
+    await db.createTag("Rush", "#ff0000", "Extras");
+    const [rush] = await db.getTags();
+    await db.replaceCommissionTags(id, [rush.id]);
+    await db.replaceCommissionCharacters(id, [luna.id]);
+    await db.addPayment(id, 60, 57, "2026-11-01", "");
+    await db.createCommissionStageImage(id, stages[0].id, "images/1.webp");
+    const [image] = await db.getCommissionStageImages(id);
+    await db.addCorrection(id, stages[0].id, "Bigger nose", { imageId: image.id, x: 0.5, y: 0.5 });
+    await db.addRequest({ name: "Ana", platform: "X", contact: "", template_id: templateId, characters: 1, details: "" });
+    await db.setRequestStatus((await db.getRequests())[0].id, "accepted", id);
+    return { id, clientId, luna, templateId, rush, image };
+  }
+
+  test("deleting a commission, in one statement, takes everything hanging from it and unlinks its request", async () => {
+    const { id } = await fullCommission();
+    raw("DELETE FROM commissions WHERE id = ?", id);
+
+    for (const table of ["commission_tags", "commission_payments", "commission_corrections", "commission_stage_images", "commission_characters"]) {
+      expect([table, count(table)]).toEqual([table, 0]);
+    }
+    expect((await db.getRequests())[0].commission_id).toBeNull();
+  });
+
+  test("deleting a client unlinks their commissions and takes their characters with their references", async () => {
+    const { id, clientId } = await fullCommission();
+    raw("DELETE FROM clients WHERE id = ?", clientId);
+
+    expect((await commission(id))?.client_id).toBeNull();
+    expect([count("client_characters"), count("character_references"), count("commission_characters")]).toEqual([0, 0, 0]);
+  });
+
+  test("deleting a tag or a template takes what depends on it; deleting an image keeps its pins as text", async () => {
+    const { rush, image } = await fullCommission();
+    raw("DELETE FROM tags WHERE id = ?", rush.id);
+    expect(count("commission_tags")).toBe(0);
+
+    raw("DELETE FROM commission_stage_images WHERE id = ?", image.id);
+    expect(await db.getAllCorrections()).toMatchObject([{ text: "Bigger nose", image_id: null, x: null, y: null }]);
+
+    const { id: unused } = await template("Sticker", ["Sketch"]);
+    raw("DELETE FROM templates WHERE id = ?", unused);
+    expect(await db.getTemplateStages(unused)).toEqual([]);
+  });
+
+  test("nothing can point at something that doesn't exist (an iPad image for a commission just deleted, say)", async () => {
+    const { id: templateId, stages } = await template("Bust", ["Sketch"]);
+    await expect(db.createCommissionStageImage(999, stages[0].id, "images/1.webp")).rejects.toThrow();
+    await expect(db.addPayment(999, 10, 10, "2026-11-01", "")).rejects.toThrow();
+    await expect(db.createClientCharacter(999, "Luna", "")).rejects.toThrow();
+    await expect(newCommission("Bust", 999, templateId)).rejects.toThrow();
+
+    const id = await newCommission("Bust", null, templateId);
+    await expect(db.updateCommission(id, "Bust", 999, "", "X", null, "EUR", null, "", 1)).rejects.toThrow();
+    expect(count("commission_stage_images") + count("commission_payments") + count("client_characters")).toBe(0);
+  });
+
+  test("the trash still brings things back when what they pointed at was deleted meanwhile", async () => {
+    const { id, clientId, rush } = await fullCommission();
+    const commissionTrash = await db.deleteCommission(id);
+    await db.deleteClient(clientId);
+    await db.deleteTag(rush.id);
+
+    expect(await db.restoreTrash(commissionTrash)).toBe("Bust");
+    expect(await commission(id)).toMatchObject({ client_id: null });
+    expect(await db.getCommissionTags(id)).toEqual([]);
+    expect(count("commission_payments")).toBe(1);
+  });
+
+  test("looking things up by commission, client, character, template or tag uses an index", () => {
+    const lookups = [
+      "SELECT * FROM commissions WHERE client_id = 1",
+      "SELECT * FROM commissions WHERE template_id = 1",
+      "SELECT * FROM template_stages WHERE template_id = 1",
+      "SELECT * FROM commission_payments WHERE commission_id = 1",
+      "SELECT * FROM commission_corrections WHERE commission_id = 1",
+      "SELECT * FROM commission_corrections WHERE image_id = 1",
+      "SELECT * FROM commission_stage_images WHERE commission_id = 1 AND stage_id = 1",
+      "SELECT * FROM commission_tags WHERE tag_id = 1",
+      "SELECT * FROM commission_characters WHERE character_id = 1",
+      "SELECT * FROM client_characters WHERE client_id = 1",
+      "SELECT * FROM character_references WHERE character_id = 1",
+      "SELECT * FROM commission_requests WHERE commission_id = 1",
+    ];
+    const scans = lookups.filter((sql) =>
+      (rawDatabase().prepare(`EXPLAIN QUERY PLAN ${sql}`).all() as { detail: string }[]).some((step) => /^SCAN/.test(step.detail)),
+    );
+    expect(scans).toEqual([]);
+  });
+});
+
 describe("data left by older versions, and empty fields", () => {
   test("templates from before colours get the colour of their old type tag, or one from the palette", async () => {
     resetDatabase(); // a database from the version where the type was a tag and templates had no colour

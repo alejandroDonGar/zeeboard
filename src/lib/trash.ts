@@ -94,6 +94,37 @@ const REFS: Record<string, { required?: Record<string, string>; nullable?: Recor
   client_links: { required: { id: "commissions" } },
 };
 
+/**
+ * The same links as SQL, so the database keeps them too: a row can't point at something missing, and deleting something
+ * takes (required) or unlinks (nullable) what points at it, in the same statement. Rows already broken are fixed first.
+ * ponytail: triggers, not FOREIGN KEY, because SQLite only adds those by rebuilding each table, which needs one connection
+ * and a transaction (the plugin's pool gives neither); swap them for real foreign keys when the database moves to Rust.
+ */
+export function integrityStatements(): string[] {
+  return Object.entries(REFS)
+    .filter(([table]) => table !== "client_links") // not a table: the commissions a deleted client had
+    .flatMap(([table, { required = {}, nullable = {} }]) => [
+      ...Object.entries(required).flatMap(([column, target]) => link(table, column, target, true)),
+      ...Object.entries(nullable).flatMap(([column, target]) => link(table, column, target, false)),
+    ]);
+}
+
+function link(table: string, column: string, target: string, required: boolean): string[] {
+  const name = `link_${table}_${column}`;
+  const missing = `NEW.${column} IS NOT NULL AND NOT EXISTS (SELECT 1 FROM ${target} WHERE id = NEW.${column})`;
+  const refuse = `BEGIN SELECT RAISE(ABORT, '${table}.${column} points at a ${target} row that does not exist'); END;`;
+  const broken = `${column} IS NOT NULL AND ${column} NOT IN (SELECT id FROM ${target})`;
+
+  return [
+    required ? `DELETE FROM ${table} WHERE ${broken};` : `UPDATE ${table} SET ${column} = NULL WHERE ${broken};`,
+    `CREATE TRIGGER IF NOT EXISTS ${name}_insert BEFORE INSERT ON ${table} WHEN ${missing} ${refuse}`,
+    `CREATE TRIGGER IF NOT EXISTS ${name}_update BEFORE UPDATE OF ${column} ON ${table} WHEN ${missing} ${refuse}`,
+    `CREATE TRIGGER IF NOT EXISTS ${name}_delete AFTER DELETE ON ${target} BEGIN ${
+      required ? `DELETE FROM ${table}` : `UPDATE ${table} SET ${column} = NULL`
+    } WHERE ${column} = OLD.id; END;`,
+  ];
+}
+
 /** Tables whose ids a restored row may point at: the ids that exist right now are needed for these */
 export const REFERENCED_TABLES = ["clients", "templates", "tags", "commissions", "client_characters"] as const;
 
