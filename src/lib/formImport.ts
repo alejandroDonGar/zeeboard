@@ -13,7 +13,7 @@ export function parseCsv(text: string): string[][] {
 
   // Google separates with commas; Spanish Excel saves with semicolons
   const body = text.replace(/^﻿/, "");
-  const firstLine = body.split(/\r?\n/, 1)[0] ?? "";
+  const firstLine = body.split(/\r?\n/, 1)[0];
   const separator = (firstLine.match(/;/g)?.length ?? 0) > (firstLine.match(/,/g)?.length ?? 0) ? ";" : ",";
 
   for (let index = 0; index < body.length; index++) {
@@ -239,7 +239,7 @@ export function parseResponses<T extends { id: number; name: string }>(
     .filter((row) => (row[contactColumn] ?? "").trim() !== "")
     .map((row): ImportedRequest => {
       const typeText = (row[typeColumn] ?? "").trim();
-      const contact = parseContact(row[contactColumn] ?? "");
+      const contact = parseContact(row[contactColumn]);
       const template = matchTemplate(typeText, templates);
       const emailText = emailColumn >= 0 ? (row[emailColumn] ?? "").trim() : "";
       // Stored as an email only if it looks like one (lowercased, to match later); otherwise it stays in the details
@@ -253,7 +253,7 @@ export function parseResponses<T extends { id: number; name: string }>(
       ].filter(Boolean);
 
       return {
-        externalId: `${row[timeColumn]}|${typeText}|${(row[contactColumn] ?? "").trim()}`,
+        externalId: `${row[timeColumn]}|${typeText}|${row[contactColumn].trim()}`,
         created_at: parseTimestamp(row[timeColumn] ?? "") ?? new Date().toISOString(),
         name: contact.handle.replace(/^@/, ""),
         platform: contact.platform,

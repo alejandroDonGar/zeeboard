@@ -180,14 +180,15 @@ export function computeStats(
 
   const clientTotal = [...perClient.values()].reduce((sum, row) => sum + row.net, 0);
   const returningTotal = [...perClient.entries()]
-    .filter(([key]) => (commissionsPerClient.get(key) ?? 0) >= 2)
+    // Every delivered client is in commissionsPerClient (delivered ones are among the included)
+    .filter(([key]) => Number(commissionsPerClient.get(key)) >= 2)
     .reduce((sum, [, row]) => sum + row.net, 0);
 
   // Fees of the cash received in the period
   const periodPayments = payments.filter((payment) => inRange(payment.paid_at, current));
-  const withNet = periodPayments.filter((payment) => payment.received !== null);
+  const withNet = periodPayments.filter((payment): payment is CommissionPayment & { received: number } => payment.received !== null);
   const gross = withNet.reduce((sum, payment) => sum + payment.amount, 0);
-  const feesTotal = round2(gross - withNet.reduce((sum, payment) => sum + (payment.received ?? 0), 0));
+  const feesTotal = round2(gross - withNet.reduce((sum, payment) => sum + payment.received, 0));
 
   // Requests by the day they came in
   const requests = input.requests ?? [];
