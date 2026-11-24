@@ -145,8 +145,8 @@ export function paymentSummary(
 ): PaymentSummary {
   const paid = round2(payments.reduce((sum, payment) => sum + (payment.tip ? 0 : payment.amount), 0));
   const tips = round2(payments.reduce((sum, payment) => sum + (payment.tip ? payment.amount : 0), 0));
-  const withReceived = payments.filter((payment) => payment.received !== null);
-  const received = round2(withReceived.reduce((sum, payment) => sum + (payment.received ?? 0), 0));
+  const withReceived = payments.filter((payment): payment is typeof payment & { received: number } => payment.received !== null);
+  const received = round2(withReceived.reduce((sum, payment) => sum + payment.received, 0));
   const fees = round2(withReceived.reduce((sum, payment) => sum + payment.amount, 0) - received);
   const remaining = round2(Math.max((price ?? 0) - paid, 0));
 
@@ -163,8 +163,8 @@ export function netIncome(summary: PaymentSummary): number {
 
 /** Euros per hour over the entries that have hours (total income / total hours, so long pieces weigh more). */
 export function ratePerHour(entries: { net: number; hours: number | null }[]): number | null {
-  const withHours = entries.filter((entry) => entry.hours !== null && entry.hours > 0);
-  const hours = withHours.reduce((sum, entry) => sum + (entry.hours ?? 0), 0);
+  const withHours = entries.filter((entry): entry is { net: number; hours: number } => entry.hours !== null && entry.hours > 0);
+  const hours = withHours.reduce((sum, entry) => sum + entry.hours, 0);
 
   return hours > 0 ? round2(withHours.reduce((sum, entry) => sum + entry.net, 0) / hours) : null;
 }

@@ -557,6 +557,31 @@ describe("trash", () => {
   });
 });
 
+describe("helpers that read the database", () => {
+  test("open commissions are the ones not at the last stage of their template, or without one", async () => {
+    const helpers = await import("../src/lib/commissionHelpers");
+    const { id: templateId, stages } = await template("Bust", ["Sketch", "Delivery"]);
+    const open = await newCommission("Open", null, templateId);
+    const done = await newCommission("Done", null, templateId);
+    const loose = await newCommission("Without template", null, null);
+    await db.updateCommissionStage(done, stages[1].id);
+
+    expect((await helpers.loadOpenCommissions()).map((item) => item.id).sort()).toEqual([open, loose].sort());
+  });
+
+  test("stage images are loaded for each commission", async () => {
+    const helpers = await import("../src/lib/commissionHelpers");
+    const { id: templateId, stages } = await template("Bust", ["Sketch"]);
+    const withImage = await newCommission("With image", null, templateId);
+    const without = await newCommission("Without", null, templateId);
+    await db.createCommissionStageImage(withImage, stages[0].id, "images/1.webp");
+
+    const loaded = await helpers.loadStageImagesForCommissions(await db.getCommissions());
+    expect(loaded[withImage].map((image) => image.image_data_url)).toEqual(["images/1.webp"]);
+    expect(loaded[without]).toEqual([]);
+  });
+});
+
 describe("data left by older versions, and empty fields", () => {
   test("templates without a colour get the colour of their old type tag, or one from the palette", async () => {
     await db.createTag("Bust", "#abcdef", TYPE_CATEGORY);
