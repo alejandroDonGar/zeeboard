@@ -384,6 +384,8 @@ docs/images/             the screenshots in this README
 
 Text in the interface is written in English and translated through a dictionary (`src/lib/es.ts`); `tests/i18n.test.ts` verifies that every text has its translation.
 
+Schema changes are numbered migrations (`MIGRATIONS` in `src/lib/database.ts`): the database stores how far it got in `PRAGMA user_version`, so each runs once. A change is a new function at the end of the list, never an edit to one that has shipped, and it must be safe to run twice.
+
 ## Roadmap
 
 What has been done and what could come next lives in [ROADMAP.md](ROADMAP.md).
