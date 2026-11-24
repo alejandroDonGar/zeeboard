@@ -3,7 +3,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { groupAlternatives, loadOpenCommissions } from "./commissionHelpers";
-import { createCommissionStageImage, createImageVersion, finishCommission, getCommissionReferences, getCommissionStageImages, getCommissions, getTemplateStages } from "./database";
+import { createCommissionStageImage, createImageVersion, finishCommission, getCommissionReferences, getCommissionStageImages, getCommissions, getTemplateStages, type Commission, type TemplateStage } from "./database";
 import { getThumbPath, isProcessedImage } from "./images";
 import { latestOfAlternative } from "./ipadLink";
 import { hide } from "./privacy";
@@ -49,36 +49,28 @@ export function ipadSettings(): IpadSettings {
 
 /** What the iPad page lists: open commissions, their stages (the hidden "delivery" stage is left out) and each stage's alternatives */
 export async function pushSnapshot(): Promise<void> {
-  const commissions = await loadOpenCommissions();
-  const stagesByTemplate = new Map<number, { id: number; name: string }[]>();
-  // The hidden last stage ("delivery"): where the final images of a finished commission go
-  const lastStageByTemplate = new Map<number, number>();
+  const withTemplate = (await loadOpenCommissions()).filter(
+    (commission): commission is Commission & { template_id: number } => commission.template_id !== null,
+  );
+  const stagesOf: Record<number, TemplateStage[]> = {};
 
-  for (const commission of commissions) {
-    if (commission.template_id !== null && !stagesByTemplate.has(commission.template_id)) {
-      const stages = await getTemplateStages(commission.template_id);
-      stagesByTemplate.set(commission.template_id, stages.length > 1 ? stages.slice(0, -1) : stages);
-      if (stages.length > 0) lastStageByTemplate.set(commission.template_id, stages[stages.length - 1].id);
-    }
+  for (const { template_id } of withTemplate) {
+    stagesOf[template_id] ??= await getTemplateStages(template_id);
   }
 
-  const withTemplate = commissions.filter((commission) => commission.template_id !== null);
-  const imagesByCommission = new Map(
-    await Promise.all(withTemplate.map(async (commission) => [commission.id, await getCommissionStageImages(commission.id)] as const)),
-  );
-  const referencesByCommission = new Map(
-    await Promise.all(withTemplate.map(async (commission) => [commission.id, await getCommissionReferences(commission.id)] as const)),
-  );
+  const entries = await Promise.all(withTemplate.map(async (commission) => {
+    const stages = stagesOf[commission.template_id];
+    const [images, references] = await Promise.all([getCommissionStageImages(commission.id), getCommissionReferences(commission.id)]);
 
-  const json = JSON.stringify({
-    commissions: withTemplate.map((commission) => ({
+    return {
       id: commission.id,
       title: commission.title,
       client: hide(commission.client_name ?? ""),
       currentStageId: commission.current_stage_id,
-      lastStageId: lastStageByTemplate.get(commission.template_id as number) ?? null,
+      // The hidden last stage ("delivery"): where the final images of a finished commission go
+      lastStageId: stages[stages.length - 1]?.id ?? null,
       // Character references, to keep them on the iPad: the server only hands out images listed here
-      refs: (referencesByCommission.get(commission.id) ?? [])
+      refs: references
         .filter((reference) => isProcessedImage(reference.image_data_url))
         .map((reference) => ({
           character: reference.character,
@@ -86,11 +78,12 @@ export async function pushSnapshot(): Promise<void> {
           image: reference.image_data_url,
           thumb: getThumbPath(reference.image_data_url),
         })),
-      stages: (stagesByTemplate.get(commission.template_id as number) ?? []).map((stage) => ({
+      // A one-stage template never has open commissions (its only stage is the last), so dropping the last always works
+      stages: stages.slice(0, -1).map((stage) => ({
         id: stage.id,
         name: stage.name,
         // Each alternative shows its newest version: that is what a new version is added on top of
-        alts: groupAlternatives((imagesByCommission.get(commission.id) ?? []).filter((image) => image.stage_id === stage.id)).map(
+        alts: groupAlternatives(images.filter((image) => image.stage_id === stage.id)).map(
           ({ alt, versions }) => {
             const latest = versions[versions.length - 1];
 
@@ -103,10 +96,10 @@ export async function pushSnapshot(): Promise<void> {
           },
         ),
       })),
-    })),
-  });
+    };
+  }));
 
-  await invoke("ipad_set_snapshot", { json });
+  await invoke("ipad_set_snapshot", { json: JSON.stringify({ commissions: entries }) });
 }
 
 export async function startIpad(): Promise<void> {

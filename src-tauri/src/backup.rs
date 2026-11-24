@@ -85,13 +85,13 @@ fn restore(backup_dir: &Path, data_dir: &Path, stamp: &str) -> Result<PathBuf, S
 const BACKUP_PREFIX: &str = "zeeboard-backup-";
 
 /// Only folders with the exact name of ZeeBoard backups are rotated (deleted),
-/// e.g. `zeeboard-backup-2026-10-06-1318`: never anything else in that folder.
+/// e.g. `zeeboard-backup-2026-10-06-131805` (or `-1318` from versions without seconds): never anything else in that folder.
 fn is_backup_name(name: &str) -> bool {
     let Some(stamp) = name.strip_prefix(BACKUP_PREFIX) else {
         return false;
     };
 
-    stamp.len() == 15
+    (stamp.len() == 15 || stamp.len() == 17)
         && stamp.chars().enumerate().all(|(index, character)| {
             if matches!(index, 4 | 7 | 10) { character == '-' } else { character.is_ascii_digit() }
         })
@@ -238,6 +238,8 @@ mod tests {
     #[test]
     fn only_exact_backup_names_are_rotated() {
         assert!(is_backup_name("zeeboard-backup-2026-10-06-1318"));
+        assert!(is_backup_name("zeeboard-backup-2026-10-06-131805"));
+        assert!(!is_backup_name("zeeboard-backup-2026-10-06-13180"));
         assert!(!is_backup_name("zeeboard-backup-2026-10-06"));
         assert!(!is_backup_name("zeeboard-backup-2026-10-06-1318-old"));
         assert!(!is_backup_name("my-photos"));

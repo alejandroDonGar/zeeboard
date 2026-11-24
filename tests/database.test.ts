@@ -1,5 +1,6 @@
 // The real database.ts against an in-memory SQLite: what the app does with commissions, clients, payments and the trash.
-import { beforeEach, describe, expect, test, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
+import { DatabaseSync } from "node:sqlite";
 import { rawDatabase, resetDatabase } from "./support/tauri-sql";
 import { TYPE_CATEGORY } from "../src/lib/catalog";
 
@@ -7,14 +8,22 @@ vi.mock("@tauri-apps/plugin-sql", async () => {
   const { loadDatabase } = await import("./support/tauri-sql");
   return { default: { load: async () => loadDatabase() } };
 });
-// The save dialog and the Rust command that writes the file, for the CSV export
-vi.mock("@tauri-apps/plugin-dialog", () => ({ save: vi.fn() }));
-vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
+// Tauri around the database: Rust commands answer like the real ones (set per test in `rust`), dialogs, paths, events
+const tauri = vi.hoisted(() => ({ rust: {} as Record<string, (args: never) => unknown>, appData: "" }));
+vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn(async (command: string, args: never) => tauri.rust[command]?.(args)) }));
+vi.mock("@tauri-apps/plugin-dialog", () => ({ save: vi.fn(), open: vi.fn() }));
+vi.mock("@tauri-apps/api/path", async () => {
+  const { join } = await import("node:path");
+  return { appDataDir: async () => tauri.appData, join: async (...parts: string[]) => join(...parts) };
+});
+vi.mock("@tauri-apps/api/event", () => ({ listen: vi.fn(async () => () => {}) }));
+vi.mock("@tauri-apps/plugin-notification", () => ({ sendNotification: vi.fn() }));
 // Image files live on disk through Rust; here only the database side matters
 vi.mock("../src/lib/images", () => ({
   deleteImageFiles: vi.fn(async () => 0),
   importImageFromDataDir: vi.fn(),
   isProcessedImage: (path: string) => /^images\/[0-9a-f]{24}\.webp$/.test(path),
+  getThumbPath: (path: string) => path.replace("images/", "images/thumbs/"),
 }));
 
 let db: typeof import("../src/lib/database");
@@ -31,6 +40,7 @@ async function reopen() {
 // A new, empty database for every test
 beforeEach(async () => {
   vi.clearAllMocks(); // the image mocks keep their calls between tests otherwise
+  for (const command of Object.keys(tauri.rust)) delete tauri.rust[command];
   resetDatabase();
   await reopen();
 });
@@ -631,6 +641,303 @@ describe("what needs attention", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe("around the data: undo, form sync, backups and the iPad", () => {
+  const page = () => window as unknown as { dispatchEvent: ReturnType<typeof vi.fn>; location: { reload: ReturnType<typeof vi.fn> } };
+  const sentEvents = () => page().dispatchEvent.mock.calls.map(([event]) => (event as Event).type);
+  let folder = "";
+
+  beforeEach(async () => {
+    const { mkdtempSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const { tmpdir } = await import("node:os");
+    folder = mkdtempSync(join(tmpdir(), "zeeboard-test-"));
+    tauri.appData = folder;
+    const data: Record<string, string> = {};
+    vi.stubGlobal("window", { dispatchEvent: vi.fn(), location: { reload: vi.fn() } });
+    vi.stubGlobal("localStorage", { getItem: (key: string) => data[key] ?? null, setItem: (key: string, value: string) => void (data[key] = value) });
+  });
+
+  afterEach(async () => {
+    vi.unstubAllGlobals();
+    (await import("node:fs")).rmSync(folder, { recursive: true, force: true });
+  });
+
+  describe("undo", () => {
+    test("the Undo button of the deleted toast brings it back and tells the screens; a second click does nothing", async () => {
+      const { undoToast, DATA_RESTORED } = await import("../src/lib/undo");
+      const trashId = await db.deleteClient(await db.createClient("Ana", "X", "ana", ""));
+      const toasts: unknown[][] = [];
+      undoToast((...toast) => void toasts.push(toast), "Client deleted.", trashId);
+      const { label, onClick } = toasts[0][2] as { label: string; onClick: () => void };
+      expect(label).toBe("Undo");
+
+      onClick();
+      await vi.waitFor(() => expect(toasts).toHaveLength(2));
+      expect(toasts[1]).toEqual(["Restored “Ana”.", "success"]);
+      expect(sentEvents()).toEqual([DATA_RESTORED]);
+      expect((await db.getClients()).map((client) => client.name)).toEqual(["Ana"]);
+
+      onClick();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(toasts).toHaveLength(2);
+    });
+
+    test("if undoing fails, it says so", async () => {
+      vi.spyOn(console, "error").mockImplementation(() => {});
+      const { undoToast } = await import("../src/lib/undo");
+      const toasts: unknown[][] = [];
+      undoToast((...toast) => void toasts.push(toast), "Deleted.", 1);
+      rawDatabase().close();
+
+      (toasts[0][2] as { onClick: () => void }).onClick();
+      await vi.waitFor(() => expect(toasts[1]).toEqual(["Could not undo.", "error"]));
+    });
+  });
+
+  describe("form responses from Drive", () => {
+    const csv = (...handles: string[]) =>
+      ["Timestamp,Handle,Type of commission", ...handles.map((handle, index) => `2026/10/0${index + 1} 4:59:22 p. m. CET,Telegram @${handle},Bust`)].join("\n");
+
+    test("with no file chosen there is nothing to read", async () => {
+      expect(await (await import("../src/lib/formSync")).syncFormResponses()).toBeNull();
+    });
+
+    test("new responses are saved, notified once and announced; the check date is kept", async () => {
+      const { syncFormResponses, REQUESTS_CHANGED } = await import("../src/lib/formSync");
+      const { sendNotification } = await import("@tauri-apps/plugin-notification");
+      await db.updateSettings({ responses_file: "C:/Drive/responses.csv" });
+      tauri.rust.read_text_file = () => csv("fox_one", "fox_two");
+
+      expect(await syncFormResponses()).toEqual({ added: 2, skipped: 0 });
+      expect(sendNotification).toHaveBeenCalledWith({ title: "ZeeBoard", body: "2 new commission requests" });
+      expect(db.appSettings().last_form_sync).not.toBeNull();
+
+      expect(await syncFormResponses()).toEqual({ added: 0, skipped: 2 });
+      expect(sendNotification).toHaveBeenCalledOnce();
+      expect(sentEvents()).toEqual([REQUESTS_CHANGED, REQUESTS_CHANGED]);
+
+      tauri.rust.read_text_file = () => csv("fox_one", "fox_two", "fox_three");
+      await syncFormResponses();
+      expect(sendNotification).toHaveBeenLastCalledWith({ title: "ZeeBoard", body: "1 new commission request" });
+    });
+
+    test("a file that isn't the form fails with the reason", async () => {
+      await db.updateSettings({ responses_file: "C:/Drive/other.csv" });
+      tauri.rust.read_text_file = () => "a,b\n1,2";
+      await expect((await import("../src/lib/formSync")).syncFormResponses()).rejects.toThrow();
+    });
+  });
+
+  describe("backups", () => {
+    beforeEach(async () => {
+      const { mkdirSync } = await import("node:fs");
+      tauri.rust.prepare_backup = ({ dir }: { dir: string }) => void mkdirSync(dir, { recursive: true });
+      tauri.rust.finish_backup = () => 1;
+    });
+    const finishCalls = async () => vi.mocked((await import("@tauri-apps/api/core")).invoke).mock.calls.filter(([command]) => command === "finish_backup").map(([, args]) => args);
+
+    test("exporting copies the database into a dated folder where you choose", async () => {
+      const backup = await import("../src/lib/backup");
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      const { join } = await import("node:path");
+      await newCommission("Bust", null, null);
+      vi.mocked(open).mockResolvedValue(folder);
+
+      const path = (await backup.exportBackup())!;
+      expect(path).toMatch(/zeeboard-backup-\d{4}-\d{2}-\d{2}-\d{6}$/);
+      const copy = new DatabaseSync(join(path, "zeeboard.db"));
+      expect(copy.prepare("SELECT title FROM commissions").all()).toEqual([{ title: "Bust" }]);
+      copy.close();
+      expect(await finishCalls()).toEqual([{ dir: path, keep: null }]);
+    });
+
+    test("closing the folder picker, or a picker that returns several, makes no backup", async () => {
+      const backup = await import("../src/lib/backup");
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      vi.mocked(open).mockResolvedValueOnce(null).mockResolvedValueOnce(["a", "b"]).mockResolvedValueOnce("C:/Backups/old");
+
+      expect(await backup.exportBackup()).toBeNull();
+      expect(await backup.exportBackup()).toBeNull();
+      expect(await backup.pickBackupFolder()).toBe("C:/Backups/old");
+    });
+
+    test("automatic backups: once a day, when enabled and with a folder; forcing runs it anyway", async () => {
+      const backup = await import("../src/lib/backup");
+      expect(await backup.runAutoBackup()).toBeNull();
+      await expect(backup.runAutoBackup(true)).rejects.toThrow();
+
+      await db.updateSettings({ auto_backup_folder: folder });
+      expect(await backup.runAutoBackup()).toBeNull(); // not enabled
+
+      vi.useFakeTimers({ toFake: ["Date"] });
+      try {
+        vi.setSystemTime(new Date("2026-11-20T09:00:00"));
+        await db.updateSettings({ auto_backup_enabled: true });
+        expect(await backup.runAutoBackup()).toContain(folder);
+        expect(db.appSettings().last_auto_backup).not.toBeNull();
+        expect(await backup.runAutoBackup()).toBeNull(); // already done today
+        vi.setSystemTime(new Date("2026-11-20T09:00:30")); // "Back up now" half a minute later: its own folder
+        expect(await backup.runAutoBackup(true)).toContain(folder);
+        expect((await finishCalls()).map((args) => (args as { keep: number }).keep)).toEqual([7, 7]);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    test("if the database copy fails, the half-made folder is cleaned up and the error is reported", async () => {
+      const backup = await import("../src/lib/backup");
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      tauri.rust.prepare_backup = () => undefined; // no folder: VACUUM INTO can't write
+      vi.mocked(open).mockResolvedValue(folder);
+
+      await expect(backup.exportBackup()).rejects.toThrow();
+      expect((await finishCalls()).map((args) => (args as { keep: null }).keep)).toEqual([null]);
+    });
+
+    test("before cleaning up images, a backup goes to the app folder, keeping the last two", async () => {
+      await (await import("../src/lib/backup")).backupBeforeCleanup();
+      const [args] = (await finishCalls()) as { dir: string; keep: number }[];
+      expect(args.dir).toContain("before-cleanup");
+      expect(args.keep).toBe(2);
+    });
+
+    test("restoring closes the database, asks Rust to swap the data and reloads the app", async () => {
+      const { invoke } = await import("@tauri-apps/api/core");
+      tauri.rust.restore_backup = () => "safety-copy";
+      await (await import("../src/lib/backup")).restoreBackup("C:/Backups/old");
+
+      expect(invoke).toHaveBeenCalledWith("restore_backup", { backupDir: "C:/Backups/old", stamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}-\d{6}$/) });
+      expect(page().location.reload).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("iPad", () => {
+    const PROCESSED = (n: number) => `images/${String(n).padStart(24, "0")}.webp`;
+    const snapshot = async () => {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const [, args] = vi.mocked(invoke).mock.calls.filter(([command]) => command === "ipad_set_snapshot").at(-1)!;
+      return JSON.parse((args as { json: string }).json);
+    };
+
+    test("a secret key is created once and remembered", async () => {
+      const ipad = await import("../src/lib/ipad");
+      const first = ipad.ipadSettings();
+      expect(first).toMatchObject({ enabled: false, port: 8787 });
+      expect(first.token).toMatch(/^[0-9a-f]{32}$/);
+      expect(ipad.ipadSettings().token).toBe(first.token);
+
+      ipad.saveIpadSettings({ enabled: true, port: 9000, token: "abc" });
+      expect(ipad.ipadSettings()).toEqual({ enabled: true, port: 9000, token: "abc" });
+    });
+
+    test("without storage the iPad still gets settings, with a new key each time", async () => {
+      const fail = () => {
+        throw new Error("storage disabled");
+      };
+      vi.stubGlobal("localStorage", { getItem: fail, setItem: fail });
+      const ipad = await import("../src/lib/ipad");
+      expect(ipad.ipadSettings().token).not.toBe(ipad.ipadSettings().token);
+    });
+
+    test("the list shows open commissions, their stages without the hidden delivery one, the newest version of each alternative and processed references", async () => {
+      const ipad = await import("../src/lib/ipad");
+      const ana = await db.createClient("Ana", "X", "ana", "");
+      await db.createClientCharacter(ana, "Luna", "");
+      const [luna] = await db.getClientCharacters(ana);
+      await db.createCharacterReference(luna.id, PROCESSED(1));
+      await db.createCharacterReference(luna.id, "old/luna.png"); // not served: only processed images
+      const { id: templateId, stages: [sketch, colour, delivery] } = await template("Bust", ["Sketch", "Colour", "Delivery"]);
+      const open = await newCommission("Open", ana, templateId);
+      await db.createCommissionStageImage(open, sketch.id, PROCESSED(2));
+      await db.createCommissionStageImage(open, sketch.id, "old/alt2.png");
+      await db.createImageVersion((await db.getCommissionStageImages(open))[0].id, PROCESSED(3));
+      const finished = await newCommission("Finished", ana, templateId);
+      await db.updateCommissionStage(finished, delivery.id);
+      await newCommission("Without template", ana, null);
+      await newCommission("Open too", ana, templateId); // same template: its stages are read once
+      const { id: noStages } = await template("Sticker", []);
+      await db.createCommission("No stages", null, "", "X", noStages, null, "EUR", null, "", 1); // and no client name
+
+      await ipad.pushSnapshot();
+
+      const { commissions } = await snapshot();
+      const listed = (title: string) => commissions.find((item: { title: string }) => item.title === title);
+      expect(commissions.map((item: { title: string }) => item.title).sort()).toEqual(["No stages", "Open", "Open too"]);
+      expect(listed("Open")).toEqual({
+        id: open, title: "Open", client: "Ana", currentStageId: sketch.id, lastStageId: delivery.id,
+        refs: [{ character: "Luna", label: "Reference 1", image: PROCESSED(1), thumb: PROCESSED(1).replace("images/", "images/thumbs/") }],
+        stages: [
+          { id: sketch.id, name: "Sketch", alts: [
+            { alt: 1, label: "Alt 1", version: 2, thumb: PROCESSED(3).replace("images/", "images/thumbs/") },
+            { alt: 2, label: "Alt 2", version: 1, thumb: null },
+          ] },
+          { id: colour.id, name: "Colour", alts: [] },
+        ],
+      });
+      expect(listed("No stages")).toMatchObject({ client: "", lastStageId: null, stages: [], refs: [] });
+      expect(listed("Open too").stages.map((stage: { name: string }) => stage.name)).toEqual(["Sketch", "Colour"]);
+    });
+
+    test("starting sends the port and key, then the list; stopping and the addresses go to Rust", async () => {
+      const ipad = await import("../src/lib/ipad");
+      const { invoke } = await import("@tauri-apps/api/core");
+      ipad.saveIpadSettings({ enabled: true, port: 9000, token: "abc" });
+      tauri.rust.ipad_addresses = () => ["192.168.1.20"];
+
+      await ipad.startIpad();
+      await ipad.stopIpad();
+      expect(await ipad.ipadAddresses()).toEqual(["192.168.1.20"]);
+      expect(vi.mocked(invoke).mock.calls.map(([command]) => command)).toEqual(["ipad_start", "ipad_set_snapshot", "ipad_stop", "ipad_addresses"]);
+      expect(invoke).toHaveBeenCalledWith("ipad_start", { port: 9000, token: "abc" });
+    });
+
+    test("an image from the iPad is a new alternative, the next version of the chosen one, or a new one if that is gone", async () => {
+      const ipad = await import("../src/lib/ipad");
+      const { id: templateId, stages: [sketch] } = await template("Bust", ["Sketch", "Delivery"]);
+      const id = await newCommission("Bust", null, templateId);
+      const send = (alt: number | null, n: number) => ipad.saveIpadImage({ commissionId: id, stageId: sketch.id, alt, stored: { path: PROCESSED(n) } });
+
+      expect(await send(null, 1)).toBe(true);
+      expect(await send(1, 2)).toBe(true);
+      expect(await send(9, 3)).toBe(false);
+
+      expect((await db.getCommissionStageImages(id)).map(({ alt, version }) => [alt, version])).toEqual([[1, 1], [1, 2], [2, 1]]);
+      expect(sentEvents()).toEqual([ipad.IPAD_IMAGE_ADDED, ipad.IPAD_IMAGE_ADDED, ipad.IPAD_IMAGE_ADDED]);
+    });
+
+    test("finishing from the iPad uses the last stage, and fails if the commission or its stages are gone", async () => {
+      const ipad = await import("../src/lib/ipad");
+      const { id: templateId, stages } = await template("Bust", ["Sketch", "Delivery"]);
+      const id = await newCommission("Bust", null, templateId);
+      const finish = (commissionId: number) => ipad.finishFromIpad({ commissionId, deliveredAt: "2026-11-20", hours: 3, notes: "Posted" });
+
+      await finish(id);
+      expect(await commission(id)).toMatchObject({ current_stage_id: stages[1].id, delivered_at: "2026-11-20", hours: 3 });
+      expect(sentEvents()).toEqual([ipad.IPAD_IMAGE_ADDED]);
+
+      await expect(finish(999)).rejects.toThrow();
+      await expect(finish(await newCommission("Loose", null, null))).rejects.toThrow();
+      const { id: empty } = await template("Empty", []);
+      await expect(finish(await newCommission("Empty", null, empty))).rejects.toThrow("no stages");
+    });
+
+    test("images and finishes announced by Rust reach their listeners", async () => {
+      const ipad = await import("../src/lib/ipad");
+      const { listen } = await import("@tauri-apps/api/event");
+      const onImage = vi.fn();
+      const onFinish = vi.fn();
+      await ipad.listenIpadImages(onImage);
+      await ipad.listenIpadFinish(onFinish);
+
+      const handler = (name: string) => vi.mocked(listen).mock.calls.find(([event]) => event === name)![1] as (event: { payload: unknown }) => void;
+      handler("ipad-image")({ payload: { commissionId: 1 } });
+      handler("ipad-finish")({ payload: { commissionId: 2 } });
+      expect(onImage).toHaveBeenCalledWith({ commissionId: 1 });
+      expect(onFinish).toHaveBeenCalledWith({ commissionId: 2 });
+    });
   });
 });
 
