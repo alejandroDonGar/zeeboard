@@ -23,7 +23,7 @@ export function Segmented<T extends string | number>({
   onChange: (value: T) => void;
 }) {
   return (
-    <div role="group" className="inline-flex shrink-0 rounded-md border border-line bg-paper p-0.5">
+    <div role="group" className="inline-flex shrink-0 rounded-control border border-line bg-paper p-0.5">
       {options.map((option) => (
         <button
           key={option.value}
@@ -34,8 +34,8 @@ export function Segmented<T extends string | number>({
           title={option.icon ? t(option.label) : undefined}
           className={
             option.value === value
-              ? "rounded-sm bg-highlight px-3 py-1.5 text-xs font-bold text-ink"
-              : "rounded-sm px-3 py-1.5 text-xs font-semibold text-muted transition hover:text-ink"
+              ? "rounded-chip bg-highlight px-3 py-1.5 text-xs font-bold text-ink"
+              : "rounded-chip px-3 py-1.5 text-xs font-semibold text-muted transition hover:text-ink"
           }
         >
           {option.icon ?? t(option.label)}
@@ -99,11 +99,11 @@ function BoardFilters({
     onFilterTagIdsChange(filterTagIds.includes(tagId) ? filterTagIds.filter((id) => id !== tagId) : [...filterTagIds, tagId]);
   }
 
-  const option = "flex w-full cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm text-ink hover:bg-highlight";
+  const option = "flex w-full cursor-pointer items-center gap-2 rounded-chip px-2 py-1.5 text-left text-sm text-ink hover:bg-highlight";
   const tick = (on: boolean) => (
     <span
       aria-hidden="true"
-      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border text-xs leading-none ${
+      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-chip border text-xs leading-none ${
         on ? "border-ink bg-primary text-on-primary" : "border-line-strong"
       }`}
     >
@@ -120,7 +120,7 @@ function BoardFilters({
 
   return (
     <>
-      <label className="flex max-w-[280px] min-w-36 flex-[1_1_160px] items-center gap-2 rounded-2xl border border-line bg-surface/60 px-2.5 py-1.5 text-faint focus-within:border-ink">
+      <label className="flex max-w-[280px] min-w-36 flex-[1_1_160px] items-center gap-2 rounded-control border border-line bg-surface/60 px-2.5 py-1.5 text-faint focus-within:border-ink">
         <IconSearch size={16} stroke={1.75} aria-hidden="true" />
         <input
           value={searchQuery}
@@ -137,13 +137,13 @@ function BoardFilters({
           onClick={() => setMenuOpen((open) => !open)}
           aria-haspopup="true"
           aria-expanded={menuOpen}
-          className={`inline-flex items-center gap-1.5 rounded-2xl border bg-surface px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition hover:bg-highlight ${
+          className={`inline-flex items-center gap-1.5 rounded-control border bg-surface px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition hover:bg-highlight ${
             activeCount > 0 ? "border-ink text-ink" : "border-field-border text-ink"
           }`}
         >
           <IconFilter size={16} stroke={1.75} aria-hidden="true" />
           {t("Filter")}
-          {activeCount > 0 && <span className="rounded-sm bg-primary px-1.5 text-xs font-bold text-on-primary">{activeCount}</span>}
+          {activeCount > 0 && <span className="rounded-chip bg-primary px-1.5 text-xs font-bold text-on-primary">{activeCount}</span>}
         </button>
 
         {menuOpen && (
@@ -151,7 +151,7 @@ function BoardFilters({
             {/* Invisible layer: a click outside closes the menu */}
             <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} />
 
-            <div role="menu" className="absolute top-full left-0 z-40 mt-1.5 max-h-[70vh] w-64 overflow-y-auto rounded-3xl border border-line-strong bg-surface p-1.5 shadow-lg">
+            <div role="menu" className="absolute top-full left-0 z-40 mt-1.5 max-h-[70vh] w-64 overflow-y-auto rounded-surface border border-line-strong bg-surface p-1.5 shadow-lg">
               {group("Payment")}
               {PAYMENTS.map(({ value, label }) => (
                 <button key={value} type="button" role="menuitemradio" aria-checked={filterPayment === value} onClick={() => onFilterPaymentChange(filterPayment === value ? "all" : value)} className={option}>
@@ -174,7 +174,7 @@ function BoardFilters({
                   {categoryTags.map((tag) => (
                     <button key={tag.id} type="button" role="menuitemcheckbox" aria-checked={filterTagIds.includes(tag.id)} onClick={() => toggleTag(tag.id)} className={option}>
                       {tick(filterTagIds.includes(tag.id))}
-                      <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: tag.color }} />
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-chip" style={{ backgroundColor: tag.color }} />
                       <span className="truncate">{tag.name}</span>
                     </button>
                   ))}

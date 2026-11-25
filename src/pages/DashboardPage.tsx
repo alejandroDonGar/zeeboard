@@ -163,15 +163,15 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
       {link && <span className="ml-auto font-medium text-faint">{link}</span>}
     </h3>
   );
-  const row = "relative grid w-full items-center gap-3 rounded-md py-2 pr-2 pl-3.5 text-left transition hover:bg-highlight/60";
+  const row = "relative grid w-full items-center gap-3 rounded-control py-2 pr-2 pl-3.5 text-left transition hover:bg-highlight/60";
   const thumb = (commission: Commission, size: string) => {
     const images = stageImagesByCommissionId[commission.id] ?? [];
     const latest = images[images.length - 1] ?? null;
 
     return latest ? (
-      <img src={thumbUrl(latest.image_data_url)} loading="lazy" decoding="async" alt="" className={`${size} rounded-md object-cover`} />
+      <img src={thumbUrl(latest.image_data_url)} loading="lazy" decoding="async" alt="" className={`${size} rounded-control object-cover`} />
     ) : (
-      <div className={`${size} flex items-center justify-center rounded-md bg-highlight text-sm font-semibold text-muted`}>{initials(commission.client_name)}</div>
+      <div className={`${size} flex items-center justify-center rounded-control bg-highlight text-sm font-semibold text-muted`}>{initials(commission.client_name)}</div>
     );
   };
 
@@ -182,7 +182,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
       </TopBar>
 
       <div className="@container min-h-0 flex-1">
-        <section className="glass grid h-full min-h-0 grid-cols-1 overflow-y-auto rounded-3xl @min-[880px]:grid-cols-[minmax(0,1fr)_clamp(280px,30%,360px)] @min-[880px]:overflow-hidden">
+        <section className="glass grid h-full min-h-0 grid-cols-1 overflow-y-auto rounded-surface @min-[880px]:grid-cols-[minmax(0,1fr)_clamp(280px,30%,360px)] @min-[880px]:overflow-hidden">
           <div className="grid min-w-0 content-start gap-7 p-6 @min-[880px]:overflow-y-auto">
             <section>
               <h2 className="mb-1 font-display text-3xl leading-tight font-semibold tracking-tight">{t("Today")}</h2>
@@ -231,7 +231,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
                       className={`${row} grid-cols-[40px_minmax(0,1fr)_minmax(70px,120px)_88px] border-t border-line first:border-t-0 max-[1100px]:grid-cols-[40px_minmax(0,1fr)_88px]`}
                     >
                       {/* Barra con el color del tipo de comisión */}
-                      <span className="absolute top-2.5 bottom-2.5 left-1 w-[3px] rounded-sm" style={{ backgroundColor: typeColor(commission) }} />
+                      <span className="absolute top-2.5 bottom-2.5 left-1 w-[3px] rounded-chip" style={{ backgroundColor: typeColor(commission) }} />
                       {thumb(commission, "h-10 w-10")}
 
                       <div className="min-w-0">
@@ -242,8 +242,8 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
                         </p>
                       </div>
 
-                      <div className="h-1 overflow-hidden rounded-sm bg-line max-[1100px]:hidden">
-                        <div className="h-full rounded-sm bg-ink" style={{ width: `${progress}%` }} />
+                      <div className="h-1 overflow-hidden rounded-chip bg-line max-[1100px]:hidden">
+                        <div className="h-full rounded-chip bg-ink" style={{ width: `${progress}%` }} />
                       </div>
 
                       {deadlineStatus ? (
@@ -304,7 +304,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
                       key={commission.id}
                       type="button"
                       onClick={() => handleOpenCommission(commission)}
-                      className="grid w-full grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md border-t border-line px-1 py-1.5 text-left transition first:border-t-0 hover:bg-highlight/60"
+                      className="grid w-full grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-control border-t border-line px-1 py-1.5 text-left transition first:border-t-0 hover:bg-highlight/60"
                     >
                       <span className="flex h-6 w-6 items-center justify-center rounded-full bg-highlight text-xs font-bold text-muted">{initials(commission.client_name)}</span>
                       <span className="min-w-0">

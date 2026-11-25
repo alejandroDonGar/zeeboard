@@ -73,13 +73,13 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
 
   return (
     <div className="modal-backdrop">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("PayPal")} className="flex max-h-[80vh] w-[720px] flex-col modal-card rounded-3xl p-6">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("PayPal")} className="flex max-h-[80vh] w-[720px] flex-col modal-card rounded-surface p-6">
         <p className="text-xs font-bold text-muted">{t("PayPal")}</p>
         <h3 className="mt-2 text-lg font-semibold text-ink">
           {t("{ready} of {total} payments ready", { ready: ready.length, total: matches.length })}
         </h3>
 
-        <div className="mt-4 min-h-0 flex-1 divide-y divide-line overflow-y-auto rounded-md border border-line">
+        <div className="mt-4 min-h-0 flex-1 divide-y divide-line overflow-y-auto rounded-control border border-line">
           {matches.length === 0 && <p className="p-4 text-sm text-muted">{t("No incoming payments found in this file.")}</p>}
 
           {matches.map((item) => (
@@ -94,7 +94,7 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
                 <select
                   value={choice[item.row.txId]}
                   onChange={(event) => setChoice({ ...choice, [item.row.txId]: Number(event.target.value) })}
-                  className="w-52 shrink-0 rounded-md border border-field-border bg-paper px-2 py-1"
+                  className="w-52 shrink-0 rounded-control border border-field-border bg-paper px-2 py-1"
                 >
                   {commissions
                     .filter((commission) => commission.client_id === item.clientId)
@@ -114,13 +114,13 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
         {error && <p className="mt-3 text-sm text-tone-bad">{error}</p>}
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="rounded-md border border-field-border px-4 py-2 font-semibold">
+          <button onClick={onClose} className="rounded-control border border-field-border px-4 py-2 font-semibold">
             {t("Cancel")}
           </button>
           <button
             onClick={handleImport}
             disabled={saving || ready.length === 0}
-            className="rounded-2xl bg-primary px-4 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-control bg-primary px-4 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-60"
           >
             {saving ? t("Importing…") : t("Import {n}", { n: ready.length })}
           </button>

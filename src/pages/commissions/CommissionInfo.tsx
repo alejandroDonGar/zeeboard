@@ -91,7 +91,7 @@ function CommissionInfo({
                 type="button"
                 title={t("Copy the account to tag when you post")}
                 onClick={() => copyTag(client.tag_handle!)}
-                className="max-w-full truncate rounded-sm border border-line-strong px-2 py-0.5 text-xs font-semibold text-muted transition hover:border-ink hover:text-ink"
+                className="max-w-full truncate rounded-chip border border-line-strong px-2 py-0.5 text-xs font-semibold text-muted transition hover:border-ink hover:text-ink"
               >
                 {hide(client.tag_handle)}
                 {client.tag_platform && client.tag_platform !== "Other" ? ` · ${client.tag_platform}` : ""} ⧉
@@ -139,7 +139,7 @@ function CommissionInfo({
                 <div className="flex flex-wrap gap-1">
                   {(referencesByCharacterId[character.id] ?? []).map((reference) => (
                     <button key={reference.id} type="button" title={reference.label} onClick={() => setZoomedImage(imageUrl(reference.image_data_url))} className="cursor-zoom-in">
-                      <img src={thumbUrl(reference.image_data_url)} loading="lazy" decoding="async" alt={reference.label} className="h-8 w-8 rounded-sm object-cover" />
+                      <img src={thumbUrl(reference.image_data_url)} loading="lazy" decoding="async" alt={reference.label} className="h-8 w-8 rounded-chip object-cover" />
                     </button>
                   ))}
                 </div>

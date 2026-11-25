@@ -1,5 +1,5 @@
 // The colour tokens in App.css, checked with the WCAG formula: text that can be read, fields that can be seen.
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
 import { contrastRatio } from "../src/lib/ambient";
 
@@ -19,6 +19,12 @@ const themes = {
   light: tokens(":root"),
   dark: tokens(':root[data-theme="dark"]'),
 };
+
+test("corners only use the three named radii: Tailwind's sm…3xl would draw 4–24 px corners", () => {
+  const sources = readdirSync(new URL("../src/", import.meta.url), { recursive: true, encoding: "utf8" }).filter((file) => file.endsWith(".tsx"));
+  const offenders = sources.filter((file) => /\brounded-(?:sm|md|lg|xl|2xl|3xl|4xl)\b/.test(readFileSync(new URL(`../src/${file}`, import.meta.url), "utf8")));
+  expect(offenders).toEqual([]);
+});
 
 test("dark by Windows setting and dark chosen in Settings use the same colours", () => {
   expect(tokens(':root:not([data-theme="light"])')).toEqual(themes.dark);

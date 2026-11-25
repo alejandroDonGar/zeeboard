@@ -270,20 +270,20 @@ function SettingsPage() {
 
   const positive = (text: string) => Math.max(1, Math.round(Number(text)) || 1);
   const numberField =
-    "w-16 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink";
+    "w-16 rounded-control border border-field-border bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink";
 
   const section = "mb-2 mt-5 text-sm font-semibold text-muted";
-  const panel = "divide-y divide-line rounded-lg border border-line bg-surface";
+  const panel = "divide-y divide-line rounded-control border border-line bg-surface";
   const row = "flex items-center gap-4 px-4 py-3";
   const ghostButton =
-    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
+    "rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <>
       <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
         <TopBar title="Settings" />
 
-        <div className="glass grid min-h-0 flex-1 grid-cols-[minmax(150px,210px)_minmax(0,1fr)] overflow-hidden rounded-3xl">
+        <div className="glass grid min-h-0 flex-1 grid-cols-[minmax(150px,210px)_minmax(0,1fr)] overflow-hidden rounded-surface">
           <nav aria-label={t("Settings")} className="overflow-y-auto border-r border-line p-2">
             {SECTIONS.map(({ id, label, Icon }) => (
               <button
@@ -291,7 +291,7 @@ function SettingsPage() {
                 type="button"
                 onClick={() => setPage(id)}
                 aria-current={page === id ? "true" : undefined}
-                className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left transition ${
+                className={`flex w-full items-center gap-2.5 rounded-control px-2.5 py-1.5 text-left transition ${
                   page === id ? "bg-highlight font-semibold text-ink" : "text-muted hover:bg-highlight/60 hover:text-ink"
                 }`}
               >
@@ -382,7 +382,7 @@ function SettingsPage() {
                     setRatePercent(String(value));
                     updateSettings({ extra_character_rate: value / 100 }).catch(console.error);
                   }}
-                  className="w-20 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink"
+                  className="w-20 rounded-control border border-field-border bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink"
                 />
                 %
               </label>
@@ -403,7 +403,7 @@ function SettingsPage() {
                         onChange={(event) => updatePlatform(index, { name: event.target.value })}
                         onBlur={savePlatforms}
                         placeholder="PayPal"
-                        className="min-w-0 flex-1 rounded-md border border-field-border bg-paper px-2 py-1.5 outline-none focus:border-ink"
+                        className="min-w-0 flex-1 rounded-control border border-field-border bg-paper px-2 py-1.5 outline-none focus:border-ink"
                       />
                       <input
                         type="number"
@@ -412,7 +412,7 @@ function SettingsPage() {
                         value={platform.percent}
                         onChange={(event) => updatePlatform(index, { percent: Number(event.target.value) || 0 })}
                         onBlur={savePlatforms}
-                        className="w-20 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
+                        className="w-20 rounded-control border border-field-border bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
                       />
                       <span className="text-muted">% +</span>
                       <input
@@ -422,7 +422,7 @@ function SettingsPage() {
                         value={platform.fixed}
                         onChange={(event) => updatePlatform(index, { fixed: Number(event.target.value) || 0 })}
                         onBlur={savePlatforms}
-                        className="w-20 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
+                        className="w-20 rounded-control border border-field-border bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
                       />
                       <span className="w-28 text-xs whitespace-nowrap text-faint">
                         200 → {formatMoney(receivedAfterFees(200, platform), currency)}
@@ -556,7 +556,7 @@ function SettingsPage() {
                 type="button"
                 onClick={handleExportBackup}
                 disabled={exporting}
-                className="rounded-2xl bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-60"
+                className="rounded-control bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-60"
               >
                 {exporting ? t("Exporting…") : t("Export")}
               </button>
@@ -618,7 +618,7 @@ function SettingsPage() {
                           console.error,
                         )
                       }
-                      className="w-16 rounded-md border border-field-border bg-paper px-2 py-1 text-right font-bold outline-none focus:border-ink"
+                      className="w-16 rounded-control border border-field-border bg-paper px-2 py-1 text-right font-bold outline-none focus:border-ink"
                     />
                     <span className="text-muted">{t("copies")}</span>
 
@@ -755,7 +755,7 @@ function SettingsPage() {
                 <p className="font-semibold">{storage ? t("{size} used", { size: formatBytes(totalBytes) }) : t("Storage")}</p>
                 {storage && (
                   <>
-                    <div className="mt-2 flex h-1.5 gap-0.5 overflow-hidden rounded-sm bg-paper">
+                    <div className="mt-2 flex h-1.5 gap-0.5 overflow-hidden rounded-chip bg-paper">
                       <span className="bg-primary" style={{ width: share(storage.imagesBytes) }} />
                       <span className="bg-faint" style={{ width: share(storage.thumbsBytes) }} />
                       <span className="bg-line-strong" style={{ width: share(storage.databaseBytes) }} />

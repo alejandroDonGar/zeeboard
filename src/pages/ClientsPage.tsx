@@ -615,7 +615,7 @@ function ClientsPage({
 
       <section className="grid min-h-0 flex-1 grid-cols-[minmax(230px,290px)_minmax(0,1fr)] gap-3">
         <GlassPanel as="nav" className="min-h-0" contentClassName="flex flex-col p-2">
-          <label className="mb-1.5 flex items-center gap-2 rounded-2xl border border-line bg-surface/60 px-2.5 py-1.5 text-faint focus-within:border-ink">
+          <label className="mb-1.5 flex items-center gap-2 rounded-control border border-line bg-surface/60 px-2.5 py-1.5 text-faint focus-within:border-ink">
             <IconSearch size={16} stroke={1.75} aria-hidden="true" />
             <input
               value={clientSearch}
@@ -645,7 +645,7 @@ function ClientsPage({
                       setClientMenuOpen(false);
                     }}
                     aria-current={client.id === selectedClientId ? "true" : undefined}
-                    className={`flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition ${
+                    className={`flex w-full items-center gap-2.5 rounded-control px-2 py-1.5 text-left transition ${
                       client.id === selectedClientId ? "bg-highlight" : "hover:bg-highlight/60"
                     }`}
                   >
@@ -669,7 +669,7 @@ function ClientsPage({
           </div>
         </GlassPanel>
 
-        <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
+        <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
           {!clientsReady ? null : !selectedClient ? (
             <div className="flex h-full flex-col items-center justify-center p-6 text-center">
               <p className="text-lg font-semibold">{clients.length === 0 ? t("Add your first client") : t("Pick a client")}</p>
@@ -679,7 +679,7 @@ function ClientsPage({
                   : t("Their profile, characters and commissions show up here.")}
               </p>
               {clients.length === 0 && (
-                <button type="button" onClick={handleOpenNewClient} className="mt-4 rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary">
+                <button type="button" onClick={handleOpenNewClient} className="mt-4 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary">
                   {t("New client")}
                 </button>
               )}
@@ -707,7 +707,7 @@ function ClientsPage({
                 <button
                   type="button"
                   onClick={() => handleOpenEditClient(selectedClient)}
-                  className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                  className="rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                 >
                   {t("Edit")}
                 </button>
@@ -720,7 +720,7 @@ function ClientsPage({
                     aria-haspopup="true"
                     aria-expanded={clientMenuOpen}
                     onClick={() => setClientMenuOpen((open) => !open)}
-                    className="flex h-[34px] w-[34px] items-center justify-center rounded-2xl border border-field-border bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                    className="flex h-[34px] w-[34px] items-center justify-center rounded-control border border-field-border bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                   >
                     <IconDots size={16} stroke={1.75} aria-hidden="true" />
                   </button>
@@ -728,7 +728,7 @@ function ClientsPage({
                   {clientMenuOpen && (
                     <>
                       <div className="fixed inset-0 z-30" onClick={() => setClientMenuOpen(false)} />
-                      <div role="menu" className="absolute top-full right-0 z-40 mt-1.5 w-52 rounded-3xl border border-line-strong bg-surface p-1.5 shadow-lg">
+                      <div role="menu" className="absolute top-full right-0 z-40 mt-1.5 w-52 rounded-surface border border-line-strong bg-surface p-1.5 shadow-lg">
                         {canFetchAvatar && (
                           <button
                             type="button"
@@ -738,7 +738,7 @@ function ClientsPage({
                               setClientMenuOpen(false);
                               handleFetchClientAvatar(selectedClient);
                             }}
-                            className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                            className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                           >
                             {fetchingAvatar ? t("Fetching…") : t("Fetch photo")}
                           </button>
@@ -751,7 +751,7 @@ function ClientsPage({
                             setClientMenuOpen(false);
                             setClientToDelete(selectedClient);
                           }}
-                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
+                          className="block w-full rounded-chip px-2.5 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
                         >
                           {t("Delete client")}…
                         </button>
@@ -816,20 +816,20 @@ function ClientsPage({
                               type="button"
                               onClick={() => handleOpenCommissionFromClient(commission)}
                               title={t("Open commission")}
-                              className={`relative grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-md py-2 pr-2 pl-3.5 text-left transition hover:bg-highlight/60 @min-[560px]:grid-cols-[40px_minmax(0,1fr)_auto_auto] ${
+                              className={`relative grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-center gap-3 rounded-control py-2 pr-2 pl-3.5 text-left transition hover:bg-highlight/60 @min-[560px]:grid-cols-[40px_minmax(0,1fr)_auto_auto] ${
                                 index > 0 ? "shadow-[0_-1px_0_var(--line)]" : ""
                               }`}
                             >
                               {/* Bar with the colour of its type */}
                               <span
-                                className="absolute top-2.5 bottom-2.5 left-1 w-[3px] rounded-sm"
+                                className="absolute top-2.5 bottom-2.5 left-1 w-[3px] rounded-chip"
                                 style={{ backgroundColor: (commission.template_id && templateColors[commission.template_id]) || "var(--line-strong)" }}
                               />
 
                               {commissionPreview ? (
-                                <img src={thumbUrl(commissionPreview.image_data_url)} loading="lazy" decoding="async" alt="" className="h-10 w-10 rounded-md object-cover" />
+                                <img src={thumbUrl(commissionPreview.image_data_url)} loading="lazy" decoding="async" alt="" className="h-10 w-10 rounded-control object-cover" />
                               ) : (
-                                <span className="h-10 w-10 rounded-md bg-highlight" />
+                                <span className="h-10 w-10 rounded-control bg-highlight" />
                               )}
 
                               <span className="min-w-0">
@@ -884,7 +884,7 @@ function ClientsPage({
                               setEditingCharacter(false);
                               setExpandedCharacterId(isOpen ? null : character.id);
                             }}
-                            className={`overflow-hidden rounded-lg border bg-surface text-left transition active:scale-[0.98] ${
+                            className={`overflow-hidden rounded-control border bg-surface text-left transition active:scale-[0.98] ${
                               isDropTarget ? "border-ink bg-highlight" : isOpen ? "border-ink" : "border-line hover:border-line-strong"
                             }`}
                           >
@@ -923,7 +923,7 @@ function ClientsPage({
                       })}
 
                       {addingCharacter ? (
-                        <div className="flex flex-col justify-center gap-2 rounded-lg border border-line-strong bg-surface p-3">
+                        <div className="flex flex-col justify-center gap-2 rounded-control border border-line-strong bg-surface p-3">
                           <input
                             autoFocus
                             value={newCharacterName}
@@ -933,17 +933,17 @@ function ClientsPage({
                               if (event.key === "Escape") setAddingCharacter(false);
                             }}
                             placeholder={t("Character name")}
-                            className="rounded-md border border-field-border bg-paper px-2 py-1.5 text-sm outline-none focus:border-ink"
+                            className="rounded-control border border-field-border bg-paper px-2 py-1.5 text-sm outline-none focus:border-ink"
                           />
                           <div className="flex justify-end gap-1">
-                            <button type="button" onClick={() => setAddingCharacter(false)} className="rounded-md px-2 py-1 text-xs font-semibold text-muted hover:text-ink">
+                            <button type="button" onClick={() => setAddingCharacter(false)} className="rounded-control px-2 py-1 text-xs font-semibold text-muted hover:text-ink">
                               {t("Cancel")}
                             </button>
                             <button
                               type="button"
                               onClick={handleCreateCharacter}
                               disabled={!newCharacterName.trim()}
-                              className="rounded-md bg-primary px-2 py-1 text-xs font-bold text-on-primary disabled:opacity-50"
+                              className="rounded-control bg-primary px-2 py-1 text-xs font-bold text-on-primary disabled:opacity-50"
                             >
                               {t("Add")}
                             </button>
@@ -953,7 +953,7 @@ function ClientsPage({
                         <button
                           type="button"
                           onClick={() => setAddingCharacter(true)}
-                          className="flex min-h-32 flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-line-strong font-medium text-muted transition hover:bg-highlight hover:text-ink"
+                          className="flex min-h-32 flex-col items-center justify-center gap-1.5 rounded-control border border-dashed border-line-strong font-medium text-muted transition hover:bg-highlight hover:text-ink"
                         >
                           <IconPlus size={18} stroke={1.75} aria-hidden="true" />
                           {t("Character")}
@@ -970,7 +970,7 @@ function ClientsPage({
                       const isDropTarget = dragZoneId === `character-detail:${character.id}`;
 
                       return (
-                        <div className="mt-4 rounded-lg border border-line bg-surface/60 p-4">
+                        <div className="mt-4 rounded-control border border-line bg-surface/60 p-4">
                           {editingCharacter ? (
                             <div className="space-y-2">
                               <input
@@ -978,24 +978,24 @@ function ClientsPage({
                                 value={editCharacterName}
                                 onChange={(event) => setEditCharacterName(event.target.value)}
                                 placeholder={t("Character name")}
-                                className="w-full rounded-md border border-field-border bg-paper px-3 py-2 text-sm font-bold"
+                                className="w-full rounded-control border border-field-border bg-paper px-3 py-2 text-sm font-bold"
                               />
                               <textarea
                                 value={editCharacterNotes}
                                 onChange={(event) => setEditCharacterNotes(event.target.value)}
                                 placeholder={t("Notes: species, colours, details to remember…")}
                                 rows={3}
-                                className="w-full rounded-md border border-field-border bg-paper px-3 py-2 text-sm"
+                                className="w-full rounded-control border border-field-border bg-paper px-3 py-2 text-sm"
                               />
                               <div className="flex justify-end gap-2">
-                                <button type="button" onClick={() => setEditingCharacter(false)} className="rounded-md px-3 py-1.5 text-xs font-semibold text-muted hover:text-ink">
+                                <button type="button" onClick={() => setEditingCharacter(false)} className="rounded-control px-3 py-1.5 text-xs font-semibold text-muted hover:text-ink">
                                   {t("Cancel")}
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleSaveCharacter(character.id)}
                                   disabled={!editCharacterName.trim()}
-                                  className="rounded-md bg-primary px-3 py-1.5 text-xs font-bold text-on-primary disabled:opacity-50"
+                                  className="rounded-control bg-primary px-3 py-1.5 text-xs font-bold text-on-primary disabled:opacity-50"
                                 >
                                   {t("Save")}
                                 </button>
@@ -1019,14 +1019,14 @@ function ClientsPage({
                                   setEditCharacterNotes(character.notes ?? "");
                                   setEditingCharacter(true);
                                 }}
-                                className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight"
+                                className="rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight"
                               >
                                 {t("Edit")}
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setCharacterToDelete(character)}
-                                className="rounded-2xl px-3 py-1.5 text-sm font-medium text-tone-bad transition hover:bg-tone-bad/10"
+                                className="rounded-control px-3 py-1.5 text-sm font-medium text-tone-bad transition hover:bg-tone-bad/10"
                               >
                                 {t("Delete")}
                               </button>
@@ -1039,7 +1039,7 @@ function ClientsPage({
 
                           <div className="grid grid-cols-[repeat(auto-fill,minmax(96px,1fr))] gap-2">
                             {references.map((reference) => (
-                              <div key={reference.id} className="group relative aspect-square overflow-hidden rounded-md bg-highlight">
+                              <div key={reference.id} className="group relative aspect-square overflow-hidden rounded-control bg-highlight">
                                 <button type="button" onClick={() => setZoomedImage(imageUrl(reference.image_data_url))} className="block h-full w-full cursor-zoom-in">
                                   <img src={thumbUrl(reference.image_data_url)} loading="lazy" decoding="async" alt={reference.label} className="h-full w-full object-cover" />
                                 </button>
@@ -1047,7 +1047,7 @@ function ClientsPage({
                                   type="button"
                                   title={t("Remove reference")}
                                   onClick={() => handleDeleteCharacterReference(character.id, reference.id)}
-                                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-sm bg-black/60 text-sm text-white opacity-0 transition hover:bg-tone-bad/100 group-hover:opacity-100"
+                                  className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-chip bg-black/60 text-sm text-white opacity-0 transition hover:bg-tone-bad/100 group-hover:opacity-100"
                                 >
                                   ×
                                 </button>
@@ -1060,7 +1060,7 @@ function ClientsPage({
                               title={t("Click, drop images here or paste with Ctrl+V")}
                               disabled={importingCharacterId !== null}
                               onClick={() => handleAddCharacterReferences(character.id)}
-                              className={`flex aspect-square flex-col items-center justify-center rounded-md border border-dashed text-center text-xs font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
+                              className={`flex aspect-square flex-col items-center justify-center rounded-control border border-dashed text-center text-xs font-semibold transition disabled:cursor-wait disabled:opacity-60 ${
                                 isDropTarget ? "border-ink bg-highlight text-ink" : "border-line-strong text-muted hover:border-ink hover:text-ink"
                               }`}
                             >
@@ -1094,10 +1094,10 @@ function ClientsPage({
                                           loading="lazy"
                                           decoding="async"
                                           alt={historyCommission.title}
-                                          className="aspect-square w-full rounded-md object-cover transition hover:opacity-80"
+                                          className="aspect-square w-full rounded-control object-cover transition hover:opacity-80"
                                         />
                                       ) : (
-                                        <div className="flex aspect-square items-center justify-center rounded-md bg-paper text-xs text-faint">{t("No image")}</div>
+                                        <div className="flex aspect-square items-center justify-center rounded-control bg-paper text-xs text-faint">{t("No image")}</div>
                                       )}
                                       <p className="mt-1 truncate text-xs font-semibold text-muted">{historyCommission.title}</p>
                                     </button>
@@ -1154,7 +1154,7 @@ function ClientsPage({
                       onBlur={saveNotes}
                       rows={4}
                       placeholder={t("Write something about this client")}
-                      className="min-h-24 w-full resize-y rounded-md border border-line bg-surface/60 px-3 py-2.5 leading-relaxed outline-none placeholder:text-faint focus:border-ink"
+                      className="min-h-24 w-full resize-y rounded-control border border-line bg-surface/60 px-3 py-2.5 leading-relaxed outline-none placeholder:text-faint focus:border-ink"
                     />
                     <p className="mt-1.5 text-xs text-faint">{t("What you write is saved by itself")}</p>
                   </div>
@@ -1174,13 +1174,13 @@ function ClientsPage({
           <img
             src={zoomedImage}
             alt=""
-            className="max-h-[90vh] max-w-[90vw] rounded-3xl shadow-2xl"
+            className="max-h-[90vh] max-w-[90vw] rounded-surface shadow-2xl"
           />
         </div>
       )}
       {clientForm && (
         <div className="modal-backdrop">
-          <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] modal-card rounded-3xl p-6">
+          <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] modal-card rounded-surface p-6">
             <DialogBehavior onClose={closeClientForm} />
             <h3 className="text-lg font-semibold text-ink">
               {clientForm === "new" ? t("New client") : t("Edit client")}
@@ -1193,14 +1193,14 @@ function ClientsPage({
                 onChange={(event) => setClientName(event.target.value)}
                 placeholder={t("Client name")}
                 data-private
-                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
+                className="w-full rounded-control border border-field-border bg-paper px-3 py-2.5"
               />
 
               <div className="grid grid-cols-[160px_minmax(0,1fr)] gap-3">
                 <select
                   value={clientPlatform}
                   onChange={(event) => setClientPlatform(event.target.value)}
-                  className="rounded-md border border-field-border bg-paper px-3 py-2.5"
+                  className="rounded-control border border-field-border bg-paper px-3 py-2.5"
                 >
                   <option>Twitter / X</option>
                   <option>Bluesky</option>
@@ -1214,7 +1214,7 @@ function ClientsPage({
                   onChange={(event) => setClientHandle(event.target.value)}
                   placeholder={t("@username")}
                 data-private
-                  className="rounded-md border border-field-border bg-paper px-3 py-2.5"
+                  className="rounded-control border border-field-border bg-paper px-3 py-2.5"
                 />
               </div>
 
@@ -1223,7 +1223,7 @@ function ClientsPage({
                 onChange={(event) => setTagText(event.target.value)}
                 placeholder={t("Account to tag when posting, e.g. Bluesky @name")}
                 data-private
-                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
+                className="w-full rounded-control border border-field-border bg-paper px-3 py-2.5"
               />
 
               <input
@@ -1232,7 +1232,7 @@ function ClientsPage({
                 onChange={(event) => setClientEmailText(event.target.value)}
                 placeholder={t("Email (PayPal), to match their payments")}
                 data-private
-                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
+                className="w-full rounded-control border border-field-border bg-paper px-3 py-2.5"
               />
 
               <textarea
@@ -1241,7 +1241,7 @@ function ClientsPage({
                 placeholder={t("Notes")}
                 data-private
                 rows={4}
-                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
+                className="w-full rounded-control border border-field-border bg-paper px-3 py-2.5"
               />
             </div>
 
@@ -1249,7 +1249,7 @@ function ClientsPage({
               <button
                 type="button"
                 onClick={closeClientForm}
-                className="rounded-md px-4 py-2 text-sm font-semibold text-muted hover:text-ink"
+                className="rounded-control px-4 py-2 text-sm font-semibold text-muted hover:text-ink"
               >
                 {t("Cancel")}
               </button>
@@ -1258,7 +1258,7 @@ function ClientsPage({
                 type="button"
                 onClick={clientForm === "new" ? handleCreateClient : handleSaveClientChanges}
                 disabled={savingClient || !clientName.trim()}
-                className="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
+                className="rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
               >
                 {savingClient ? t("Saving…") : clientForm === "new" ? t("Create client") : t("Save")}
               </button>

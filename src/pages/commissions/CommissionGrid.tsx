@@ -49,7 +49,7 @@ function CommissionGrid({
           <button
             key={commission.id}
             onClick={() => handleOpenCommission(commission)}
-            className="flex min-w-0 flex-col justify-start rounded-3xl border border-line bg-paper p-4 text-left transition hover:border-ink"
+            className="flex min-w-0 flex-col justify-start rounded-surface border border-line bg-paper p-4 text-left transition hover:border-ink"
           >
             {latestImage && (
               <div
@@ -67,7 +67,7 @@ function CommissionGrid({
                   event.stopPropagation();
                   setZoomedImage(imageUrl(latestImage.image_data_url));
                 }}
-                className="mb-3 cursor-zoom-in overflow-hidden rounded-2xl bg-surface shadow-sm transition hover:scale-[1.02]"
+                className="mb-3 cursor-zoom-in overflow-hidden rounded-control bg-surface shadow-sm transition hover:scale-[1.02]"
               >
                 <img
                   src={thumbUrl(latestImage.image_data_url)}
@@ -83,7 +83,7 @@ function CommissionGrid({
               ];
 
               return (
-                <span className={`mb-2 inline-flex rounded-sm px-2 py-0.5 text-xs font-bold ${status.className}`}>
+                <span className={`mb-2 inline-flex rounded-chip px-2 py-0.5 text-xs font-bold ${status.className}`}>
                   {status.label}
                 </span>
               );
@@ -98,7 +98,7 @@ function CommissionGrid({
                 {commissionCharacters.map((character) => (
                   <span
                     key={character.id}
-                    className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-bold text-muted shadow-sm"
+                    className="rounded-chip border border-line-strong bg-surface px-3 py-1 text-xs font-bold text-muted shadow-sm"
                   >
                     {character.name}
                   </span>
@@ -129,12 +129,12 @@ function CommissionGrid({
                 <span>{completionPercentage}%</span>
               </div>
 
-              <div className="mt-2 h-2 overflow-hidden rounded-sm bg-surface">
+              <div className="mt-2 h-2 overflow-hidden rounded-chip bg-surface">
                 <div
                   className={
                     completionPercentage === 100
-                      ? "h-full rounded-sm bg-tone-ok"
-                      : "h-full rounded-sm bg-primary"
+                      ? "h-full rounded-chip bg-tone-ok"
+                      : "h-full rounded-chip bg-primary"
                   }
                   style={{ width: `${completionPercentage}%` }}
                 />
@@ -143,12 +143,12 @@ function CommissionGrid({
 
             <div className="mt-4 flex flex-wrap items-center gap-2">
               {altCount > 0 && (
-                <span className="rounded-sm border border-line-strong bg-surface px-3 py-1 text-xs font-bold text-muted shadow-sm">
+                <span className="rounded-chip border border-line-strong bg-surface px-3 py-1 text-xs font-bold text-muted shadow-sm">
                   📷 {altCount} {t(altCount === 1 ? "Alt" : "Alts")}
                 </span>
               )}
 
-              <span className="rounded-sm bg-surface px-3 py-1 text-xs font-bold text-ink shadow-sm">
+              <span className="rounded-chip bg-surface px-3 py-1 text-xs font-bold text-ink shadow-sm">
                 {commission.price
                   ? formatMoney(commission.price, commission.currency)
                   : t("No price")}
@@ -156,12 +156,12 @@ function CommissionGrid({
 
               {deadlineStatus ? (
                 <span
-                  className={`rounded-sm px-3 py-1 text-xs font-bold shadow-sm ${deadlineStatus.className}`}
+                  className={`rounded-chip px-3 py-1 text-xs font-bold shadow-sm ${deadlineStatus.className}`}
                 >
                   {deadlineStatus.label}
                 </span>
               ) : (
-                <span className="rounded-sm bg-surface px-3 py-1 text-xs font-bold text-ink shadow-sm">
+                <span className="rounded-chip bg-surface px-3 py-1 text-xs font-bold text-ink shadow-sm">
                   {t("No deadline")}
                 </span>
               )}

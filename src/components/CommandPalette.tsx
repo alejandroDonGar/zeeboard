@@ -68,13 +68,13 @@ export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Keyboard shortcuts")} className="w-[420px] modal-card rounded-3xl p-6" onClick={(event) => event.stopPropagation()}>
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Keyboard shortcuts")} className="w-[420px] modal-card rounded-surface p-6" onClick={(event) => event.stopPropagation()}>
         <h3 className="text-lg font-semibold">{t("Keyboard shortcuts")}</h3>
         <div className="mt-4 divide-y divide-line">
           {SHORTCUTS.map(([keys, description]) => (
             <div key={keys} className="flex items-center justify-between py-2 text-sm">
               <span>{t(description)}</span>
-              <kbd className="rounded-sm border border-line-strong bg-paper px-2 py-0.5 text-xs font-bold text-muted">{keys}</kbd>
+              <kbd className="rounded-chip border border-line-strong bg-paper px-2 py-0.5 text-xs font-bold text-muted">{keys}</kbd>
             </div>
           ))}
         </div>
@@ -238,7 +238,7 @@ function CommandPalette({
 
   return (
     <div className="modal-backdrop items-start! px-4 pt-[14vh]" onClick={onClose}>
-      <div role="dialog" aria-modal="true" aria-label={t("Search")} className="w-full max-w-xl overflow-hidden modal-card rounded-3xl" onClick={(event) => event.stopPropagation()}>
+      <div role="dialog" aria-modal="true" aria-label={t("Search")} className="w-full max-w-xl overflow-hidden modal-card rounded-surface" onClick={(event) => event.stopPropagation()}>
         <div className="flex items-center gap-3 border-b border-line px-4 py-3">
           <IconSearch size={18} stroke={1.75} className="text-faint" aria-hidden="true" />
           <input
@@ -252,7 +252,7 @@ function CommandPalette({
             placeholder={t("Search commissions, clients, screens and actions…")}
             className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-faint"
           />
-          <kbd className="rounded-sm border border-line-strong px-1.5 text-xs font-semibold text-faint">Esc</kbd>
+          <kbd className="rounded-chip border border-line-strong px-1.5 text-xs font-semibold text-faint">Esc</kbd>
         </div>
 
         <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-1">

@@ -95,7 +95,7 @@ function CommissionPayments({
   }
 
   const status = PAYMENT_STATUS_STYLE[summary.status];
-  const field = "min-w-0 rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
+  const field = "min-w-0 rounded-control border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
   const paidShare = commission.price ? Math.min(100, (summary.paid / commission.price) * 100) : summary.paid > 0 ? 100 : 0;
 
   const renderRow = (payment: CommissionPayment) => (
@@ -124,7 +124,7 @@ function CommissionPayments({
         type="button"
         title={t("Remove payment")}
         onClick={() => run(async () => undoToast(showToast, "Payment removed.", await deletePayment(payment.id)))}
-        className="rounded-sm text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
+        className="rounded-chip text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
       >
         ×
       </button>
@@ -141,7 +141,7 @@ function CommissionPayments({
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
-          className="ml-auto rounded-sm px-1 py-1 text-xs font-medium text-faint transition hover:text-ink"
+          className="ml-auto rounded-chip px-1 py-1 text-xs font-medium text-faint transition hover:text-ink"
         >
           {t("Payments")}
           {payments.length > 0 ? ` · ${payments.length}` : ""} {open ? "▴" : "▾"}
@@ -155,7 +155,7 @@ function CommissionPayments({
         </span>
       </p>
 
-      <div className="my-2.5 h-1.5 overflow-hidden rounded-sm bg-line" role="presentation">
+      <div className="my-2.5 h-1.5 overflow-hidden rounded-chip bg-line" role="presentation">
         <div className="h-full bg-tone-ok" style={{ width: `${paidShare}%` }} />
       </div>
 
@@ -202,14 +202,14 @@ function CommissionPayments({
               if (event.key === "Enter") handleAdd();
             }}
           >
-            <div role="group" className="col-span-2 inline-flex w-fit rounded-md border border-line bg-paper p-0.5">
+            <div role="group" className="col-span-2 inline-flex w-fit rounded-control border border-line bg-paper p-0.5">
               {(["payment", "tip", "refund"] as const).map((option) => (
                 <button
                   key={option}
                   type="button"
                   aria-pressed={kind === option}
                   onClick={() => setKind(option)}
-                  className={`rounded-sm px-3 py-1 text-xs ${kind === option ? "bg-highlight font-bold text-ink" : "font-semibold text-muted hover:text-ink"}`}
+                  className={`rounded-chip px-3 py-1 text-xs ${kind === option ? "bg-highlight font-bold text-ink" : "font-semibold text-muted hover:text-ink"}`}
                 >
                   {option === "tip" ? t("Tip") : option === "refund" ? t("Refund") : t("Payment")}
                 </button>
@@ -259,7 +259,7 @@ function CommissionPayments({
               className={field}
             />
             <input value={note} onChange={(event) => setNote(event.target.value)} placeholder={t("Note: PayPal, deposit…")} aria-label={t("Note: PayPal, deposit…")} className={field} />
-            <button type="button" onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
+            <button type="button" onClick={handleAdd} className="rounded-control bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
               {kind === "tip" ? t("Add tip") : kind === "refund" ? t("Add refund") : t("Add payment")}
             </button>
           </div>

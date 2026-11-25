@@ -7,10 +7,10 @@ import { isPrivate } from "../lib/privacy";
 import { useToast } from "../context/ToastContext";
 import { t } from "../lib/i18n";
 
-const panel = "divide-y divide-line rounded-lg border border-line bg-surface";
+const panel = "divide-y divide-line rounded-control border border-line bg-surface";
 const row = "flex items-center gap-4 px-5 py-4";
 const ghostButton =
-  "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
+  "rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
 
 function qrSvg(text: string): string {
   const qr = qrcode(0, "M");
@@ -85,7 +85,7 @@ function IpadSettings() {
               <div className="flex gap-5">
                 {link && (
                   <div
-                    className="h-40 w-40 shrink-0 rounded-md bg-white p-2 [&>svg]:h-full [&>svg]:w-full"
+                    className="h-40 w-40 shrink-0 rounded-control bg-white p-2 [&>svg]:h-full [&>svg]:w-full"
                     dangerouslySetInnerHTML={{ __html: qrSvg(link) }}
                   />
                 )}

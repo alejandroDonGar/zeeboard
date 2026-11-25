@@ -127,7 +127,7 @@ function StatisticsPage() {
   ];
   const range = periodRanges(period, now).current;
   const periodExpenses = expenses.filter((expense) => expense.spent_at >= range.from && expense.spent_at <= range.to);
-  const field = "min-w-0 rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
+  const field = "min-w-0 rounded-control border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
   const bestClient = Math.max(...(stats?.topClients.map((client) => client.net) ?? []), 1);
 
   return (
@@ -197,7 +197,7 @@ function StatisticsPage() {
                       {stats.byTemplate.map((row) => (
                         <tr key={row.name} className="border-t border-line text-right whitespace-nowrap">
                           <td className="py-2.5 pl-0 text-left font-semibold whitespace-normal">
-                            <i className="mr-2 inline-block h-2.5 w-2.5 rounded-sm align-[-1px]" style={{ backgroundColor: colorOf(row.name) }} />
+                            <i className="mr-2 inline-block h-2.5 w-2.5 rounded-chip align-[-1px]" style={{ backgroundColor: colorOf(row.name) }} />
                             {row.name || t("No template")}
                           </td>
                           <td className="py-2.5 pl-3 text-muted">{row.pieces}</td>
@@ -228,7 +228,7 @@ function StatisticsPage() {
                         <span className="text-muted tabular-nums">
                           {t(client.pieces === 1 ? "{n} piece" : "{n} pieces", { n: client.pieces })} · <b className="font-semibold text-ink">{formatMoney(client.net)}</b>
                         </span>
-                        <span className="col-start-2 col-end-4 mt-1 mb-1 h-1 overflow-hidden rounded-sm bg-line">
+                        <span className="col-start-2 col-end-4 mt-1 mb-1 h-1 overflow-hidden rounded-chip bg-line">
                           <i className="block h-full bg-ink" style={{ width: `${(client.net / bestClient) * 100}%` }} />
                         </span>
                       </div>
@@ -302,7 +302,7 @@ function StatisticsPage() {
               <input type="date" value={newExpense.spentAt} onChange={(event) => setNewExpense({ ...newExpense, spentAt: event.target.value })} aria-label={t("Date")} className={field} />
               <input value={newExpense.amount} onChange={(event) => setNewExpense({ ...newExpense, amount: event.target.value })} placeholder={t("Amount")} aria-label={t("Amount")} inputMode="decimal" className={`${field} w-28`} />
               <input value={newExpense.note} onChange={(event) => setNewExpense({ ...newExpense, note: event.target.value })} placeholder={t("What was it?")} aria-label={t("What was it?")} className={`${field} flex-1`} />
-              <button type="button" onClick={() => handleAddExpense().catch(console.error)} className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
+              <button type="button" onClick={() => handleAddExpense().catch(console.error)} className="rounded-control bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
                 {t("Add expense")}
               </button>
             </div>
@@ -315,7 +315,7 @@ function StatisticsPage() {
                   type="button"
                   title={t("Remove expense")}
                   onClick={() => deleteExpense(expense.id).then(reloadExpenses).catch(console.error)}
-                  className="rounded-sm text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
+                  className="rounded-chip text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
                 >
                   ×
                 </button>

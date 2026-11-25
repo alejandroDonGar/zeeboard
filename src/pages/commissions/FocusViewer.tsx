@@ -168,7 +168,7 @@ function FocusViewer({
                 <div
                   onClick={(event) => event.stopPropagation()}
                   style={{ left: boxLeft(openPin.x ?? 0), top: `${(openPin.y ?? 0) * 100}%` }}
-                  className="absolute z-10 mt-4 w-60 -translate-x-1/2 rounded-md bg-surface p-2.5 text-sm text-ink shadow-2xl"
+                  className="absolute z-10 mt-4 w-60 -translate-x-1/2 rounded-control bg-surface p-2.5 text-sm text-ink shadow-2xl"
                 >
                   {openPin.image_id !== shown.id && (
                     <p className="mb-1 text-xs text-faint">
@@ -213,7 +213,7 @@ function FocusViewer({
                     }}
                     placeholder={t("What should change here? Enter to add")}
                     style={{ left: boxLeft(pinDraft.x), top: `${pinDraft.y * 100}%` }}
-                    className="absolute z-10 mt-4 w-64 -translate-x-1/2 rounded-md border border-field-border bg-surface px-3 py-1.5 text-sm text-ink shadow-2xl outline-none focus:border-ink"
+                    className="absolute z-10 mt-4 w-64 -translate-x-1/2 rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm text-ink shadow-2xl outline-none focus:border-ink"
                   />
                 </>
               )}
@@ -228,7 +228,7 @@ function FocusViewer({
                     key={version.id}
                     type="button"
                     onClick={() => setFocusImageId(version.id)}
-                    className={`rounded-sm px-2 py-0.5 text-xs font-bold ${
+                    className={`rounded-chip px-2 py-0.5 text-xs font-bold ${
                       version.id === shown.id ? "bg-white text-black" : "bg-white/20 text-white hover:bg-white/30"
                     }`}
                   >
@@ -242,7 +242,7 @@ function FocusViewer({
                   setPinDraft(null);
                   setOpenPinId(null);
                 }}
-                className={`rounded-sm px-2 py-0.5 text-xs font-bold ${
+                className={`rounded-chip px-2 py-0.5 text-xs font-bold ${
                   pinMode ? "bg-amber-400 text-black" : "bg-white/20 text-white hover:bg-white/30"
                 }`}
               >
@@ -252,7 +252,7 @@ function FocusViewer({
                 type="button"
                 disabled={importingStageId !== null}
                 onClick={() => handleAddVersion(shown)}
-                className="rounded-sm bg-white/20 px-2 py-0.5 text-xs font-bold text-white hover:bg-white/30 disabled:opacity-50"
+                className="rounded-chip bg-white/20 px-2 py-0.5 text-xs font-bold text-white hover:bg-white/30 disabled:opacity-50"
               >
                 {t("+ New version")}
               </button>

@@ -65,7 +65,7 @@ function StageViewer({
   const isDone = stageIndex < currentStageIndex;
   const isCurrent = stageIndex === currentStageIndex;
   const isDropTarget = dragZoneId === `stage:${stage.id}`;
-  const overlay = "flex h-7 items-center justify-center rounded-sm bg-black/65 px-2 text-xs font-bold text-white hover:bg-black/85 disabled:opacity-50";
+  const overlay = "flex h-7 items-center justify-center rounded-chip bg-black/65 px-2 text-xs font-bold text-white hover:bg-black/85 disabled:opacity-50";
 
   return (
     <div className="grid min-h-0 min-w-0 gap-3.5 p-4 @min-[760px]:h-full @min-[760px]:grid-rows-[minmax(14rem,1fr)_auto] @min-[760px]:overflow-y-auto">
@@ -83,23 +83,23 @@ function StageViewer({
               <img
                 src={imageUrl(image.image_data_url)}
                 alt={`${stage.name} · ${image.label}`}
-                className="block max-h-[100cqh] max-w-[100cqw] rounded-md object-contain shadow-md ring-1 ring-line"
+                className="block max-h-[100cqh] max-w-[100cqw] rounded-control object-contain shadow-md ring-1 ring-line"
               />
             </button>
 
             {(getVersions(image).length > 1 || isDone) && (
-              <span className="absolute top-2 left-2 rounded-sm bg-black/65 px-1.5 py-0.5 text-xs font-bold text-white">
+              <span className="absolute top-2 left-2 rounded-chip bg-black/65 px-1.5 py-0.5 text-xs font-bold text-white">
                 {versionLabel(image, getVersions(image), isDone)}
               </span>
             )}
 
             {images.length > 1 && (
-              <span className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-md bg-black/65 p-0.5 text-xs whitespace-nowrap text-white">
+              <span className="absolute bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-0.5 rounded-control bg-black/65 p-0.5 text-xs whitespace-nowrap text-white">
                 <button
                   type="button"
                   title={t("Previous alt")}
                   onClick={() => setActiveIndex(stage.id, (imageIndex - 1 + images.length) % images.length)}
-                  className="h-6 w-6 rounded-sm hover:bg-white/15"
+                  className="h-6 w-6 rounded-chip hover:bg-white/15"
                 >
                   ‹
                 </button>
@@ -108,7 +108,7 @@ function StageViewer({
                   type="button"
                   title={t("Next alt")}
                   onClick={() => setActiveIndex(stage.id, (imageIndex + 1) % images.length)}
-                  className="h-6 w-6 rounded-sm hover:bg-white/15"
+                  className="h-6 w-6 rounded-chip hover:bg-white/15"
                 >
                   ›
                 </button>
@@ -127,14 +127,14 @@ function StageViewer({
               </button>
             </span>
 
-            {importingStageId === stage.id && <span className="absolute right-2 bottom-2 rounded-sm bg-black/65 px-1.5 py-0.5 text-xs text-white">{t("Optimizing…")}</span>}
+            {importingStageId === stage.id && <span className="absolute right-2 bottom-2 rounded-chip bg-black/65 px-1.5 py-0.5 text-xs text-white">{t("Optimizing…")}</span>}
           </div>
         ) : (
           <button
             type="button"
             disabled={importingStageId !== null}
             onClick={() => addImages(stage.id)}
-            className={`flex h-[min(100cqh,320px)] w-[min(100cqw,420px)] flex-col items-center justify-center gap-2 rounded-md border border-dashed text-center text-sm transition ${
+            className={`flex h-[min(100cqh,320px)] w-[min(100cqw,420px)] flex-col items-center justify-center gap-2 rounded-control border border-dashed text-center text-sm transition ${
               isDropTarget ? "border-ink bg-highlight text-ink" : "border-line-strong text-faint hover:border-ink hover:text-ink"
             }`}
           >
@@ -163,7 +163,7 @@ function StageViewer({
                   onClick={() => setViewStageId(item.id)}
                   aria-pressed={selected}
                   title={item.name}
-                  className={`flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-md border bg-paper transition ${
+                  className={`flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-control border bg-paper transition ${
                     thumb ? "border-line" : "border-dashed border-line-strong text-faint hover:border-ink hover:text-ink"
                   } ${selected ? "ring-2 ring-ink ring-offset-2 ring-offset-surface" : ""}`}
                 >
@@ -185,7 +185,7 @@ function StageViewer({
                   type="button"
                   onClick={() => toggleCorrections(item.id)}
                   aria-expanded={open}
-                  className={`mt-0.5 max-w-full self-start truncate rounded-sm px-1 py-1 text-xs transition ${
+                  className={`mt-0.5 max-w-full self-start truncate rounded-chip px-1 py-1 text-xs transition ${
                     pending > 0 ? "bg-tone-warn/15 font-semibold text-ink" : open ? "text-ink" : "text-faint hover:text-ink"
                   }`}
                 >

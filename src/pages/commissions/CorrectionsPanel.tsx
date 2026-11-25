@@ -40,7 +40,7 @@ function CorrectionsPanel({
   const { showToast } = useToast();
 
   return (
-    <div className="rounded-md border border-line bg-surface/60 p-3">
+    <div className="rounded-control border border-line bg-surface/60 p-3">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-xs font-semibold text-muted">
           {t("Corrections")} · {stage.name}
@@ -108,7 +108,7 @@ function CorrectionsPanel({
           }
         }}
         placeholder={t("What did the client ask to change? Enter to add")}
-        className="mt-2 w-full rounded-md border border-field-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
+        className="mt-2 w-full rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
       />
 
       {stageImages.length > 0 && (
@@ -119,7 +119,7 @@ function CorrectionsPanel({
               type="button"
               disabled={importingStageId !== null}
               onClick={() => addVersion(image)}
-              className="rounded-sm border border-line-strong px-2.5 py-1 text-xs font-semibold text-muted transition hover:border-ink hover:text-ink disabled:opacity-50"
+              className="rounded-chip border border-line-strong px-2.5 py-1 text-xs font-semibold text-muted transition hover:border-ink hover:text-ink disabled:opacity-50"
             >
               {stageImages.length > 1 ? t("Upload retouched version · {name}", { name: image.label }) : t("Upload retouched version")}
             </button>

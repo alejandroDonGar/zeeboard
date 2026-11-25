@@ -888,7 +888,7 @@ function CommissionsPage() {
           />
         )}
 
-        <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
+        <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
           {viewMode === "list" && activeCommission ? (
             <>
               {/* Header: tinted with the colours of the image being looked at */}
@@ -917,7 +917,7 @@ function CommissionsPage() {
                 <button
                   type="button"
                   onClick={handleOpenEditCommission}
-                  className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                  className="rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                 >
                   {t("Edit")}
                 </button>
@@ -930,7 +930,7 @@ function CommissionsPage() {
                     aria-haspopup="true"
                     aria-expanded={commissionMenuOpen}
                     onClick={() => setCommissionMenuOpen((open) => !open)}
-                    className="flex h-[34px] w-[34px] items-center justify-center rounded-2xl border border-field-border bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                    className="flex h-[34px] w-[34px] items-center justify-center rounded-control border border-field-border bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                   >
                     <IconDots size={16} stroke={1.75} aria-hidden="true" />
                   </button>
@@ -938,7 +938,7 @@ function CommissionsPage() {
                   {commissionMenuOpen && (
                     <>
                       <div className="fixed inset-0 z-30" onClick={() => setCommissionMenuOpen(false)} />
-                      <div role="menu" className="absolute top-full right-0 z-40 mt-1.5 w-48 rounded-3xl border border-line-strong bg-surface p-1.5 shadow-lg">
+                      <div role="menu" className="absolute top-full right-0 z-40 mt-1.5 w-48 rounded-surface border border-line-strong bg-surface p-1.5 shadow-lg">
                         <button
                           type="button"
                           role="menuitem"
@@ -947,7 +947,7 @@ function CommissionsPage() {
                             setCommissionMenuOpen(false);
                             handleDuplicateCommission();
                           }}
-                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                          className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                         >
                           {duplicatingCommission ? t("Duplicating…") : t("Duplicate")}
                         </button>
@@ -959,7 +959,7 @@ function CommissionsPage() {
                             setCommissionMenuOpen(false);
                             copyInvoiceDescription();
                           }}
-                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                          className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                         >
                           {t("Copy description")}
                         </button>
@@ -971,7 +971,7 @@ function CommissionsPage() {
                             if (activeCommission.cancelled_at) setCancelled(null);
                             else setCancelReason("");
                           }}
-                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                          className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                         >
                           {activeCommission.cancelled_at ? t("Reopen") : t("Cancel commission…")}
                         </button>
@@ -985,7 +985,7 @@ function CommissionsPage() {
                               setCommissionMenuOpen(false);
                               toggleWaiting();
                             }}
-                            className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                            className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                           >
                             {activeCommission.waiting_since ? t("Not waiting any more") : t("Waiting for the client")}
                           </button>
@@ -1004,7 +1004,7 @@ function CommissionsPage() {
                               setCommissionMenuOpen(false);
                               copyMessage(template);
                             }}
-                            className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                            className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                           >
                             {label}
                           </button>
@@ -1017,7 +1017,7 @@ function CommissionsPage() {
                             setCommissionMenuOpen(false);
                             setShowDeleteCommissionModal(true);
                           }}
-                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
+                          className="block w-full rounded-chip px-2.5 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
                         >
                           {t("Delete")}
                         </button>
@@ -1030,7 +1030,7 @@ function CommissionsPage() {
               {/* Body: the stages (image and strip) and, beside them or below, the properties */}
               <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto border-t border-line @min-[760px]:grid-cols-[minmax(0,1fr)_clamp(250px,30%,310px)] @min-[760px]:overflow-hidden">
                 {workflowStages.length === 0 ? (
-                  <p className="m-4 rounded-md border border-dashed border-line-strong p-6 text-center text-sm text-faint">
+                  <p className="m-4 rounded-control border border-dashed border-line-strong p-6 text-center text-sm text-faint">
                     {t("This commission has no template, so it has no stages. Edit it to pick one.")}
                   </p>
                 ) : (
@@ -1106,14 +1106,14 @@ function CommissionsPage() {
                     title={t("Back to the previous stage")}
                     onClick={() => handleMoveStage(-1)}
                     disabled={currentStageIndex <= 0}
-                    className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97] disabled:opacity-40"
+                    className="rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97] disabled:opacity-40"
                   >
                     {t("‹ Back")}
                   </button>
 
                   {isLastStage ? (
                     <>
-                      <span className="rounded-2xl bg-tone-ok px-4 py-1.5 text-sm font-semibold text-on-tone">
+                      <span className="rounded-control bg-tone-ok px-4 py-1.5 text-sm font-semibold text-on-tone">
                         {t("✓ Finished")}
                         {activeCommission.delivered_at &&
                           ` · ${new Date(`${activeCommission.delivered_at}T12:00:00`).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}`}
@@ -1123,7 +1123,7 @@ function CommissionsPage() {
                         type="button"
                         title={t("Finish it again with a new delivery date")}
                         onClick={() => setShowFinishModal(true)}
-                        className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97]"
+                        className="rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97]"
                       >
                         {t("Edit delivery")}
                       </button>
@@ -1132,7 +1132,7 @@ function CommissionsPage() {
                     <button
                       type="button"
                       onClick={() => (nextIsFinish ? setShowFinishModal(true) : handleMoveStage(1))}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97]"
+                      className="inline-flex items-center gap-2 rounded-control bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97]"
                     >
                       <IconCheck size={16} stroke={2} aria-hidden="true" />
                       {nextIsFinish
@@ -1149,7 +1149,7 @@ function CommissionsPage() {
                       onClick={toggleTimer}
                       aria-pressed={timing}
                       title={trackedByStage || t("Time the current stage: the hours fill in when you finish")}
-                      className="inline-flex items-center gap-1.5 rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink tabular-nums transition hover:bg-highlight active:scale-[0.97]"
+                      className="inline-flex items-center gap-1.5 rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink tabular-nums transition hover:bg-highlight active:scale-[0.97]"
                     >
                       {timing ? <IconPlayerStop size={15} stroke={2} aria-hidden="true" /> : <IconPlayerPlay size={15} stroke={2} aria-hidden="true" />}
                       {timing ? t("Stop") : t("Time")}
@@ -1262,7 +1262,7 @@ function CommissionsPage() {
             placeholder={t("Reason (optional): the client disappeared, refunded…")}
             aria-label={t("Reason")}
             rows={2}
-            className="mt-3 w-full rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink"
+            className="mt-3 w-full rounded-control border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink"
           />
         </ConfirmModal>
       )}
@@ -1294,7 +1294,7 @@ function CommissionsPage() {
           <img
             src={zoomedImage}
             alt=""
-            className="max-h-[90vh] max-w-[90vw] rounded-3xl shadow-2xl"
+            className="max-h-[90vh] max-w-[90vw] rounded-surface shadow-2xl"
           />
         </div>
       )}

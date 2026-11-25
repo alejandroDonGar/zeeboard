@@ -126,7 +126,7 @@ function CommissionForm({
     }));
   const formLabel = "mb-1.5 block text-xs font-bold text-muted";
   const formField =
-    "rounded-md border border-field-border bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
+    "rounded-control border border-field-border bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
 
   /** Saves the form: creates or updates, and in both cases saves tags and characters */
   async function handleSaveCommissionForm() {
@@ -176,7 +176,7 @@ function CommissionForm({
 
   return (
     <div className="modal-backdrop">
-      <div role="dialog" aria-modal="true" aria-label={mode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden modal-card rounded-3xl">
+      <div role="dialog" aria-modal="true" aria-label={mode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden modal-card rounded-surface">
         <DialogBehavior onClose={() => onClose()} />
         {/* Left: pick */}
         <div className="min-h-0 space-y-5 overflow-y-auto p-6">
@@ -185,7 +185,7 @@ function CommissionForm({
             value={commissionTitle}
             onChange={(event) => setCommissionTitle(event.target.value)}
             placeholder={t("Commission title")}
-            className="w-full rounded-md border border-transparent bg-transparent px-1 text-xl font-semibold tracking-tight outline-none hover:border-line focus:border-ink"
+            className="w-full rounded-control border border-transparent bg-transparent px-1 text-xl font-semibold tracking-tight outline-none hover:border-line focus:border-ink"
           />
 
           <div>
@@ -239,7 +239,7 @@ function CommissionForm({
                   if (value >= 1) changeCharacterCount(value);
                 }}
                 title={t("How many characters the commission has; the price depends on it")}
-                className="ml-3 w-14 rounded-sm border border-field-border bg-surface px-1.5 py-0.5 text-center text-sm normal-case tracking-normal text-ink outline-none focus:border-ink"
+                className="ml-3 w-14 rounded-chip border border-field-border bg-surface px-1.5 py-0.5 text-center text-sm normal-case tracking-normal text-ink outline-none focus:border-ink"
               />
               <span className="ml-2 normal-case tracking-normal text-faint">
                 {t("the price depends on this number")}
@@ -262,8 +262,8 @@ function CommissionForm({
                     }}
                     className={
                       selected
-                        ? "rounded-sm bg-primary px-2.5 py-1 text-sm font-bold text-on-primary"
-                        : "rounded-sm border border-line-strong px-2.5 py-1 text-sm text-muted hover:border-ink hover:text-ink"
+                        ? "rounded-chip bg-primary px-2.5 py-1 text-sm font-bold text-on-primary"
+                        : "rounded-chip border border-line-strong px-2.5 py-1 text-sm text-muted hover:border-ink hover:text-ink"
                     }
                   >
                     {character.name}
@@ -293,7 +293,7 @@ function CommissionForm({
                   }
                 }}
                 placeholder={t("+ from another client")}
-                className="w-52 rounded-sm border border-dashed border-line-strong bg-transparent px-2 py-1 text-sm outline-none focus:border-ink"
+                className="w-52 rounded-chip border border-dashed border-line-strong bg-transparent px-2 py-1 text-sm outline-none focus:border-ink"
               />
               <datalist id="character-options">
                 {allCharacterOptions.map((option) => (
@@ -326,7 +326,7 @@ function CommissionForm({
                       applyAutoPrice(template.id, characterCount);
                       applyAutoTags(characterCount);
                     }}
-                    className={`rounded-md border px-3 py-2 text-left transition disabled:cursor-default ${
+                    className={`rounded-control border px-3 py-2 text-left transition disabled:cursor-default ${
                       selected
                         ? "border-ink bg-paper ring-1 ring-ink"
                         : "border-line hover:border-line-strong disabled:opacity-40"
@@ -424,12 +424,12 @@ function CommissionForm({
                   inputMode="decimal"
                   data-private
                   title={t("Calculated from the type and characters; you can change it")}
-                  className="w-24 rounded-md border border-field-border bg-surface px-2 py-1 text-right font-semibold outline-none focus:border-ink"
+                  className="w-24 rounded-control border border-field-border bg-surface px-2 py-1 text-right font-semibold outline-none focus:border-ink"
                 />
                 <select
                   value={currency}
                   onChange={(event) => setCurrency(event.target.value)}
-                  className="rounded-md border border-field-border bg-surface px-1 py-1 text-sm font-semibold"
+                  className="rounded-control border border-field-border bg-surface px-1 py-1 text-sm font-semibold"
                 >
                   <option>EUR</option>
                   <option>USD</option>
@@ -444,7 +444,7 @@ function CommissionForm({
                       placeholder="0,92"
                       inputMode="decimal"
                       aria-label={t("Exchange rate")}
-                      className="w-16 rounded-md border border-field-border bg-surface px-2 py-1 text-right text-sm outline-none focus:border-ink"
+                      className="w-16 rounded-control border border-field-border bg-surface px-2 py-1 text-right text-sm outline-none focus:border-ink"
                     />
                     {appSettings().default_currency}
                   </label>
@@ -477,7 +477,7 @@ function CommissionForm({
             <button
               type="button"
               onClick={() => onClose()}
-              className="rounded-md px-4 py-2 text-sm font-semibold text-muted hover:text-ink"
+              className="rounded-control px-4 py-2 text-sm font-semibold text-muted hover:text-ink"
             >
               {t("Cancel")}
             </button>
@@ -485,7 +485,7 @@ function CommissionForm({
               type="button"
               onClick={handleSaveCommissionForm}
               disabled={savingCommission || !commissionTitle.trim()}
-              className="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
+              className="rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
             >
               {savingCommission ? t("Saving…") : mode === "new" ? t("Create commission") : t("Save changes")}
             </button>

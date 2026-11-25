@@ -41,13 +41,11 @@
   --color-tone-info: var(--tone-info);
   --color-on-tone: var(--on-tone); /* texto sobre un fondo tone-* sólido */
 
-  /* Esquinas rectas y sobrias: las clases rounded-* de toda la app usan estos valores */
-  --radius-sm: 3px; /* etiquetas, chips, barras de progreso */
-  --radius-md: 4px;
-  --radius-lg: 4px;
-  --radius-xl: 4px; /* botones pequeños, miniaturas */
-  --radius-2xl: 4px; /* botones, campos, imágenes */
-  --radius-3xl: 6px; /* tarjetas y modales */
+  /* Esquinas rectas y sobrias (maqueta D): tres radios con su papel. Los nombres de Tailwind (sm, md, 2xl…) no se
+     usan: valen 16–24 px por defecto y engañan al leer el código (lo comprueba tests/tokens.test.ts) */
+  --radius-chip: 3px; /* rounded-chip: chips, etiquetas, barras de progreso */
+  --radius-control: 4px; /* rounded-control: campos, botones, miniaturas, filas */
+  --radius-surface: 6px; /* rounded-surface: paneles, ventanas, menús */
 }
 
 :root {

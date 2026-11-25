@@ -49,8 +49,8 @@ function TagEditor({
   const strengths = tintStrengths(draft.color);
   const heroStyle = { "--tint": draft.color, "--ts-light": strengths.light, "--ts-dark": strengths.dark } as CSSProperties;
   const btn =
-    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
-  const field = "rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
+    "rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
+  const field = "rounded-control border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
 
   return (
     <div
@@ -68,7 +68,7 @@ function TagEditor({
           onChange={(event) => setDraft({ ...draft, name: event.target.value })}
           placeholder={t("Tag name")}
           aria-label={t("Tag name")}
-          className="-ml-1 block w-full rounded-md border border-transparent bg-transparent px-1 py-0.5 font-display text-3xl leading-tight font-semibold tracking-tight outline-none hover:border-line focus:border-line-strong focus:bg-paper"
+          className="-ml-1 block w-full rounded-control border border-transparent bg-transparent px-1 py-0.5 font-display text-3xl leading-tight font-semibold tracking-tight outline-none hover:border-line focus:border-line-strong focus:bg-paper"
         />
 
         <div className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-3 text-xs text-faint">
@@ -131,7 +131,7 @@ function TagEditor({
           type="button"
           onClick={save}
           disabled={!draft.name.trim() || saving}
-          className="ml-auto rounded-2xl bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50"
+          className="ml-auto rounded-control bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50"
         >
           {saving ? t("Saving…") : tag ? t("Save changes") : t("Add tag")}
         </button>

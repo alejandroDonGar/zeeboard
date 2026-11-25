@@ -261,10 +261,10 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   const free = settings.slots_total - taken;
 
   const btn =
-    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
+    "rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
   const primaryBtn =
-    "inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50";
-  const field = "w-full rounded-md border border-field-border bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
+    "inline-flex items-center gap-2 rounded-control bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50";
+  const field = "w-full rounded-control border border-field-border bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
 
   // The open request; if it left the list, the next one waiting
   const current = requests.find((request) => request.id === selectedId) ?? waiting[0] ?? waitlist[0] ?? null;
@@ -289,7 +289,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
         type="button"
         onClick={() => setSelectedId(request.id)}
         aria-current={request.id === current?.id ? "true" : undefined}
-        className={`grid w-full grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition ${
+        className={`grid w-full grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-control px-2 py-1.5 text-left transition ${
           request.id === current?.id ? "bg-highlight" : "hover:bg-highlight/60"
         }`}
       >
@@ -350,7 +350,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
               {Array.from({ length: Math.max(settings.slots_total, taken) }, (_, index) => (
                 <i
                   key={index}
-                  className={`h-3.5 w-2.5 rounded-sm border ${
+                  className={`h-3.5 w-2.5 rounded-chip border ${
                     index >= settings.slots_total ? "border-tone-bad bg-tone-bad" : index < taken ? "border-ink bg-ink" : "border-line-strong"
                   }`}
                 />
@@ -369,7 +369,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 min={1}
                 value={settings.slots_total}
                 onChange={(event) => saveSlots({ slots_total: Math.max(1, Math.round(Number(event.target.value)) || 1) }).catch(console.error)}
-                className="w-14 rounded-md border border-field-border bg-surface px-1.5 py-1 text-right text-sm font-semibold text-ink tabular-nums outline-none focus:border-ink"
+                className="w-14 rounded-control border border-field-border bg-surface px-1.5 py-1 text-right text-sm font-semibold text-ink tabular-nums outline-none focus:border-ink"
               />
             </label>
           </div>
@@ -389,7 +389,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 <>
                   {group(t("Waitlist · {n}", { n: waitlist.length }))}
                   {free > 0 && (
-                    <p className="mx-2 mb-1.5 rounded-md bg-tone-ok/12 px-2.5 py-2 text-xs">
+                    <p className="mx-2 mb-1.5 rounded-control bg-tone-ok/12 px-2.5 py-2 text-xs">
                       {t(free === 1 ? "You have {n} free slot: time to take someone from the waitlist." : "You have {n} free slots: time to take someone from the waitlist.", { n: free })}
                     </p>
                   )}
@@ -433,7 +433,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                   aria-haspopup="true"
                   aria-expanded={formMenuOpen}
                   onClick={() => setFormMenuOpen((open) => !open)}
-                  className="flex h-[30px] w-[30px] items-center justify-center rounded-2xl border border-field-border bg-surface text-ink transition hover:bg-highlight"
+                  className="flex h-[30px] w-[30px] items-center justify-center rounded-control border border-field-border bg-surface text-ink transition hover:bg-highlight"
                 >
                   <IconDots size={16} stroke={1.75} aria-hidden="true" />
                 </button>
@@ -441,7 +441,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 {formMenuOpen && (
                   <>
                     <div className="fixed inset-0 z-30" onClick={() => setFormMenuOpen(false)} />
-                    <div role="menu" className="absolute right-0 bottom-full z-40 mb-1.5 w-48 rounded-3xl border border-line-strong bg-surface p-1.5 shadow-lg">
+                    <div role="menu" className="absolute right-0 bottom-full z-40 mb-1.5 w-48 rounded-surface border border-line-strong bg-surface p-1.5 shadow-lg">
                       {settings.responses_file && (
                         <button
                           type="button"
@@ -451,7 +451,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                             setFormMenuOpen(false);
                             checkNow();
                           }}
-                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm text-ink hover:bg-highlight"
+                          className="block w-full rounded-chip px-2.5 py-2 text-left text-sm text-ink hover:bg-highlight"
                         >
                           {t("Check now")}
                         </button>
@@ -464,7 +464,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                           setFormMenuOpen(false);
                           chooseResponsesFile();
                         }}
-                        className="block w-full rounded-sm px-2.5 py-2 text-left text-sm text-ink hover:bg-highlight"
+                        className="block w-full rounded-chip px-2.5 py-2 text-left text-sm text-ink hover:bg-highlight"
                       >
                         {settings.responses_file ? t("Change…") : t("Choose file…")}
                       </button>
@@ -475,7 +475,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
             </div>
           </GlassPanel>
 
-          <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
+          <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
             {!ready ? null : !current ? (
               <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                 <p className="text-lg font-semibold">{t("Pick a request")}</p>
@@ -516,7 +516,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                           <select
                             value=""
                             onChange={(event) => run(() => setRequestTemplate(current.id, Number(event.target.value)), "Could not set the type")}
-                            className="w-full rounded-md border border-tone-warn bg-tone-warn/15 px-2 py-1 text-sm font-semibold text-ink"
+                            className="w-full rounded-control border border-tone-warn bg-tone-warn/15 px-2 py-1 text-sm font-semibold text-ink"
                           >
                             <option value="">{t("Choose the type…")}</option>
                             {templates.map((item) => (
@@ -609,7 +609,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
 
       {draft && (
         <div className="modal-backdrop">
-          <div role="dialog" aria-modal="true" aria-label={t("New request")} className="w-[520px] max-w-[94vw] modal-card rounded-3xl p-6">
+          <div role="dialog" aria-modal="true" aria-label={t("New request")} className="w-[520px] max-w-[94vw] modal-card rounded-surface p-6">
             <DialogBehavior onClose={() => setDraft(null)} />
             <h3 className="text-lg font-semibold">{t("New request")}</h3>
 
@@ -671,14 +671,14 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
-              <button type="button" onClick={() => setDraft(null)} className="rounded-md px-4 py-2 text-sm font-semibold text-muted hover:text-ink">
+              <button type="button" onClick={() => setDraft(null)} className="rounded-control px-4 py-2 text-sm font-semibold text-muted hover:text-ink">
                 {t("Cancel")}
               </button>
               <button
                 type="button"
                 onClick={handleAdd}
                 disabled={busy || !draft.name.trim() || draft.template_id === null}
-                className="rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
+                className="rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover disabled:opacity-50"
               >
                 {t("Add request")}
               </button>

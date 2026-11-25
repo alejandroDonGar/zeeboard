@@ -43,7 +43,7 @@ function StageRow({
       value={stage}
       dragListener={false}
       dragControls={dragControls}
-      className={`mb-1.5 flex items-center gap-2 rounded-md border bg-surface px-1.5 py-1.5 ${isLast ? "border-dashed border-line-strong" : "border-line"}`}
+      className={`mb-1.5 flex items-center gap-2 rounded-control border bg-surface px-1.5 py-1.5 ${isLast ? "border-dashed border-line-strong" : "border-line"}`}
     >
       <span
         title={t("Drag to reorder")}
@@ -65,14 +65,14 @@ function StageRow({
         value={stage.name}
         onChange={(event) => onRename(event.target.value)}
         aria-label={t("Stage {n}", { n: index + 1 })}
-        className="min-w-0 flex-1 rounded-sm border border-transparent bg-transparent px-1.5 py-0.5 outline-none hover:border-line focus:border-ink focus:bg-paper"
+        className="min-w-0 flex-1 rounded-chip border border-transparent bg-transparent px-1.5 py-0.5 outline-none hover:border-line focus:border-ink focus:bg-paper"
       />
 
       <button
         type="button"
         title={t("Remove stage")}
         onClick={onRemove}
-        className="rounded-sm px-2 py-0.5 text-faint transition hover:bg-tone-bad/10 hover:text-tone-bad"
+        className="rounded-chip px-2 py-0.5 text-faint transition hover:bg-tone-bad/10 hover:text-tone-bad"
       >
         ×
       </button>
@@ -158,9 +158,9 @@ function TypeEditor({
 
   const strengths = tintStrengths(template.color);
   const heroStyle = { "--tint": template.color, "--ts-light": strengths.light, "--ts-dark": strengths.dark } as CSSProperties;
-  const field = "rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm font-semibold outline-none focus:border-ink";
+  const field = "rounded-control border border-field-border bg-surface px-2 py-1.5 text-sm font-semibold outline-none focus:border-ink";
   const btn =
-    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
+    "rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
 
   return (
     <>
@@ -171,7 +171,7 @@ function TypeEditor({
           onChange={(event) => setName(event.target.value)}
           placeholder={t("Template name")}
           aria-label={t("Template name")}
-          className="-ml-1 block w-full rounded-md border border-transparent bg-transparent px-1 py-0.5 font-display text-3xl leading-tight font-semibold tracking-tight outline-none hover:border-line focus:border-line-strong focus:bg-paper"
+          className="-ml-1 block w-full rounded-control border border-transparent bg-transparent px-1 py-0.5 font-display text-3xl leading-tight font-semibold tracking-tight outline-none hover:border-line focus:border-line-strong focus:bg-paper"
         />
 
         <div className="mt-3 flex flex-wrap items-end gap-x-6 gap-y-3 text-xs text-faint">
@@ -221,7 +221,7 @@ function TypeEditor({
               if (event.key === "Enter") handleAddStage();
             }}
             placeholder={t("Add a stage and press Enter")}
-            className="mt-2 w-full max-w-[560px] rounded-md border border-field-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
+            className="mt-2 w-full max-w-[560px] rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
           />
           <p className="mt-2 max-w-[480px] text-xs text-faint">{t("The last stage stays hidden until you press “Mark as finished” on the commission.")}</p>
         </div>
@@ -240,7 +240,7 @@ function TypeEditor({
                   type="button"
                   title={t("Open commission")}
                   onClick={() => onOpenCommission(commission)}
-                  className="block w-full truncate rounded-md px-1.5 py-1.5 text-left transition hover:bg-highlight/60"
+                  className="block w-full truncate rounded-control px-1.5 py-1.5 text-left transition hover:bg-highlight/60"
                 >
                   <span className="font-semibold">{commission.title}</span>
                 </button>
@@ -282,7 +282,7 @@ function TypeEditor({
           type="button"
           onClick={handleSave}
           disabled={saving || !name.trim()}
-          className="ml-auto rounded-2xl bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50"
+          className="ml-auto rounded-control bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50"
         >
           {saving ? t("Saving…") : t("Save changes")}
         </button>

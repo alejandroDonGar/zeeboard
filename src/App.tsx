@@ -305,7 +305,7 @@ function App() {
     return (
       <div className="flex h-screen items-center justify-center bg-canvas text-ink">
         <div className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-[#1f2933] ring-1 ring-white/10">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-control bg-[#1f2933] ring-1 ring-white/10">
             <Logo className="h-9 w-9 bg-[#f6f3ee]" />
           </div>
           <p className="mt-3 text-sm font-bold text-muted">
@@ -317,9 +317,9 @@ function App() {
           </p>
 
           {progress && (
-            <div className="mx-auto mt-4 h-2 w-64 overflow-hidden rounded-sm bg-line">
+            <div className="mx-auto mt-4 h-2 w-64 overflow-hidden rounded-chip bg-line">
               <div
-                className="h-full rounded-sm bg-primary transition-all duration-500"
+                className="h-full rounded-chip bg-primary transition-all duration-500"
                 style={{ width: `${(progress.done / progress.total) * 100}%` }}
               />
             </div>
@@ -348,9 +348,9 @@ function App() {
       <AmbientBackground />
       <div className="relative flex h-full gap-3 p-3">
         {/* Below 1180 px only the icons show (names stay for screen readers and as tooltips): the page gets the room */}
-        <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-3xl px-3 py-4 max-[1180px]:w-[64px] max-[1180px]:px-2">
+        <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-surface px-3 py-4 max-[1180px]:w-[64px] max-[1180px]:px-2">
           <div className="mb-6 flex items-center gap-3 px-2 max-[1180px]:justify-center max-[1180px]:px-0">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1f2933] ring-1 ring-white/10">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-[#1f2933] ring-1 ring-white/10">
               <Logo className="h-5 w-5 bg-[#f6f3ee]" />
             </div>
             <h1 className="text-xl tracking-tight max-[1180px]:sr-only">
@@ -369,7 +369,7 @@ function App() {
                   onClick={() => setCurrentPage(item.id)}
                   aria-current={isActive ? "page" : undefined}
                   title={t(item.label)}
-                  className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm max-[1180px]:justify-center max-[1180px]:px-0 ${
+                  className={`relative flex w-full items-center gap-3 rounded-control px-3 py-2 text-left text-sm max-[1180px]:justify-center max-[1180px]:px-0 ${
                     isActive ? "bg-highlight font-semibold text-ink" : "font-medium text-muted transition hover:bg-highlight/60 hover:text-ink"
                   }`}
                 >
@@ -389,7 +389,7 @@ function App() {
             type="button"
             onClick={() => setPrivate(!privateMode)}
             title={t("Hide client names and prices while streaming (Ctrl+Shift+P)")}
-            className={`mt-auto flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition max-[1180px]:justify-center max-[1180px]:px-0 ${
+            className={`mt-auto flex w-full items-center gap-3 rounded-control px-3 py-2 text-left text-sm font-medium transition max-[1180px]:justify-center max-[1180px]:px-0 ${
               privateMode ? "bg-tone-warn/15 text-ink" : "text-muted hover:bg-highlight hover:text-ink"
             }`}
           >
@@ -401,16 +401,16 @@ function App() {
             type="button"
             onClick={() => setHelpOpen(true)}
             title={t("Shortcuts")}
-            className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium text-muted transition hover:bg-highlight hover:text-ink max-[1180px]:justify-center max-[1180px]:px-0"
+            className="mt-1 flex w-full items-center justify-between rounded-control px-3 py-2 text-left text-sm font-medium text-muted transition hover:bg-highlight hover:text-ink max-[1180px]:justify-center max-[1180px]:px-0"
           >
             <span className="max-[1180px]:sr-only">{t("Shortcuts")}</span>
-            <kbd className="rounded-sm border border-line-strong px-1.5 text-xs font-medium">?</kbd>
+            <kbd className="rounded-chip border border-line-strong px-1.5 text-xs font-medium">?</kbd>
           </button>
         </aside>
 
         <main key={navKey} className="relative min-w-0 flex-1">
           {/* Cada pantalla dibuja sus propios paneles de cristal sobre el fondo de colores */}
-          <div className="relative h-full overflow-hidden rounded-3xl">
+          <div className="relative h-full overflow-hidden rounded-surface">
           {currentPage === "dashboard" && (
             <DashboardPage
               onOpenCommissionsPage={() => setCurrentPage("commissions")}

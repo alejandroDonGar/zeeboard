@@ -22,8 +22,8 @@ function GlassPanel({
 }) {
   return (
     <Tag className={`relative min-w-0 ${className}`}>
-      <div aria-hidden="true" className={`${heavy ? "glass-heavy" : "glass"} absolute inset-0 rounded-3xl`} />
-      <div className={`relative h-full min-h-0 rounded-3xl ${contentClassName}`}>{children}</div>
+      <div aria-hidden="true" className={`${heavy ? "glass-heavy" : "glass"} absolute inset-0 rounded-surface`} />
+      <div className={`relative h-full min-h-0 rounded-surface ${contentClassName}`}>{children}</div>
     </Tag>
   );
 }

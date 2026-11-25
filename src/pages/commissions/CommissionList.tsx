@@ -60,17 +60,17 @@ function CommissionList({
                     type="button"
                     onClick={() => handleOpenCommission(commission)}
                     aria-current={selected ? "true" : undefined}
-                    className={`relative grid w-full grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md py-1.5 pr-2 pl-3.5 text-left transition ${
+                    className={`relative grid w-full grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-control py-1.5 pr-2 pl-3.5 text-left transition ${
                       selected ? "bg-highlight" : "hover:bg-highlight/60"
                     }`}
                   >
                     {/* Barra con el color del tipo de comisión */}
-                    <span className="absolute top-2 bottom-2 left-1 w-[3px] rounded-sm" style={{ backgroundColor: typeColor(commission) }} />
+                    <span className="absolute top-2 bottom-2 left-1 w-[3px] rounded-chip" style={{ backgroundColor: typeColor(commission) }} />
 
                     {latestImage ? (
-                      <img src={thumbUrl(latestImage.image_data_url)} loading="lazy" decoding="async" alt="" className="h-9 w-9 rounded-md object-cover" />
+                      <img src={thumbUrl(latestImage.image_data_url)} loading="lazy" decoding="async" alt="" className="h-9 w-9 rounded-control object-cover" />
                     ) : (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-md bg-highlight text-xs font-semibold text-muted">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-control bg-highlight text-xs font-semibold text-muted">
                         {hide(commission.client_name || "?").slice(0, 2)}
                       </span>
                     )}

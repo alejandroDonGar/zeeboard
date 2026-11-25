@@ -47,7 +47,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
 
   return (
     <GlassPanel as="aside" className="h-full min-h-0" contentClassName="overflow-hidden p-5">
-      <div className="max-h-full overflow-y-auto rounded-3xl border border-line bg-paper p-4">
+      <div className="max-h-full overflow-y-auto rounded-surface border border-line bg-paper p-4">
         <p className="text-xs font-bold text-muted">
           {t("Calendar")}
         </p>
@@ -57,7 +57,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
         </p>
 
         {selectedDeadlineCommission && (
-          <div className="mt-4 rounded-2xl bg-surface p-4 shadow-sm">
+          <div className="mt-4 rounded-control bg-surface p-4 shadow-sm">
             <p className="text-xs font-bold text-muted">
               {t("Next deadline")}
             </p>
@@ -70,7 +70,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
               {selectedDeadlineCommission.deadline}
             </p>
 
-            <p className="mt-3 rounded-sm bg-tone-warn/15 px-3 py-1 text-xs font-bold text-ink">
+            <p className="mt-3 rounded-chip bg-tone-warn/15 px-3 py-1 text-xs font-bold text-ink">
               {daysUntilSelectedDeadline !== null
                 ? t(daysUntilSelectedDeadline === 1 ? "{n} day left" : "{n} days left", { n: daysUntilSelectedDeadline })
                 : t("No date")}
@@ -119,12 +119,12 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
                 key={index}
                 className={
                   isDeadlineDay
-                    ? "flex aspect-square items-center justify-center rounded-xl bg-tone-bad text-xs font-bold text-on-tone"
+                    ? "flex aspect-square items-center justify-center rounded-control bg-tone-bad text-xs font-bold text-on-tone"
                     : isToday
-                      ? "flex aspect-square items-center justify-center rounded-xl bg-primary-hover text-xs font-bold text-on-primary shadow-sm"
+                      ? "flex aspect-square items-center justify-center rounded-control bg-primary-hover text-xs font-bold text-on-primary shadow-sm"
                       : isInDeadlineRange
-                        ? "flex aspect-square items-center justify-center rounded-xl bg-tone-warn/15 text-xs font-bold text-ink"
-                        : "flex aspect-square items-center justify-center rounded-xl bg-surface text-xs font-bold text-faint"
+                        ? "flex aspect-square items-center justify-center rounded-control bg-tone-warn/15 text-xs font-bold text-ink"
+                        : "flex aspect-square items-center justify-center rounded-control bg-surface text-xs font-bold text-faint"
                 }
               >
                 {day ?? ""}
@@ -134,7 +134,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
         </div>
 
         {selectedDeadlineCommission?.deadline && (
-          <div className="mt-4 rounded-2xl bg-surface p-4 shadow-sm">
+          <div className="mt-4 rounded-control bg-surface p-4 shadow-sm">
             <p className="text-xs font-bold text-muted">
               {t("Deadline summary")}
             </p>
@@ -163,7 +163,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
                 </span>
               </div>
 
-              <div className="rounded-sm bg-tone-warn/15 px-3 py-2 text-center text-xs font-bold text-ink">
+              <div className="rounded-chip bg-tone-warn/15 px-3 py-2 text-center text-xs font-bold text-ink">
                 {daysUntilSelectedDeadline !== null
                   ? daysUntilSelectedDeadline > 0
                     ? t(daysUntilSelectedDeadline === 1 ? "{n} day left" : "{n} days left", { n: daysUntilSelectedDeadline })

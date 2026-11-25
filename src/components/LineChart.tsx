@@ -36,7 +36,7 @@ function LineChart({ points, height = 150 }: { points: ChartPoint[]; height?: nu
               title={`${point.label}: ${text}`}
               onMouseEnter={() => setHover(index)}
               onMouseLeave={() => setHover(null)}
-              className="grid cursor-default grid-rows-[1fr_22px] justify-items-center rounded-md hover:bg-linear-to-b hover:from-transparent hover:to-highlight/70"
+              className="grid cursor-default grid-rows-[1fr_22px] justify-items-center rounded-control hover:bg-linear-to-b hover:from-transparent hover:to-highlight/70"
             >
               <div className="relative w-full">
                 <span
@@ -45,7 +45,7 @@ function LineChart({ points, height = 150 }: { points: ChartPoint[]; height?: nu
                 />
                 <span
                   style={{ top: `${y(point.value)}%` }}
-                  className={`pointer-events-none absolute -translate-y-[130%] rounded-md bg-primary px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-on-primary transition-opacity ${
+                  className={`pointer-events-none absolute -translate-y-[130%] rounded-control bg-primary px-2 py-0.5 text-xs font-semibold whitespace-nowrap text-on-primary transition-opacity ${
                     now ? "right-0" : "left-1/2 -translate-x-1/2"
                   } ${hover === index || (now && hover === null) ? "opacity-100" : "opacity-0"}`}
                 >

@@ -187,7 +187,7 @@ function FinishedPage({
   const dateFormatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
 
   const dateInput =
-    "w-[132px] rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm text-ink outline-none focus:border-ink";
+    "w-[132px] rounded-control border border-field-border bg-surface px-2 py-1.5 text-sm text-ink outline-none focus:border-ink";
   const viewedCommission = viewed ? commissions.find((commission) => commission.id === viewed.commissionId) : undefined;
 
   return (
@@ -203,7 +203,7 @@ function FinishedPage({
             onChange={setGroupMode}
           />
 
-          <label className="flex max-w-[280px] min-w-36 flex-[1_1_160px] items-center gap-2 rounded-2xl border border-line bg-surface/60 px-2.5 py-1.5 text-faint focus-within:border-ink">
+          <label className="flex max-w-[280px] min-w-36 flex-[1_1_160px] items-center gap-2 rounded-control border border-line bg-surface/60 px-2.5 py-1.5 text-faint focus-within:border-ink">
             <IconSearch size={16} stroke={1.75} aria-hidden="true" />
             <input
               value={searchQuery}
@@ -281,12 +281,12 @@ function FinishedPage({
                                   type="button"
                                   title={t("View image")}
                                   onClick={() => setViewed({ path: latestImage.image_data_url, commissionId: commission.id })}
-                                  className="block aspect-square w-full cursor-zoom-in overflow-hidden rounded-md shadow-[0_0_0_1px_var(--line)] transition active:scale-[0.98]"
+                                  className="block aspect-square w-full cursor-zoom-in overflow-hidden rounded-control shadow-[0_0_0_1px_var(--line)] transition active:scale-[0.98]"
                                 >
                                   <img src={thumbUrl(latestImage.image_data_url)} loading="lazy" decoding="async" alt={commission.title} className="h-full w-full object-cover" />
                                 </button>
                               ) : (
-                                <div className="aspect-square w-full rounded-md bg-highlight shadow-[0_0_0_1px_var(--line)]" />
+                                <div className="aspect-square w-full rounded-control bg-highlight shadow-[0_0_0_1px_var(--line)]" />
                               )}
 
                               <button
@@ -322,7 +322,7 @@ function FinishedPage({
 
       {viewed && (
         <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-2.5 bg-black/80 p-6 backdrop-blur-md" onClick={() => setViewed(null)}>
-          <img src={imageUrl(viewed.path)} alt="" className="max-h-[82vh] max-w-[90vw] rounded-lg shadow-2xl" />
+          <img src={imageUrl(viewed.path)} alt="" className="max-h-[82vh] max-w-[90vw] rounded-control shadow-2xl" />
           <p className="flex w-full max-w-[90vw] items-center justify-center gap-4 text-sm text-[#ece6dc]" onClick={(event) => event.stopPropagation()}>
             {viewedCommission && (
               <>

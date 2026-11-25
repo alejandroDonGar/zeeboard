@@ -225,11 +225,11 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
       type="button"
       onClick={onClick}
       aria-current={active ? "true" : undefined}
-      className={`grid w-full grid-cols-[12px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition ${
+      className={`grid w-full grid-cols-[12px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-control px-2 py-1.5 text-left transition ${
         active ? "bg-highlight" : "hover:bg-highlight/60"
       }`}
     >
-      <i className={`h-3 w-3 ${round ? "rounded-full" : "rounded-sm"}`} style={{ backgroundColor: color }} />
+      <i className={`h-3 w-3 ${round ? "rounded-full" : "rounded-chip"}`} style={{ backgroundColor: color }} />
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold">{name}</span>
         <span className="block truncate text-xs text-faint">{sub}</span>
@@ -246,7 +246,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
             <button
               type="button"
               onClick={() => setSelection({ kind: "new-tag", category: selectedTag?.category || categoryNames.find((name) => name !== TYPE_CATEGORY) || "Extras" })}
-              className="inline-flex items-center gap-2 rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+              className="inline-flex items-center gap-2 rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
             >
               <IconPlus size={16} stroke={1.75} aria-hidden="true" />
               {t("New tag")}
@@ -297,7 +297,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
             )}
           </GlassPanel>
 
-          <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
+          <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
             {!ready ? null : selectedTemplate ? (
               <TypeEditor
                 template={selectedTemplate}
@@ -334,7 +334,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
               <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                 <p className="text-lg font-semibold">{t("Create your first template")}</p>
                 <p className="mt-1 text-sm text-muted">{t("A template is the list of stages a commission moves through.")}</p>
-                <button type="button" onClick={handleNewTemplate} className="mt-4 rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary">
+                <button type="button" onClick={handleNewTemplate} className="mt-4 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary">
                   {t("New template")}
                 </button>
               </div>

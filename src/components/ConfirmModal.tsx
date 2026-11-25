@@ -35,7 +35,7 @@ function ConfirmModal({
 
   return (
     <div className="modal-backdrop">
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} className="w-[450px] modal-card rounded-3xl p-6">
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={title} className="w-[450px] modal-card rounded-surface p-6">
         <p
           className={
             eyebrowTone === "danger"
@@ -60,7 +60,7 @@ function ConfirmModal({
           {onCancel && (
             <button
               onClick={onCancel}
-              className="rounded-2xl border border-field-border bg-surface px-4 py-2 font-semibold"
+              className="rounded-control border border-field-border bg-surface px-4 py-2 font-semibold"
             >
               {t(cancelLabel)}
             </button>
@@ -71,8 +71,8 @@ function ConfirmModal({
             disabled={isConfirming}
             className={
               confirmVariant === "danger"
-                ? "rounded-2xl bg-tone-bad px-4 py-2 font-semibold text-on-tone disabled:cursor-not-allowed disabled:opacity-70"
-                : "rounded-2xl bg-primary px-4 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-70"
+                ? "rounded-control bg-tone-bad px-4 py-2 font-semibold text-on-tone disabled:cursor-not-allowed disabled:opacity-70"
+                : "rounded-control bg-primary px-4 py-2 font-semibold text-on-primary disabled:cursor-not-allowed disabled:opacity-70"
             }
           >
             {t(isConfirming && confirmingLabel ? confirmingLabel : confirmLabel)}
