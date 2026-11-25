@@ -440,6 +440,8 @@ export type Commission = {
   cancel_reason?: string | null;
   /** Set while it waits for the client (their feedback or payment): no stalled alert meanwhile */
   waiting_since?: string | null;
+  /** For another currency: what 1 of it is worth in the default currency, typed by hand (null = not set) */
+  exchange_rate?: number | null;
 };
 
 export async function getCommissions(): Promise<Commission[]> {
@@ -646,9 +648,10 @@ export async function duplicateCommission(
       deadline,
       notes,
       character_count,
+      exchange_rate,
       created_at
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     `,
     [
       copyTitle,
@@ -662,6 +665,7 @@ export async function duplicateCommission(
       commission.deadline,
       commission.notes,
       commission.character_count,
+      commission.exchange_rate ?? null,
       new Date().toISOString(),
     ],
   );
@@ -1977,4 +1981,9 @@ export async function startTimer(commissionId: number, stageId: number | null): 
     stageId,
     new Date().toISOString(),
   ]);
+}
+
+/** The rate typed for a commission in another currency (null removes it). */
+export async function setCommissionExchangeRate(commissionId: number, rate: number | null): Promise<void> {
+  await (await getDatabase()).execute(`UPDATE commissions SET exchange_rate = ? WHERE id = ?;`, [rate, commissionId]);
 }

@@ -100,7 +100,7 @@ function StatisticsPage() {
         end={
           stats && stats.excluded > 0 ? (
             <span className="text-xs text-faint">
-              {t(stats.excluded === 1 ? "{n} commission in another currency isn't counted." : "{n} commissions in another currency aren't counted.", { n: stats.excluded })}
+              {t(stats.excluded === 1 ? "{n} commission in another currency has no exchange rate, so it isn't counted. Add it when editing the commission." : "{n} commissions in another currency have no exchange rate, so they aren't counted. Add it when editing them.", { n: stats.excluded })}
             </span>
           ) : undefined
         }

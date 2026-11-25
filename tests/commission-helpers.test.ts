@@ -11,6 +11,7 @@ import {
   paymentSummary,
   ratePerHour,
   trackedHours,
+  inDefaultCurrency,
 } from "../src/lib/commissionHelpers";
 import type { Commission, CommissionStageImage, TemplateStage } from "../src/lib/database";
 
@@ -112,6 +113,24 @@ test("tracked time: the total and each stage's share, with the running entry cou
   ];
   expect(trackedHours(entries, new Date("2026-11-25T12:15:00.000Z"))).toEqual({ total: 2, byStage: { 1: 1.75, 2: 0.25 } });
   expect(trackedHours([], new Date())).toEqual({ total: 0, byStage: {} });
+});
+
+test("money in another currency is converted with the commission's rate; without a rate it is left out", () => {
+  const usd = { id: 1, currency: "USD", price: 100, exchange_rate: 0.9 };
+  const gbpNoRate = { id: 2, currency: "GBP", price: 50, exchange_rate: null };
+  const eur = { id: 3, currency: null, price: 40 };
+  const payments = [
+    { commission_id: 1, amount: 100, received: 95 },
+    { commission_id: 2, amount: 50, received: 48 },
+    { commission_id: 3, amount: 40, received: null },
+  ];
+
+  const money = inDefaultCurrency([usd, gbpNoRate, eur], payments, "EUR");
+  expect(money.excluded).toBe(1);
+  expect(money.commissions).toEqual([{ ...usd, price: 90, currency: "EUR" }, { ...eur, currency: "EUR" }]);
+  expect(money.payments).toEqual([{ commission_id: 1, amount: 90, received: 85.5 }, { commission_id: 3, amount: 40, received: null }]);
+  // A commission without a price yet stays without one
+  expect(inDefaultCurrency([{ id: 4, currency: "USD", price: null, exchange_rate: 2 }], [], "EUR").commissions[0].price).toBeNull();
 });
 
 test("versions uploaded in the same second keep the order they were saved in", () => {

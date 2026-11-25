@@ -286,3 +286,37 @@ export function trackedHours(
 
   return { total: round2(total), byStage };
 }
+
+/**
+ * Commissions and their payments in the default currency, for any total: another currency is multiplied by the rate typed
+ * on the commission; one without a rate is left out (counted in `excluded`), never added as if it were the same money.
+ */
+export function inDefaultCurrency<
+  C extends { id: number; currency?: string | null; price: number | null; exchange_rate?: number | null },
+  P extends { commission_id: number; amount: number; received: number | null },
+>(commissions: C[], payments: P[], currency: string): { commissions: C[]; payments: P[]; excluded: number } {
+  const rates = new Map<number, number>();
+
+  for (const commission of commissions) {
+    if (!commission.currency || commission.currency === currency) rates.set(commission.id, 1);
+    else if (commission.exchange_rate) rates.set(commission.id, commission.exchange_rate);
+  }
+
+  const convert = (value: number, rate: number) => (rate === 1 ? value : round2(value * rate));
+
+  return {
+    commissions: commissions
+      .filter((commission) => rates.has(commission.id))
+      .map((commission) => {
+        const rate = rates.get(commission.id)!;
+        return { ...commission, currency, price: commission.price === null ? null : convert(commission.price, rate) };
+      }),
+    payments: payments
+      .filter((payment) => rates.has(payment.commission_id))
+      .map((payment) => {
+        const rate = rates.get(payment.commission_id)!;
+        return { ...payment, amount: convert(payment.amount, rate), received: payment.received === null ? null : convert(payment.received, rate) };
+      }),
+    excluded: commissions.length - rates.size,
+  };
+}

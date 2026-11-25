@@ -197,6 +197,15 @@ describe("statistics", () => {
     ({ id, commission_id, amount: 100, received: 100, paid_at: "2026-05-02", note: null }) as CommissionPayment;
   const now = new Date(2026, 9, 7);
 
+  test("a commission in another currency counts with its rate; without one it is left out", () => {
+    const usd = delivered(1, { currency: "USD", exchange_rate: 0.9 });
+    const gbp = delivered(2, { currency: "GBP" });
+    const stats = computeStats({ commissions: [usd, gbp], payments: [paid(1, 1), paid(2, 2)], templates: [], stages, currency: "EUR", now }, "year");
+    expect(stats.excluded).toBe(1);
+    expect(stats.current.received).toBe(90);
+    expect(stats.current.pieces).toBe(1);
+  });
+
   test("a commission without a currency counts in the default one", () => {
     const stats = computeStats({ commissions: [delivered(1, { currency: null })], payments: [paid(1, 1)], templates: [], stages, currency: "EUR", now }, "year");
     expect(stats.excluded).toBe(0);

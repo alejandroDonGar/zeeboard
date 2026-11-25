@@ -9,6 +9,7 @@ import {
   createCommission,
   replaceCommissionCharacters,
   replaceCommissionTags,
+  setCommissionExchangeRate,
   updateCommission,
   type Client,
   type ClientCharacter,
@@ -61,6 +62,9 @@ function CommissionForm({
   const [countIsFixed, setCountIsFixed] = useState(editing !== null);
   const [platform, setPlatform] = useState(editing?.platform || "Discord");
   const [currency, setCurrency] = useState(editing ? editing.currency || "EUR" : appSettings().default_currency);
+  // Another currency needs its rate, typed by hand, so its money can be added to the rest
+  const [exchangeRate, setExchangeRate] = useState(editing?.exchange_rate ? String(editing.exchange_rate).replace(".", ",") : "");
+  const foreign = currency !== appSettings().default_currency;
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(editing?.template_id ?? null);
   const [savingCommission, setSavingCommission] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>(initialTagIds);
@@ -156,6 +160,7 @@ function CommissionForm({
         );
       }
 
+      await setCommissionExchangeRate(commissionId, foreign ? parsePrice(exchangeRate) : null);
       await replaceCommissionTags(commissionId, selectedTagIds);
       await replaceCommissionCharacters(commissionId, selectedCharacterIds);
 
@@ -430,6 +435,20 @@ function CommissionForm({
                   <option>USD</option>
                   <option>GBP</option>
                 </select>
+                {foreign && (
+                  <label className="flex items-center gap-1 text-xs text-muted" title={t("Without it, this commission's money isn't added to the totals")}>
+                    1 {currency} =
+                    <input
+                      value={exchangeRate}
+                      onChange={(event) => setExchangeRate(event.target.value)}
+                      placeholder="0,92"
+                      inputMode="decimal"
+                      aria-label={t("Exchange rate")}
+                      className="w-16 rounded-md border border-line-strong bg-surface px-2 py-1 text-right text-sm outline-none focus:border-ink"
+                    />
+                    {appSettings().default_currency}
+                  </label>
+                )}
               </span>
             </div>
           </div>

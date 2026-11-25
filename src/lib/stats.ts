@@ -7,6 +7,7 @@ import {
   paymentSummary,
   ratePerHour,
   round2,
+  inDefaultCurrency,
 } from "./commissionHelpers";
 import type { Commission, CommissionPayment, RequestStatus, TemplateStage } from "./database";
 
@@ -106,9 +107,10 @@ export function computeStats(
 ): Stats {
   const { current, previous } = periodRanges(period, input.now);
 
-  const included = input.commissions.filter((commission) => (commission.currency ?? input.currency) === input.currency);
-  const includedIds = new Set(included.map((commission) => commission.id));
-  const payments = input.payments.filter((payment) => includedIds.has(payment.commission_id));
+  // Everything in the default currency (other currencies by their typed rate; without one, left out)
+  const money = inDefaultCurrency(input.commissions, input.payments, input.currency);
+  const included = money.commissions;
+  const payments = money.payments;
 
   const piecesIn = (range: Range) =>
     included
@@ -199,7 +201,7 @@ export function computeStats(
   const declined = count(inPeriod, "declined");
 
   return {
-    excluded: input.commissions.length - included.length,
+    excluded: money.excluded,
     current: summary(current),
     previous: previous ? summary(previous) : null,
     months,

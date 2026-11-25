@@ -294,7 +294,12 @@ async function addColumn(database: ZeeDatabase, table: string, definition: strin
  * A new change is a new function at the end; one that has shipped is never edited. Each must be safe to run twice:
  * there is no transaction (the plugin's pool doesn't guarantee one connection), so a crash before the version is saved repeats it.
  */
-const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity, cancelling, waiting, timer];
+const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity, cancelling, waiting, timer, exchange];
+
+/** Migration 7: a commission in another currency carries the rate typed for it (default-currency units per 1 of its own). */
+async function exchange(database: ZeeDatabase): Promise<void> {
+  await addColumn(database, "commissions", "exchange_rate REAL");
+}
 
 /** Migration 6: time tracked per stage (a timer). Its links (deleted and restored with its commission) come from REFS. */
 async function timer(database: ZeeDatabase): Promise<void> {

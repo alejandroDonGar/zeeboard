@@ -614,6 +614,18 @@ describe("loading many at once", () => {
   });
 });
 
+describe("exchange rate", () => {
+  test("a commission in another currency keeps the rate typed for it, and a duplicate copies it", async () => {
+    const id = await db.createCommission("Bust", null, "Ana", "X", null, 100, "USD", null, "", 1);
+    await db.setCommissionExchangeRate(id, 0.92);
+    expect((await commission(id))?.exchange_rate).toBe(0.92);
+    expect((await commission(await db.duplicateCommission(id)))?.exchange_rate).toBe(0.92);
+
+    await db.setCommissionExchangeRate(id, null);
+    expect((await commission(id))?.exchange_rate).toBeNull();
+  });
+});
+
 describe("stage timer", () => {
   test("one timer at a time: starting another stops the running one; stopping ends it", async () => {
     const { id: templateId, stages } = await template("Bust", ["Sketch", "Colour"]);
