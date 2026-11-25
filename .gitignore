@@ -25,3 +25,6 @@ dist-ssr
 
 # Maquetas del rediseño: quedan en local (ver REDISENO.md, anexo con todo el código)
 maquetas-ui/
+
+# Capturas de la modernización (scripts/capturas.mjs): se comparan en local, no se suben
+capturas/

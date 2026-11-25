@@ -199,6 +199,9 @@ const contrast = (a: number[], b: number[]) => {
   return (hi + 0.05) / (lo + 0.05);
 };
 
+/** WCAG contrast ratio between two #rrggbb colours (1 to 21). */
+export const contrastRatio = (a: string, b: string) => contrast(rgb(a), rgb(b));
+
 /**
  * Cuánto puede teñir un color la cabecera del detalle sin que el texto deje de leerse: la mayor intensidad (con tope)
  * con la que el texto principal y el secundario siguen en ≥ 4,8:1 sobre el cristal. Una por tema; el CSS elige.

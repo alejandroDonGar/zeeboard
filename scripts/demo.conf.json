@@ -1,0 +1,6 @@
+{
+  "identifier": "com.zeeboard.demo",
+  "productName": "ZeeBoard Demo",
+  "build": { "devUrl": "http://localhost:1431", "beforeDevCommand": "npm run dev -- --port 1431" },
+  "app": { "security": { "assetProtocol": { "enable": true, "scope": ["$APPDATA/images/**"] } } }
+}
