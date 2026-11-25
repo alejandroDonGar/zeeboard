@@ -1,4 +1,6 @@
 import { t } from "../lib/i18n";
+import { inDefaultCurrency } from "../lib/commissionHelpers";
+import { appSettings } from "../lib/database";
 import { takeAction } from "../lib/actions";
 import { useEffect, useState, type CSSProperties } from "react";
 import { IconDots, IconPlus, IconSearch } from "@tabler/icons-react";
@@ -499,22 +501,26 @@ function ClientsPage({
     (commission) => !isCommissionCompleted(commission),
   );
 
+  // Totals in your currency: another currency by its typed rate; one without a rate adds nothing
+  const money = inDefaultCurrency(selectedClientCommissions, payments, appSettings().default_currency);
+  const converted = new Map(money.commissions.map((commission) => [commission.id, commission]));
+
   // Prices plus the tips they left
   const totalSpent = selectedClientCommissions.reduce(
     (sum, commission) =>
       sum +
-      (commission.price ?? 0) +
-      payments.filter((payment) => payment.commission_id === commission.id && payment.tip).reduce((tips, payment) => tips + payment.amount, 0),
+      (converted.get(commission.id)?.price ?? 0) +
+      money.payments.filter((payment) => payment.commission_id === commission.id && payment.tip).reduce((tips, payment) => tips + payment.amount, 0),
     0,
   );
 
-  const commissionsWithPrice = selectedClientCommissions.filter((commission) => commission.price !== null);
+  const commissionsWithPrice = money.commissions.filter((commission) => commission.price !== null);
   const averagePrice = commissionsWithPrice.length > 0 ? Math.round(totalSpent / commissionsWithPrice.length) : 0;
 
   // What is still owed across all their commissions
   const pendingAmount = selectedClientCommissions.reduce(
     (sum, commission) =>
-      sum + paymentSummary(commission.price, payments.filter((payment) => payment.commission_id === commission.id)).remaining,
+      sum + paymentSummary(converted.get(commission.id)?.price ?? null, money.payments.filter((payment) => payment.commission_id === commission.id)).remaining,
     0,
   );
 

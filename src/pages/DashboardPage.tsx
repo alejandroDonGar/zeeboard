@@ -1,4 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { inDefaultCurrency } from "../lib/commissionHelpers";
+import { appSettings } from "../lib/database";
 import {
   getCommissionCompletionPercentage,
   deliveryDay,
@@ -87,21 +89,24 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
     (commission) => commission.deadline !== null && daysUntil(commission.deadline) <= 7,
   ).length;
 
+  // Every total in your currency: another currency by its typed rate; without one it isn't added (Statistics says so)
+  const money = inDefaultCurrency(commissions, payments, appSettings().default_currency);
+
   const summaryOf = (commission: Commission) =>
     paymentSummary(
       commission.price,
-      payments.filter((payment) => payment.commission_id === commission.id),
+      money.payments.filter((payment) => payment.commission_id === commission.id),
     );
 
   // What's left to collect: unpaid and partial with a price
-  const unpaid = commissions
+  const unpaid = money.commissions
     .map((commission) => ({ commission, remaining: summaryOf(commission).remaining }))
     .filter((entry) => entry.remaining > 0);
 
   const thisMonth = isoDay(new Date()).slice(0, 7);
   const receivedThisMonth = paymentSummary(
     null,
-    payments.filter((payment) => payment.paid_at.startsWith(thisMonth)),
+    money.payments.filter((payment) => payment.paid_at.startsWith(thisMonth)),
   );
 
   const monthFormatter = new Intl.DateTimeFormat(locale, { month: "short" });
@@ -111,13 +116,13 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
     const key = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}`;
     const summary = paymentSummary(
       null,
-      payments.filter((payment) => payment.paid_at.startsWith(key)),
+      money.payments.filter((payment) => payment.paid_at.startsWith(key)),
     );
     return { label: monthFormatter.format(month), total: summary.received, pending: summary.pendingReceived };
   });
   // Hourly rate of what you delivered in the last 90 days (only pieces with hours)
   const since = isoDay(new Date(Date.now() - 90 * DAY));
-  const recent = commissions.filter(
+  const recent = money.commissions.filter(
     (commission) =>
       isCommissionCompletedHelper(commission, templateStagesByTemplateId) &&
       deliveryDay(commission) >= since &&

@@ -144,7 +144,7 @@ Press **Ctrl+N** or **+ New commission**.
 - Pick the **client** (type to search, or write a new name), the **characters** (also from other clients, for collaborations) and the **template**.
 - The **Characters** number next to the characters decides the price. It follows the characters you link, but you can raise it when a character has no profile (a collaborator you don't have as a client); it never drops below the ones linked. Requests that came with "2 characters" keep that number.
 - The **price** is calculated for you: the template's base price plus a percentage per extra character (50 % by default, adjustable in Settings). You can still change it by hand.
-- In **another currency** (USD, GBP…) a field asks what 1 of it is worth in yours, typed by hand. Statistics convert that commission's money with it; without it, the commission is left out of the totals and Statistics says so.
+- In **another currency** (USD, GBP…) a field asks what 1 of it is worth in yours, typed by hand. Every total (dashboard, finished commissions, what a client has spent, statistics) converts that commission's money with it; each row still shows its own currency. Without it, the commission is left out of the totals and Statistics says so.
 - The **type** comes from the template (and its colour from the Catalog); only the "N Characters" tag is added automatically, and you can add extra tags before saving. The summary on the right shows the price breakdown as you type.
 - The template is locked once the commission exists, because its stages and images depend on it.
 

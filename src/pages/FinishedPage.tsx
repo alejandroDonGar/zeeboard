@@ -1,4 +1,6 @@
 import { locale, t } from "../lib/i18n";
+import { inDefaultCurrency } from "../lib/commissionHelpers";
+import { appSettings } from "../lib/database";
 import { useEffect, useState } from "react";
 import { IconSearch } from "@tabler/icons-react";
 import { useAmbientImage } from "../lib/ambient";
@@ -114,17 +116,21 @@ function FinishedPage({
     return matchesSearch && matchesFrom && matchesTo;
   });
 
+  // Totals in your currency: another currency by its typed rate; one without a rate adds nothing (rows keep their own)
+  const money = inDefaultCurrency(filteredCompleted, payments, appSettings().default_currency);
+  const converted = new Map(money.commissions.map((commission) => [commission.id, commission]));
+
   // Price plus the tips it got
   const tipsOf = (commission: Commission) =>
-    payments.filter((payment) => payment.commission_id === commission.id && payment.tip).reduce((sum, payment) => sum + payment.amount, 0);
-  const earned = (commission: Commission) => (commission.price ?? 0) + tipsOf(commission);
+    money.payments.filter((payment) => payment.commission_id === commission.id && payment.tip).reduce((sum, payment) => sum + payment.amount, 0);
+  const earned = (commission: Commission) => (converted.get(commission.id)?.price ?? 0) + tipsOf(commission);
   const totalEarnings = filteredCompleted.reduce((sum, commission) => sum + earned(commission), 0);
 
   // What each finished commission brought in per hour (only those with hours)
   const net = (commission: Commission) =>
-    netIncome(paymentSummary(commission.price, payments.filter((payment) => payment.commission_id === commission.id)));
-  const rateOf = (commission: Commission) => ratePerHour([{ net: net(commission), hours: commission.hours }]);
-  const overallRate = ratePerHour(filteredCompleted.map((commission) => ({ net: net(commission), hours: commission.hours })));
+    netIncome(paymentSummary(converted.get(commission.id)?.price ?? null, money.payments.filter((payment) => payment.commission_id === commission.id)));
+  const rateOf = (commission: Commission) => (converted.has(commission.id) ? ratePerHour([{ net: net(commission), hours: commission.hours }]) : null);
+  const overallRate = ratePerHour(money.commissions.map((commission) => ({ net: net(commission), hours: commission.hours })));
   const rateByTemplate = templates
     .map((template) => ({
       name: template.name,
