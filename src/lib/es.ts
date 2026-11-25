@@ -694,6 +694,7 @@ export const es: Record<string, string> = {
   "Commission cancelled. Its payments stay.": "Comisión cancelada. Sus pagos se quedan.",
   "Could not save the change.": "No se pudo guardar el cambio.",
   "Waiting for the client": "Esperando al cliente",
+  "Once you have delivered one of this type": "Cuando hayas entregado una de este tipo",
   "{n} commission in another currency has no exchange rate, so it isn't counted. Add it when editing the commission.": "{n} comisión en otra moneda no tiene cambio, así que no se cuenta. Añádelo al editar la comisión.",
   "{n} commissions in another currency have no exchange rate, so they aren't counted. Add it when editing them.": "{n} comisiones en otra moneda no tienen cambio, así que no se cuentan. Añádelo al editarlas.",
   "Exchange rate": "Cambio de moneda",

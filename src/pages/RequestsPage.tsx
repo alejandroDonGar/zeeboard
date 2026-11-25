@@ -23,7 +23,8 @@ import {
   type CommissionRequest,
   type Template,
 } from "../lib/database";
-import { calculateCommissionPrice, formatMoney, loadOpenCommissions } from "../lib/commissionHelpers";
+import { calculateCommissionPrice, formatMoney, isoDay, loadOpenCommissions, typicalDays } from "../lib/commissionHelpers";
+import { getCommissions, getStagesByTemplate } from "../lib/database";
 import { autoTagIds, normalizeHandle, parseResponses } from "../lib/formImport";
 import { REQUESTS_CHANGED, syncFormResponses } from "../lib/formSync";
 import { fetchAvatar } from "../lib/avatars";
@@ -58,10 +59,13 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   const [formMenuOpen, setFormMenuOpen] = useState(false);
   const { showToast } = useToast();
 
+  const [daysByTemplate, setDaysByTemplate] = useState<Record<number, number>>({});
+
   async function load() {
-    const [requestList, templateList, open] = await Promise.all([getRequests(), getTemplates(), loadOpenCommissions()]);
+    const [requestList, templateList, open, all] = await Promise.all([getRequests(), getTemplates(), loadOpenCommissions(), getCommissions()]);
     setRequests(requestList);
     setTemplates(templateList);
+    setDaysByTemplate(typicalDays(all, await getStagesByTemplate(templateList.map((template) => template.id))));
     setTaken(open.length);
     setReady(true);
     window.dispatchEvent(new Event(REQUESTS_CHANGED));
@@ -269,6 +273,9 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
     current && currentTemplate?.base_price != null
       ? formatMoney(calculateCommissionPrice(currentTemplate.base_price, current.characters, settings.extra_character_rate), settings.default_currency)
       : null;
+  // When it would arrive if accepted today: today plus the days this type usually takes (null until one was delivered)
+  const typical = current?.template_id != null ? daysByTemplate[current.template_id] : undefined;
+  const delivery = typical === undefined ? null : isoDay(new Date(Date.now() + typical * 86400000));
   const live = current?.status === "new" || current?.status === "waitlist";
   const dot = { new: "bg-tone-info", waitlist: "bg-tone-warn", accepted: "bg-tone-ok", declined: "bg-faint" } as const;
   const statusLabel = { new: "New", waitlist: "Waitlist", accepted: "Accepted", declined: "Declined" } as const;
@@ -521,6 +528,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                     </div>
                     {prop(t("Characters"), current.characters, "")}
                     {prop(t("Estimate"), estimate && `≈ ${estimate}`, t("When you pick the type"))}
+                    {prop(t("Delivery"), delivery && `≈ ${delivery}`, t("Once you have delivered one of this type"))}
                     {prop(
                       t("Contact"),
                       current.contact && [current.platform, hide(current.contact)].filter(Boolean).join(" "),

@@ -320,3 +320,22 @@ export function inDefaultCurrency<
     excluded: commissions.length - rates.size,
   };
 }
+
+/**
+ * Days it usually takes to deliver each type, from accepting to delivering (delivered ones, cancelled left out): an estimate
+ * for a new request. ponytail: a plain average of past ones, which already includes the queue each had; weight recent ones if
+ * your pace changes a lot.
+ */
+export function typicalDays(commissions: Commission[], stages: Record<number, TemplateStage[]>): Record<number, number> {
+  const byTemplate: Record<number, number[]> = {};
+
+  for (const commission of commissions) {
+    if (commission.template_id === null || commission.cancelled_at || !isCommissionCompleted(commission, stages)) continue;
+    const days = (new Date(`${deliveryDay(commission)}T12:00:00`).getTime() - new Date(commission.created_at).getTime()) / 86400000;
+    (byTemplate[commission.template_id] ??= []).push(days);
+  }
+
+  return Object.fromEntries(
+    Object.entries(byTemplate).map(([id, days]) => [id, Math.round(days.reduce((sum, value) => sum + value, 0) / days.length)]),
+  );
+}

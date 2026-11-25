@@ -12,6 +12,7 @@ import {
   ratePerHour,
   trackedHours,
   inDefaultCurrency,
+  typicalDays,
 } from "../src/lib/commissionHelpers";
 import type { Commission, CommissionStageImage, TemplateStage } from "../src/lib/database";
 
@@ -131,6 +132,19 @@ test("money in another currency is converted with the commission's rate; without
   expect(money.payments).toEqual([{ commission_id: 1, amount: 90, received: 85.5 }, { commission_id: 3, amount: 40, received: null }]);
   // A commission without a price yet stays without one
   expect(inDefaultCurrency([{ id: 4, currency: "USD", price: null, exchange_rate: 2 }], [], "EUR").commissions[0].price).toBeNull();
+});
+
+test("typical days to deliver each type: from accepting to delivering, finished ones only, cancelled left out", () => {
+  const stages = { 1: [{ id: 10, template_id: 1, name: "Delivery", stage_order: 1 }] } as Record<number, TemplateStage[]>;
+  const done = (id: number, created: string, delivered: string, extra = {}) =>
+    ({ id, template_id: 1, current_stage_id: 10, created_at: `${created}T10:00:00.000Z`, delivered_at: delivered, stage_changed_at: null, ...extra }) as Commission;
+  const commissions = [
+    done(1, "2026-10-01", "2026-10-11"),
+    done(2, "2026-10-01", "2026-10-21"),
+    done(3, "2026-10-01", "2026-12-01", { cancelled_at: "2026-10-05T10:00:00.000Z" }),
+    { id: 4, template_id: 1, current_stage_id: null, created_at: "2026-10-01T10:00:00.000Z" } as Commission,
+  ];
+  expect(typicalDays(commissions, stages)).toEqual({ 1: 15 });
 });
 
 test("versions uploaded in the same second keep the order they were saved in", () => {
