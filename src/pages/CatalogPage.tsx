@@ -332,7 +332,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
               />
             ) : (
               <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                <p className="font-display text-xl font-semibold">{t("Create your first template")}</p>
+                <p className="text-lg font-semibold">{t("Create your first template")}</p>
                 <p className="mt-1 text-sm text-muted">{t("A template is the list of stages a commission moves through.")}</p>
                 <button type="button" onClick={handleNewTemplate} className="mt-4 rounded-2xl bg-primary px-4 py-2 text-sm font-semibold text-on-primary">
                   {t("New template")}

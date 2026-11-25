@@ -45,7 +45,7 @@ function FinishCommissionModal({
     <div className="modal-backdrop">
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Mark as finished")} className="w-[480px] modal-card rounded-3xl p-6">
         <p className="text-xs font-bold text-muted">{t("Mark as finished")}</p>
-        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">{title}</h3>
+        <h3 className="mt-2 text-lg font-semibold text-ink">{title}</h3>
 
         <div className="mt-5 grid grid-cols-2 gap-4">
           <label>

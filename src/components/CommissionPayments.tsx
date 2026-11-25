@@ -148,7 +148,7 @@ function CommissionPayments({
         </button>
       </div>
 
-      <p className="flex flex-wrap items-baseline gap-x-2 text-[22px] font-semibold">
+      <p className="flex flex-wrap items-baseline gap-x-2 text-xl font-semibold">
         <Money amount={summary.paid} currency={currency} />
         <span className="text-xs font-medium text-faint">
           {commission.price !== null ? t("of {amount}", { amount: formatMoney(commission.price, currency) }) : t("No price")}

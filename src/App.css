@@ -3,6 +3,16 @@
 @theme {
   --font-sans: "Manrope Variable", ui-sans-serif, system-ui, "Segoe UI", sans-serif;
   --font-display: "Fraunces Variable", Georgia, serif;
+
+  /* Escala tipográfica de 7 pasos: no hay más tamaños en la app (ver PLAN-MODERNIZACION.md, 2.2).
+     xs 12 pies y chips · sm 14 interfaz · base 16 · lg 18 títulos de sección · xl 22 cifras · 2xl 28 nombre de lo
+     abierto · 3xl 34 título de pantalla. Los cuatro primeros son los de Tailwind; los tres grandes, propios. */
+  --text-xl: 22px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 28px;
+  --text-2xl--line-height: 34px;
+  --text-3xl: 34px;
+  --text-3xl--line-height: 40px;
 }
 
 /*

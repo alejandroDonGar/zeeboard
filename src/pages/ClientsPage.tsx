@@ -672,7 +672,7 @@ function ClientsPage({
         <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
           {!clientsReady ? null : !selectedClient ? (
             <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-              <p className="font-display text-xl font-semibold">{clients.length === 0 ? t("Add your first client") : t("Pick a client")}</p>
+              <p className="text-lg font-semibold">{clients.length === 0 ? t("Add your first client") : t("Pick a client")}</p>
               <p className="mt-1 text-sm text-muted">
                 {clients.length === 0
                   ? t("Keep their contact, characters and references in one place.")
@@ -791,7 +791,7 @@ function ClientsPage({
                   </div>
 
                   <div>
-                    <h4 className="mb-2 flex items-baseline gap-2 text-[13px] font-semibold">
+                    <h4 className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
                       {t("Commissions")}
                       <span className="font-medium text-faint tabular-nums">{selectedClientCommissions.length}</span>
                     </h4>
@@ -860,7 +860,7 @@ function ClientsPage({
                   </div>
 
                   <div>
-                    <h4 className="mb-2 flex items-baseline gap-2 text-[13px] font-semibold">
+                    <h4 className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
                       {t("Characters")}
                       <span className="font-medium text-faint tabular-nums">{selectedCharacters.length}</span>
                     </h4>
@@ -1004,7 +1004,7 @@ function ClientsPage({
                           ) : (
                             <div className="flex items-start gap-3">
                               <div className="min-w-0 flex-1">
-                                <p className="font-display text-lg font-semibold">{character.name}</p>
+                                <p className="text-lg font-semibold">{character.name}</p>
                                 {character.notes ? (
                                   <p className="mt-1 whitespace-pre-wrap text-sm text-muted">{character.notes}</p>
                                 ) : (
@@ -1143,7 +1143,7 @@ function ClientsPage({
                   </dl>
 
                   <div>
-                    <label htmlFor="client-notes" className="mb-2 block text-[13px] font-semibold">
+                    <label htmlFor="client-notes" className="mb-2 block text-sm font-semibold">
                       {t("Notes")}
                     </label>
                     <textarea
@@ -1182,7 +1182,7 @@ function ClientsPage({
         <div className="modal-backdrop">
           <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] modal-card rounded-3xl p-6">
             <DialogBehavior onClose={closeClientForm} />
-            <h3 className="font-display text-2xl font-semibold tracking-tight text-ink">
+            <h3 className="text-lg font-semibold text-ink">
               {clientForm === "new" ? t("New client") : t("Edit client")}
             </h3>
 

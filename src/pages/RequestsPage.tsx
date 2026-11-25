@@ -345,7 +345,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
             onChange={(value) => saveSlots({ slots_open: value === "open" }).catch(console.error)}
           />
 
-          <div className="flex items-center gap-2.5 whitespace-nowrap text-[13px] text-muted">
+          <div className="flex items-center gap-2.5 whitespace-nowrap text-sm text-muted">
             <span aria-hidden="true" className="flex gap-[3px]">
               {Array.from({ length: Math.max(settings.slots_total, taken) }, (_, index) => (
                 <i
@@ -413,7 +413,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
             </div>
 
             {/* The form the responses come from */}
-            <div className="flex items-center gap-2 border-t border-line px-3 py-2.5 text-[13px] text-muted">
+            <div className="flex items-center gap-2 border-t border-line px-3 py-2.5 text-sm text-muted">
               <i className={`h-[7px] w-[7px] shrink-0 rounded-full ${settings.responses_file ? "bg-tone-ok" : "bg-faint"}`} />
               <span className="min-w-0 flex-1">
                 {settings.responses_file ? t("Form connected") : t("Form not connected")}
@@ -478,7 +478,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
           <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-3xl @container">
             {!ready ? null : !current ? (
               <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                <p className="font-display text-xl font-semibold">{t("Pick a request")}</p>
+                <p className="text-lg font-semibold">{t("Pick a request")}</p>
                 <p className="mt-1 text-sm text-muted">{t("What they asked for shows up here.")}</p>
               </div>
             ) : (
@@ -496,7 +496,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
 
                 <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto border-t border-line @min-[700px]:grid-cols-[minmax(0,1fr)_clamp(250px,32%,320px)] @min-[700px]:overflow-hidden">
                   <div className="min-w-0 p-5 @min-[700px]:overflow-y-auto">
-                    <p className="mb-2 text-[13px] font-semibold">{t("What they ask for")}</p>
+                    <p className="mb-2 text-sm font-semibold">{t("What they ask for")}</p>
                     {current.details ? (
                       <p className="max-w-[68ch] leading-relaxed whitespace-pre-wrap [overflow-wrap:anywhere]">
                         <Linkified text={current.details} />
@@ -611,7 +611,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
         <div className="modal-backdrop">
           <div role="dialog" aria-modal="true" aria-label={t("New request")} className="w-[520px] max-w-[94vw] modal-card rounded-3xl p-6">
             <DialogBehavior onClose={() => setDraft(null)} />
-            <h3 className="font-display text-2xl font-semibold tracking-tight">{t("New request")}</h3>
+            <h3 className="text-lg font-semibold">{t("New request")}</h3>
 
             <div className="mt-5 space-y-3">
               <input

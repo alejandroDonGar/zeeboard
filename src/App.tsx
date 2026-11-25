@@ -376,7 +376,7 @@ function App() {
                   <item.icon size={18} stroke={1.5} aria-hidden="true" />
                   <span className="max-[1180px]:sr-only">{t(item.label)}</span>
                   {item.id === "requests" && newRequests > 0 && (
-                    <span className="ml-auto text-xs font-medium text-faint tabular-nums max-[1180px]:absolute max-[1180px]:top-0.5 max-[1180px]:right-1 max-[1180px]:text-[10px]">
+                    <span className="ml-auto text-xs font-medium text-faint tabular-nums max-[1180px]:absolute max-[1180px]:top-0.5 max-[1180px]:right-1 max-[1180px]:text-xs">
                       {newRequests}
                     </span>
                   )}

@@ -41,7 +41,7 @@ function CommissionInfo({
 }) {
   const label = "pt-2.5 text-faint first:pt-0";
   const value = "flex min-w-0 flex-wrap items-center gap-1.5 pt-2.5 first:pt-0";
-  const heading = "mb-2 text-[13px] font-semibold";
+  const heading = "mb-2 text-sm font-semibold";
   const showRevisions = revisions.included !== null || revisions.count > 0;
   const revisionTone =
     revisions.included === null ? "" : revisions.count > revisions.included ? "chip-bad" : revisions.count === revisions.included ? "chip-warn" : "";

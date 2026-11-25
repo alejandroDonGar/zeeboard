@@ -272,7 +272,7 @@ function SettingsPage() {
   const numberField =
     "w-16 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink";
 
-  const section = "mb-2 mt-5 text-[13px] font-semibold text-muted";
+  const section = "mb-2 mt-5 text-sm font-semibold text-muted";
   const panel = "divide-y divide-line rounded-lg border border-line bg-surface";
   const row = "flex items-center gap-4 px-4 py-3";
   const ghostButton =
@@ -303,7 +303,7 @@ function SettingsPage() {
           </nav>
 
           <div className="min-w-0 overflow-y-auto px-7 pt-5 pb-9">
-            <h2 className="mb-4 font-display text-[26px] leading-tight font-semibold tracking-tight">{t(SECTIONS.find((item) => item.id === page)!.label)}</h2>
+            <h2 className="mb-4 font-display text-2xl leading-tight font-semibold tracking-tight">{t(SECTIONS.find((item) => item.id === page)!.label)}</h2>
             <div className="max-w-[760px] pb-2">
           {page === "general" && (
             <>

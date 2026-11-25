@@ -24,7 +24,7 @@ function TopBar({
 }) {
   return (
     <header className="glass flex min-h-13 shrink-0 flex-wrap items-center gap-x-2.5 gap-y-2 rounded-3xl py-2 pr-2.5 pl-4">
-      <h1 className="mr-1.5 text-[15px] font-semibold tracking-tight">{t(title)}</h1>
+      <h1 className="mr-1.5 text-base font-semibold tracking-tight">{t(title)}</h1>
       {children}
       <div className="flex-1" />
       {end}

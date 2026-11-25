@@ -75,7 +75,7 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
     <div className="modal-backdrop">
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("PayPal")} className="flex max-h-[80vh] w-[720px] flex-col modal-card rounded-3xl p-6">
         <p className="text-xs font-bold text-muted">{t("PayPal")}</p>
-        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">
+        <h3 className="mt-2 text-lg font-semibold text-ink">
           {t("{ready} of {total} payments ready", { ready: ready.length, total: matches.length })}
         </h3>
 

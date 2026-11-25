@@ -185,7 +185,7 @@ function CommissionForm({
             value={commissionTitle}
             onChange={(event) => setCommissionTitle(event.target.value)}
             placeholder={t("Commission title")}
-            className="w-full rounded-md border border-transparent bg-transparent px-1 font-display text-2xl font-semibold tracking-tight outline-none hover:border-line focus:border-ink"
+            className="w-full rounded-md border border-transparent bg-transparent px-1 text-xl font-semibold tracking-tight outline-none hover:border-line focus:border-ink"
           />
 
           <div>
@@ -380,7 +380,7 @@ function CommissionForm({
         <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-l border-line bg-paper p-6">
           <div>
             <p className={formLabel}>{t("Summary")}</p>
-            <p className="truncate font-display text-lg font-semibold">{commissionTitle.trim() || "Untitled commission"}</p>
+            <p className="truncate text-lg font-semibold">{commissionTitle.trim() || "Untitled commission"}</p>
             <p className="text-sm text-muted">
               {[clientName.trim() || t("No client"), platform, formTemplate?.name].filter(Boolean).join(" · ")}
             </p>

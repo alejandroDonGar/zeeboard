@@ -904,7 +904,7 @@ function CommissionsPage() {
                     </span>
                   )}
                   <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-muted">
-                    <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-highlight text-[11px] font-bold text-ink">
+                    <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-highlight text-xs font-bold text-ink">
                       {hide(activeCommission.client_name || "?").slice(0, 2)}
                     </span>
                     <span>

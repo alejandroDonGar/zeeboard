@@ -103,7 +103,7 @@ function BoardFilters({
   const tick = (on: boolean) => (
     <span
       aria-hidden="true"
-      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border text-[10px] leading-none ${
+      className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-sm border text-xs leading-none ${
         on ? "border-ink bg-primary text-on-primary" : "border-line-strong"
       }`}
     >

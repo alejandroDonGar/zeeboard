@@ -236,14 +236,14 @@ function FinishedPage({
         <GlassPanel className="min-h-0 flex-1" contentClassName="overflow-y-auto px-5 pb-7">
           {!ready ? null : filteredCompleted.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-              <p className="font-display text-xl font-semibold">{completedCommissions.length === 0 ? t("Nothing finished yet") : t("No matches")}</p>
+              <p className="text-lg font-semibold">{completedCommissions.length === 0 ? t("Nothing finished yet") : t("No matches")}</p>
               <p className="mt-1 text-sm text-muted">
                 {completedCommissions.length === 0 ? t("Commissions land here when you mark them as finished.") : t("Try another search or date range.")}
               </p>
             </div>
           ) : (
             <>
-              <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1 pt-3.5 pb-1 text-[13px] text-muted tabular-nums">
+              <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1 pt-3.5 pb-1 text-sm text-muted tabular-nums">
                 <span className="text-ink">
                   {t("{n} finished · {amount}", { n: filteredCompleted.length, amount: formatMoney(totalEarnings) })}
                   {overallRate !== null && ` · ${formatMoney(overallRate)}/h`}
@@ -257,10 +257,10 @@ function FinishedPage({
                   <section key={group.key}>
                     {/* Group header stays at the top while its images scroll */}
                     <div className="sticky top-0 z-10 flex items-baseline gap-2.5 bg-gradient-to-b from-[var(--glass)] from-70% to-transparent pt-4 pb-2.5">
-                      <h3 className="font-display text-[22px] leading-tight font-semibold tracking-tight first-letter:uppercase">
+                      <h3 className="text-base font-semibold first-letter:uppercase">
                         {groupMode === "client" ? hide(group.label) : group.label}
                       </h3>
-                      <span className="text-[12.5px] text-faint tabular-nums">
+                      <span className="text-xs text-faint tabular-nums">
                         {group.commissions.length} · {formatMoney(groupEarnings)}
                       </span>
                     </div>

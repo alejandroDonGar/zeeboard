@@ -118,7 +118,7 @@ function StatisticsPage() {
     },
   ];
 
-  const h3 = "mb-2.5 flex items-baseline gap-2 text-[13px] font-semibold";
+  const h3 = "mb-2.5 flex items-baseline gap-2 text-sm font-semibold";
   const funnel = stats && [
     { label: t("accepted"), n: stats.requests.accepted, color: "bg-tone-ok" },
     { label: t("declined"), n: stats.requests.declined, color: "bg-faint" },
@@ -160,7 +160,7 @@ function StatisticsPage() {
           <dl className="grid grid-cols-[repeat(auto-fit,minmax(170px,1fr))] gap-y-4 pt-5 pb-5">
             {tiles.map((tile) => (
               <div key={tile.label} className="border-l border-line px-5 first:border-l-0 first:pl-0">
-                <dt className="text-[13px] text-muted">{tile.label}</dt>
+                <dt className="text-sm text-muted">{tile.label}</dt>
                 <dd className="mt-1 font-display text-2xl leading-tight font-semibold tabular-nums">{tile.value}</dd>
                 <dd className="mt-0.5 text-xs">{tile.change}</dd>
               </div>
@@ -183,7 +183,7 @@ function StatisticsPage() {
                 <p className="text-faint">{t("Nothing in this period yet.")}</p>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-[13px] tabular-nums">
+                  <table className="w-full border-collapse text-sm tabular-nums">
                     <thead>
                       <tr className="text-right text-faint">
                         {[t("Template"), t("Pieces"), t("Received"), t("Average"), t("Hours"), t("Days"), t("Per hour")].map((label, index) => (
@@ -258,7 +258,7 @@ function StatisticsPage() {
                       <i key={part.label} className={`block ${part.color}`} style={{ flex: part.n }} />
                     ))}
                   </div>
-                  <p className="flex flex-wrap gap-x-[18px] gap-y-1.5 text-[13px] text-muted">
+                  <p className="flex flex-wrap gap-x-[18px] gap-y-1.5 text-sm text-muted">
                     {funnel!.map((part) => (
                       <span key={part.label} className="inline-flex items-center gap-1.5">
                         <i className={`h-[7px] w-[7px] rounded-full ${part.color}`} />
@@ -275,7 +275,7 @@ function StatisticsPage() {
 
             <section className="min-w-0 border-t border-line py-5 min-[1100px]:border-t-0 min-[1100px]:border-l min-[1100px]:pl-6">
               <h3 className={h3}>{t("Platform fees")}</h3>
-              <p className="font-display text-[22px] leading-tight font-semibold tabular-nums">
+              <p className="font-display text-xl leading-tight font-semibold tabular-nums">
                 <Money amount={stats.fees.total} />
               </p>
               <p className="mt-1 text-muted">

@@ -46,7 +46,7 @@ function ConfirmModal({
           {t(eyebrow)}
         </p>
 
-        <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-ink">
+        <h3 className="mt-2 text-lg font-semibold text-ink">
           {t(title)}
         </h3>
 

@@ -69,7 +69,7 @@ export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
   return (
     <div className="modal-backdrop" onClick={onClose}>
       <div ref={dialogRef} role="dialog" aria-modal="true" aria-label={t("Keyboard shortcuts")} className="w-[420px] modal-card rounded-3xl p-6" onClick={(event) => event.stopPropagation()}>
-        <h3 className="font-display text-2xl font-semibold">{t("Keyboard shortcuts")}</h3>
+        <h3 className="text-lg font-semibold">{t("Keyboard shortcuts")}</h3>
         <div className="mt-4 divide-y divide-line">
           {SHORTCUTS.map(([keys, description]) => (
             <div key={keys} className="flex items-center justify-between py-2 text-sm">

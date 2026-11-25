@@ -100,10 +100,10 @@ function TagEditor({
       </div>
 
       <div className="min-h-0 flex-1 overflow-y-auto border-t border-line p-5">
-        <p className="mb-2 text-[13px] font-semibold">{t("Preview")}</p>
+        <p className="mb-2 text-sm font-semibold">{t("Preview")}</p>
         <TagChip name={draft.name.trim() || t("Tag name")} color={draft.color} />
 
-        <p className="mt-5 mb-1 text-[13px] font-semibold">{t("What tags are for")}</p>
+        <p className="mt-5 mb-1 text-sm font-semibold">{t("What tags are for")}</p>
         <p className="max-w-[60ch] text-muted">
           {tag?.category === TYPE_CATEGORY
             ? t("The type now comes from the commission's template, with its own colour, so these tags are no longer shown on commissions. They are kept so nothing is lost; delete them whenever you like.")

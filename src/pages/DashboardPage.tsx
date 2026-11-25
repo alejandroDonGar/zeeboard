@@ -157,7 +157,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
 
   // Un trozo de la pantalla: título pequeño, su contador y, si hace falta, un enlace a la derecha
   const heading = (text: string, count?: number | string, link?: ReactNode) => (
-    <h3 className="mb-2 flex items-baseline gap-2 text-[13px] font-semibold">
+    <h3 className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
       {text}
       {count !== undefined && <span className="font-medium text-faint tabular-nums">{count}</span>}
       {link && <span className="ml-auto font-medium text-faint">{link}</span>}
@@ -202,7 +202,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
                   {thumb(item.commission, "h-10 w-10")}
                   <span className="min-w-0">
                     <strong className="block truncate font-semibold">{item.text}</strong>
-                    <small className="block truncate text-[12.5px] text-muted">
+                    <small className="block truncate text-xs text-muted">
                       {item.commission.client_name ? hide(item.commission.client_name) : t("No client")}
                     </small>
                   </span>
@@ -260,7 +260,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
             <section>
               {heading(t("Received per month"), t("after platform fees"))}
               <p className="mb-1.5 flex items-baseline gap-2.5">
-                <span className="text-[22px] font-semibold"><Money amount={received6} /></span>
+                <span className="text-xl font-semibold"><Money amount={received6} /></span>
                 <span className="text-xs text-faint">
                   {t("in {n} months · average {amount} a month", { n: receivedByMonth.length, amount: formatMoney(received6 / receivedByMonth.length) })}
                 </span>
@@ -306,7 +306,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
                       onClick={() => handleOpenCommission(commission)}
                       className="grid w-full grid-cols-[24px_minmax(0,1fr)_auto] items-center gap-2.5 rounded-md border-t border-line px-1 py-1.5 text-left transition first:border-t-0 hover:bg-highlight/60"
                     >
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-highlight text-[11px] font-bold text-muted">{initials(commission.client_name)}</span>
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-highlight text-xs font-bold text-muted">{initials(commission.client_name)}</span>
                       <span className="min-w-0">
                         <strong className="block truncate font-semibold" title={commission.title}>{commission.title}</strong>
                         <small className="block truncate text-xs text-faint">{commission.client_name ? hide(commission.client_name) : t("No client")}</small>
@@ -325,7 +325,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
             {recentRate !== null && (
               <section>
                 {heading(t("Your hourly rate"), t("last 90 days"))}
-                <p className="text-[26px] font-semibold"><Money amount={recentRate} />/h</p>
+                <p className="text-2xl font-semibold"><Money amount={recentRate} />/h</p>
                 <p className="mt-0.5 text-xs text-faint">
                   {t(recent.length === 1 ? "{n} piece · {hours} h" : "{n} pieces · {hours} h", {
                     n: recent.length,

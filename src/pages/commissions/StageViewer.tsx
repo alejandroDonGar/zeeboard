@@ -172,7 +172,7 @@ function StageViewer({
 
                 <p className="mt-1.5 flex items-center gap-1.5 text-xs">
                   <span
-                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
+                    className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
                       done ? "bg-tone-ok text-on-tone" : current ? "bg-primary text-on-primary" : "border border-line-strong text-faint"
                     }`}
                   >

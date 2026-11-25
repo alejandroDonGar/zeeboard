@@ -197,7 +197,7 @@ function TypeEditor({
 
       <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto border-t border-line @min-[700px]:grid-cols-[minmax(0,1fr)_clamp(240px,32%,300px)] @min-[700px]:overflow-hidden">
         <div className="min-w-0 p-5 @min-[700px]:overflow-y-auto">
-          <p className="mb-2 flex items-baseline gap-2 text-[13px] font-semibold">
+          <p className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
             {t("Stages")} <span className="font-medium text-faint tabular-nums">{stages.length}</span>
           </p>
 
@@ -228,7 +228,7 @@ function TypeEditor({
 
         <div className="grid min-w-0 content-start gap-5 border-t border-line p-4 @min-[700px]:overflow-y-auto @min-[700px]:border-t-0 @min-[700px]:border-l">
           <div>
-            <p className="mb-2 flex items-baseline gap-2 text-[13px] font-semibold">
+            <p className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
               {t("In progress")} <span className="font-medium text-faint tabular-nums">{inProgress.length}</span>
             </p>
             {inProgress.length === 0 ? (
@@ -249,7 +249,7 @@ function TypeEditor({
           </div>
 
           <div>
-            <p className="mb-2 text-[13px] font-semibold">{t("Finished")}</p>
+            <p className="mb-2 text-sm font-semibold">{t("Finished")}</p>
             {figures.n === 0 ? (
               <p className="text-faint">{t("You haven't delivered any yet.")}</p>
             ) : (
