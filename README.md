@@ -221,7 +221,7 @@ Everything you have delivered, as a register.
 <img src="docs/images/finished.png" alt="Finished commissions grouped by month" width="900">
 
 - A gallery grouped by **month** or by **client**, with a sticky header for each group (count and total). Search by title or client and filter by **date range**.
-- Each tile shows the image, the title, the amount and the client (or date), hours and rate per hour. The top line has how many you finished, the total and your **rate per hour**, and the rate per type. Click an image to see it large (the background takes its colours); click the text to open the commission.
+- Each tile shows the image, the title, the amount and the client (or date), hours and rate per hour. The top line has how many you finished, the total and your **rate per hour** (the rate of each type is in [Statistics](#statistics)). A commission not collected yet shows its hours without a rate. Click an image to see it large (the background takes its colours); click the text to open the commission.
 
 **Marking a commission as finished.** On the last working stage, the button reads **Mark as finished**: you set the **delivery date**, the **hours spent** (typed by hand), an optional **final image** and **final notes** (a link to the post, how it went…). **Back** reopens it, and **Edit delivery** changes those details later. Hours and delivery date feed the register and [Statistics](#statistics).
 

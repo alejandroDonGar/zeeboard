@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { IconPlus } from "@tabler/icons-react";
 import { t } from "../lib/i18n";
 import {
   createTag,
@@ -245,9 +246,10 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
             <button
               type="button"
               onClick={() => setSelection({ kind: "new-tag", category: selectedTag?.category || categoryNames.find((name) => name !== TYPE_CATEGORY) || "Extras" })}
-              className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+              className="inline-flex items-center gap-2 rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-semibold whitespace-nowrap text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
             >
-              + {t("New tag")}
+              <IconPlus size={16} stroke={1.75} aria-hidden="true" />
+              {t("New tag")}
             </button>
           }
         />
@@ -285,7 +287,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
                         tag.color,
                         true,
                         tag.name,
-                        t("Tag"),
+                        "",
                         usageLabel(tag.id),
                       ),
                     )}

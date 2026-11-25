@@ -415,7 +415,7 @@ export const es: Record<string, string> = {
   "{n} free": "{n} libres",
   full: "completo",
   "{n} over": "{n} de más",
-  slots: "plazas",
+  Slots: "Plazas",
   "Every commission that isn't finished takes a slot, including the ones in the queue.": "Cada comisión sin terminar ocupa una plaza, también las que están en cola.",
   "Checked {date} · again every 30 minutes": "Comprobado {date} · de nuevo cada 30 minutos",
   "Not checked yet": "Aún sin comprobar",

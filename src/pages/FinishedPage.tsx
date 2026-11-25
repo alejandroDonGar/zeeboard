@@ -18,12 +18,10 @@ import {
 import {
   getAllPayments,
   getCommissions,
-  getTemplates,
   getStagesByTemplate,
   type Commission,
   type CommissionPayment,
   type CommissionStageImage,
-  type Template,
   type TemplateStage,
 } from "../lib/database";
 import { hide } from "../lib/privacy";
@@ -55,11 +53,8 @@ function FinishedPage({
   useAmbientImage(viewed?.path);
   const [ready, setReady] = useState(false);
   const [payments, setPayments] = useState<CommissionPayment[]>([]);
-  const [templates, setTemplates] = useState<Template[]>([]);
-
   useEffect(() => {
     getAllPayments().then(setPayments).catch(console.error);
-    getTemplates().then(setTemplates).catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -134,17 +129,6 @@ function FinishedPage({
   const rateOf = (commission: Commission) =>
     converted.has(commission.id) && net(commission) !== 0 ? ratePerHour([{ net: net(commission), hours: commission.hours }]) : null;
   const overallRate = ratePerHour(money.commissions.map((commission) => ({ net: net(commission), hours: commission.hours })));
-  const rateByTemplate = templates
-    .map((template) => ({
-      name: template.name,
-      rate: ratePerHour(
-        filteredCompleted
-          .filter((commission) => commission.template_id === template.id)
-          .map((commission) => ({ net: net(commission), hours: commission.hours })),
-      ),
-    }))
-    .filter((entry): entry is { name: string; rate: number } => entry.rate !== null)
-    .sort((a, b) => b.rate - a.rate);
 
   const monthFormatter = new Intl.DateTimeFormat(locale, {
     month: "long",
@@ -264,12 +248,6 @@ function FinishedPage({
                   {t("{n} finished · {amount}", { n: filteredCompleted.length, amount: formatMoney(totalEarnings) })}
                   {overallRate !== null && ` · ${formatMoney(overallRate)}/h`}
                 </span>
-                {rateByTemplate.length > 0 && <span className="font-semibold">{t("Per hour")}</span>}
-                {rateByTemplate.map((entry) => (
-                  <span key={entry.name}>
-                    {entry.name} <b className="font-semibold text-ink">{formatMoney(entry.rate)}</b>
-                  </span>
-                ))}
               </p>
 
               {groups.map((group) => {

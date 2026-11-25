@@ -362,14 +362,16 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 {free > 0 ? t("{n} free", { n: free }) : free === 0 ? t("full") : t("{n} over", { n: -free })}
               </span>
             </span>
-            <input
-              type="number"
-              min={1}
-              value={settings.slots_total}
-              aria-label={t("slots")}
-              onChange={(event) => saveSlots({ slots_total: Math.max(1, Math.round(Number(event.target.value)) || 1) }).catch(console.error)}
-              className="w-14 rounded-md border border-line-strong bg-surface px-1.5 py-1 text-right text-sm font-semibold text-ink tabular-nums outline-none focus:border-ink"
-            />
+            <label className="flex items-center gap-1.5 text-xs text-faint">
+              {t("Slots")}
+              <input
+                type="number"
+                min={1}
+                value={settings.slots_total}
+                onChange={(event) => saveSlots({ slots_total: Math.max(1, Math.round(Number(event.target.value)) || 1) }).catch(console.error)}
+                className="w-14 rounded-md border border-line-strong bg-surface px-1.5 py-1 text-right text-sm font-semibold text-ink tabular-nums outline-none focus:border-ink"
+              />
+            </label>
           </div>
         </TopBar>
 
@@ -534,7 +536,8 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                       current.contact && [current.platform, hide(current.contact)].filter(Boolean).join(" "),
                       t("No contact"),
                     )}
-                    {prop(
+                    {/* The account to tag, unless it is the same one they wrote as contact */}
+                    {current.tag_handle !== current.contact && prop(
                       t("Social account"),
                       current.tag_handle &&
                         `${current.tag_platform && current.tag_platform !== "Other" ? `${current.tag_platform} ` : ""}${hide(current.tag_handle)}`,
