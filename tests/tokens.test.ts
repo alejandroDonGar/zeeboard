@@ -27,20 +27,19 @@ test("dark by Windows setting and dark chosen in Settings use the same colours",
 describe.each(Object.entries(themes))("%s theme", (_, theme) => {
   test("every text colour reads at 4.5:1 or more on every background it sits on (WCAG 1.4.3)", () => {
     for (const text of ["ink", "muted", "faint"]) {
-      for (const background of ["surface", "canvas", "highlight"]) {
+      for (const background of ["surface", "canvas", "highlight", "paper"]) {
         expect(contrastRatio(theme[text], theme[background]), `${text} on ${background}`).toBeGreaterThanOrEqual(4.5);
       }
     }
   });
 
-  // ponytail: these two fail with today's colours (muted/faint at 1.2:1, field borders at 1.6:1); M1.1 fixes the
-  // colours and turns test.fails into test.
-  test.fails("secondary and tertiary text are two greys you can tell apart (1.5:1 between them)", () => {
+  test("secondary and tertiary text are two greys you can tell apart (1.5:1 between them)", () => {
     expect(contrastRatio(theme.muted, theme.faint)).toBeGreaterThanOrEqual(1.5);
   });
 
-  test.fails("field borders show where a field is: 3:1 on the surface (WCAG 1.4.11)", () => {
-    expect(theme["field-border"]).toBeDefined();
-    expect(contrastRatio(theme["field-border"], theme.surface)).toBeGreaterThanOrEqual(3);
+  test("field borders show where a field is: 3:1 on the backgrounds fields sit on (WCAG 1.4.11)", () => {
+    for (const background of ["surface", "paper"]) {
+      expect(contrastRatio(theme["field-border"], theme[background]), background).toBeGreaterThanOrEqual(3);
+    }
   });
 });

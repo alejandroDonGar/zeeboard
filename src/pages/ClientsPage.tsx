@@ -707,7 +707,7 @@ function ClientsPage({
                 <button
                   type="button"
                   onClick={() => handleOpenEditClient(selectedClient)}
-                  className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                  className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                 >
                   {t("Edit")}
                 </button>
@@ -720,7 +720,7 @@ function ClientsPage({
                     aria-haspopup="true"
                     aria-expanded={clientMenuOpen}
                     onClick={() => setClientMenuOpen((open) => !open)}
-                    className="flex h-[34px] w-[34px] items-center justify-center rounded-2xl border border-line-strong bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                    className="flex h-[34px] w-[34px] items-center justify-center rounded-2xl border border-field-border bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                   >
                     <IconDots size={16} stroke={1.75} aria-hidden="true" />
                   </button>
@@ -933,7 +933,7 @@ function ClientsPage({
                               if (event.key === "Escape") setAddingCharacter(false);
                             }}
                             placeholder={t("Character name")}
-                            className="rounded-md border border-line-strong bg-paper px-2 py-1.5 text-sm outline-none focus:border-ink"
+                            className="rounded-md border border-field-border bg-paper px-2 py-1.5 text-sm outline-none focus:border-ink"
                           />
                           <div className="flex justify-end gap-1">
                             <button type="button" onClick={() => setAddingCharacter(false)} className="rounded-md px-2 py-1 text-xs font-semibold text-muted hover:text-ink">
@@ -978,14 +978,14 @@ function ClientsPage({
                                 value={editCharacterName}
                                 onChange={(event) => setEditCharacterName(event.target.value)}
                                 placeholder={t("Character name")}
-                                className="w-full rounded-md border border-line-strong bg-paper px-3 py-2 text-sm font-bold"
+                                className="w-full rounded-md border border-field-border bg-paper px-3 py-2 text-sm font-bold"
                               />
                               <textarea
                                 value={editCharacterNotes}
                                 onChange={(event) => setEditCharacterNotes(event.target.value)}
                                 placeholder={t("Notes: species, colours, details to remember…")}
                                 rows={3}
-                                className="w-full rounded-md border border-line-strong bg-paper px-3 py-2 text-sm"
+                                className="w-full rounded-md border border-field-border bg-paper px-3 py-2 text-sm"
                               />
                               <div className="flex justify-end gap-2">
                                 <button type="button" onClick={() => setEditingCharacter(false)} className="rounded-md px-3 py-1.5 text-xs font-semibold text-muted hover:text-ink">
@@ -1019,7 +1019,7 @@ function ClientsPage({
                                   setEditCharacterNotes(character.notes ?? "");
                                   setEditingCharacter(true);
                                 }}
-                                className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight"
+                                className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight"
                               >
                                 {t("Edit")}
                               </button>
@@ -1193,14 +1193,14 @@ function ClientsPage({
                 onChange={(event) => setClientName(event.target.value)}
                 placeholder={t("Client name")}
                 data-private
-                className="w-full rounded-md border border-line-strong bg-paper px-3 py-2.5"
+                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
               />
 
               <div className="grid grid-cols-[160px_minmax(0,1fr)] gap-3">
                 <select
                   value={clientPlatform}
                   onChange={(event) => setClientPlatform(event.target.value)}
-                  className="rounded-md border border-line-strong bg-paper px-3 py-2.5"
+                  className="rounded-md border border-field-border bg-paper px-3 py-2.5"
                 >
                   <option>Twitter / X</option>
                   <option>Bluesky</option>
@@ -1214,7 +1214,7 @@ function ClientsPage({
                   onChange={(event) => setClientHandle(event.target.value)}
                   placeholder={t("@username")}
                 data-private
-                  className="rounded-md border border-line-strong bg-paper px-3 py-2.5"
+                  className="rounded-md border border-field-border bg-paper px-3 py-2.5"
                 />
               </div>
 
@@ -1223,7 +1223,7 @@ function ClientsPage({
                 onChange={(event) => setTagText(event.target.value)}
                 placeholder={t("Account to tag when posting, e.g. Bluesky @name")}
                 data-private
-                className="w-full rounded-md border border-line-strong bg-paper px-3 py-2.5"
+                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
               />
 
               <input
@@ -1232,7 +1232,7 @@ function ClientsPage({
                 onChange={(event) => setClientEmailText(event.target.value)}
                 placeholder={t("Email (PayPal), to match their payments")}
                 data-private
-                className="w-full rounded-md border border-line-strong bg-paper px-3 py-2.5"
+                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
               />
 
               <textarea
@@ -1241,7 +1241,7 @@ function ClientsPage({
                 placeholder={t("Notes")}
                 data-private
                 rows={4}
-                className="w-full rounded-md border border-line-strong bg-paper px-3 py-2.5"
+                className="w-full rounded-md border border-field-border bg-paper px-3 py-2.5"
               />
             </div>
 

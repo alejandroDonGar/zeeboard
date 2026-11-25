@@ -127,7 +127,7 @@ function StatisticsPage() {
   ];
   const range = periodRanges(period, now).current;
   const periodExpenses = expenses.filter((expense) => expense.spent_at >= range.from && expense.spent_at <= range.to);
-  const field = "min-w-0 rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
+  const field = "min-w-0 rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
   const bestClient = Math.max(...(stats?.topClients.map((client) => client.net) ?? []), 1);
 
   return (

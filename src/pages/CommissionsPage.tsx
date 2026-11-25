@@ -917,7 +917,7 @@ function CommissionsPage() {
                 <button
                   type="button"
                   onClick={handleOpenEditCommission}
-                  className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                  className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                 >
                   {t("Edit")}
                 </button>
@@ -930,7 +930,7 @@ function CommissionsPage() {
                     aria-haspopup="true"
                     aria-expanded={commissionMenuOpen}
                     onClick={() => setCommissionMenuOpen((open) => !open)}
-                    className="flex h-[34px] w-[34px] items-center justify-center rounded-2xl border border-line-strong bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
+                    className="flex h-[34px] w-[34px] items-center justify-center rounded-2xl border border-field-border bg-surface text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97]"
                   >
                     <IconDots size={16} stroke={1.75} aria-hidden="true" />
                   </button>
@@ -1106,7 +1106,7 @@ function CommissionsPage() {
                     title={t("Back to the previous stage")}
                     onClick={() => handleMoveStage(-1)}
                     disabled={currentStageIndex <= 0}
-                    className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97] disabled:opacity-40"
+                    className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97] disabled:opacity-40"
                   >
                     {t("‹ Back")}
                   </button>
@@ -1123,7 +1123,7 @@ function CommissionsPage() {
                         type="button"
                         title={t("Finish it again with a new delivery date")}
                         onClick={() => setShowFinishModal(true)}
-                        className="rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97]"
+                        className="rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97]"
                       >
                         {t("Edit delivery")}
                       </button>
@@ -1149,7 +1149,7 @@ function CommissionsPage() {
                       onClick={toggleTimer}
                       aria-pressed={timing}
                       title={trackedByStage || t("Time the current stage: the hours fill in when you finish")}
-                      className="inline-flex items-center gap-1.5 rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink tabular-nums transition hover:bg-highlight active:scale-[0.97]"
+                      className="inline-flex items-center gap-1.5 rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink tabular-nums transition hover:bg-highlight active:scale-[0.97]"
                     >
                       {timing ? <IconPlayerStop size={15} stroke={2} aria-hidden="true" /> : <IconPlayerPlay size={15} stroke={2} aria-hidden="true" />}
                       {timing ? t("Stop") : t("Time")}
@@ -1262,7 +1262,7 @@ function CommissionsPage() {
             placeholder={t("Reason (optional): the client disappeared, refunded…")}
             aria-label={t("Reason")}
             rows={2}
-            className="mt-3 w-full rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink"
+            className="mt-3 w-full rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink"
           />
         </ConfirmModal>
       )}

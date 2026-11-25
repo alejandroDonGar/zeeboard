@@ -213,7 +213,7 @@ function FocusViewer({
                     }}
                     placeholder={t("What should change here? Enter to add")}
                     style={{ left: boxLeft(pinDraft.x), top: `${pinDraft.y * 100}%` }}
-                    className="absolute z-10 mt-4 w-64 -translate-x-1/2 rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm text-ink shadow-2xl outline-none focus:border-ink"
+                    className="absolute z-10 mt-4 w-64 -translate-x-1/2 rounded-md border border-field-border bg-surface px-3 py-1.5 text-sm text-ink shadow-2xl outline-none focus:border-ink"
                   />
                 </>
               )}

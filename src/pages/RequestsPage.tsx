@@ -261,10 +261,10 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   const free = settings.slots_total - taken;
 
   const btn =
-    "rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
+    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
   const primaryBtn =
     "inline-flex items-center gap-2 rounded-2xl bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97] disabled:opacity-50";
-  const field = "w-full rounded-md border border-line-strong bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
+  const field = "w-full rounded-md border border-field-border bg-paper px-3 py-2 text-sm outline-none focus:border-ink";
 
   // The open request; if it left the list, the next one waiting
   const current = requests.find((request) => request.id === selectedId) ?? waiting[0] ?? waitlist[0] ?? null;
@@ -369,7 +369,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 min={1}
                 value={settings.slots_total}
                 onChange={(event) => saveSlots({ slots_total: Math.max(1, Math.round(Number(event.target.value)) || 1) }).catch(console.error)}
-                className="w-14 rounded-md border border-line-strong bg-surface px-1.5 py-1 text-right text-sm font-semibold text-ink tabular-nums outline-none focus:border-ink"
+                className="w-14 rounded-md border border-field-border bg-surface px-1.5 py-1 text-right text-sm font-semibold text-ink tabular-nums outline-none focus:border-ink"
               />
             </label>
           </div>
@@ -433,7 +433,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                   aria-haspopup="true"
                   aria-expanded={formMenuOpen}
                   onClick={() => setFormMenuOpen((open) => !open)}
-                  className="flex h-[30px] w-[30px] items-center justify-center rounded-2xl border border-line-strong bg-surface text-ink transition hover:bg-highlight"
+                  className="flex h-[30px] w-[30px] items-center justify-center rounded-2xl border border-field-border bg-surface text-ink transition hover:bg-highlight"
                 >
                   <IconDots size={16} stroke={1.75} aria-hidden="true" />
                 </button>

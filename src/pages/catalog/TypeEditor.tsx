@@ -158,9 +158,9 @@ function TypeEditor({
 
   const strengths = tintStrengths(template.color);
   const heroStyle = { "--tint": template.color, "--ts-light": strengths.light, "--ts-dark": strengths.dark } as CSSProperties;
-  const field = "rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm font-semibold outline-none focus:border-ink";
+  const field = "rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm font-semibold outline-none focus:border-ink";
   const btn =
-    "rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
+    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
 
   return (
     <>
@@ -221,7 +221,7 @@ function TypeEditor({
               if (event.key === "Enter") handleAddStage();
             }}
             placeholder={t("Add a stage and press Enter")}
-            className="mt-2 w-full max-w-[560px] rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
+            className="mt-2 w-full max-w-[560px] rounded-md border border-field-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
           />
           <p className="mt-2 max-w-[480px] text-xs text-faint">{t("The last stage stays hidden until you press “Mark as finished” on the commission.")}</p>
         </div>

@@ -126,7 +126,7 @@ function CommissionForm({
     }));
   const formLabel = "mb-1.5 block text-xs font-bold text-muted";
   const formField =
-    "rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
+    "rounded-md border border-field-border bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
 
   /** Saves the form: creates or updates, and in both cases saves tags and characters */
   async function handleSaveCommissionForm() {
@@ -239,7 +239,7 @@ function CommissionForm({
                   if (value >= 1) changeCharacterCount(value);
                 }}
                 title={t("How many characters the commission has; the price depends on it")}
-                className="ml-3 w-14 rounded-sm border border-line-strong bg-surface px-1.5 py-0.5 text-center text-sm normal-case tracking-normal text-ink outline-none focus:border-ink"
+                className="ml-3 w-14 rounded-sm border border-field-border bg-surface px-1.5 py-0.5 text-center text-sm normal-case tracking-normal text-ink outline-none focus:border-ink"
               />
               <span className="ml-2 normal-case tracking-normal text-faint">
                 {t("the price depends on this number")}
@@ -424,12 +424,12 @@ function CommissionForm({
                   inputMode="decimal"
                   data-private
                   title={t("Calculated from the type and characters; you can change it")}
-                  className="w-24 rounded-md border border-line-strong bg-surface px-2 py-1 text-right font-semibold outline-none focus:border-ink"
+                  className="w-24 rounded-md border border-field-border bg-surface px-2 py-1 text-right font-semibold outline-none focus:border-ink"
                 />
                 <select
                   value={currency}
                   onChange={(event) => setCurrency(event.target.value)}
-                  className="rounded-md border border-line-strong bg-surface px-1 py-1 text-sm font-semibold"
+                  className="rounded-md border border-field-border bg-surface px-1 py-1 text-sm font-semibold"
                 >
                   <option>EUR</option>
                   <option>USD</option>
@@ -444,7 +444,7 @@ function CommissionForm({
                       placeholder="0,92"
                       inputMode="decimal"
                       aria-label={t("Exchange rate")}
-                      className="w-16 rounded-md border border-line-strong bg-surface px-2 py-1 text-right text-sm outline-none focus:border-ink"
+                      className="w-16 rounded-md border border-field-border bg-surface px-2 py-1 text-right text-sm outline-none focus:border-ink"
                     />
                     {appSettings().default_currency}
                   </label>

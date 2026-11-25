@@ -7,7 +7,7 @@ import { useDialog } from "../lib/useDialog";
 export type FinishDetails = { deliveredAt: string; hours: number | null; notes: string; imagePaths: string[] };
 
 const label = "mb-1.5 block text-xs font-bold text-muted";
-const field = "rounded-md border border-line-strong bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
+const field = "rounded-md border border-field-border bg-surface px-3 py-2 text-sm outline-none focus:border-ink";
 
 /** Final details of a piece. Hours and notes come prefilled when a finished commission is finished again. */
 function FinishCommissionModal({
@@ -71,7 +71,7 @@ function FinishCommissionModal({
           <button
             type="button"
             onClick={async () => setImagePaths([...imagePaths, ...(await pickImagePaths())])}
-            className="rounded-md border border-line-strong px-3 py-1.5 text-sm font-semibold transition hover:border-ink"
+            className="rounded-md border border-field-border px-3 py-1.5 text-sm font-semibold transition hover:border-ink"
           >
             {imagePaths.length === 0 ? t("Add final image") : t("{n} selected · add more", { n: imagePaths.length })}
           </button>
@@ -91,7 +91,7 @@ function FinishCommissionModal({
         {error && <p className="mt-3 text-sm text-tone-bad">{error}</p>}
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onCancel} className="rounded-2xl border border-line-strong px-4 py-2 font-semibold">
+          <button onClick={onCancel} className="rounded-2xl border border-field-border px-4 py-2 font-semibold">
             {t("Cancel")}
           </button>
           <button

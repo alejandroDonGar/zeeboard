@@ -60,7 +60,7 @@ function ConfirmModal({
           {onCancel && (
             <button
               onClick={onCancel}
-              className="rounded-2xl border border-line-strong bg-surface px-4 py-2 font-semibold"
+              className="rounded-2xl border border-field-border bg-surface px-4 py-2 font-semibold"
             >
               {t(cancelLabel)}
             </button>

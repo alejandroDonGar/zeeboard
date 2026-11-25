@@ -94,7 +94,7 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
                 <select
                   value={choice[item.row.txId]}
                   onChange={(event) => setChoice({ ...choice, [item.row.txId]: Number(event.target.value) })}
-                  className="w-52 shrink-0 rounded-md border border-line-strong bg-paper px-2 py-1"
+                  className="w-52 shrink-0 rounded-md border border-field-border bg-paper px-2 py-1"
                 >
                   {commissions
                     .filter((commission) => commission.client_id === item.clientId)
@@ -114,7 +114,7 @@ function PaypalImport({ preview, onClose }: { preview: PaypalPreview; onClose: (
         {error && <p className="mt-3 text-sm text-tone-bad">{error}</p>}
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="rounded-md border border-line-strong px-4 py-2 font-semibold">
+          <button onClick={onClose} className="rounded-md border border-field-border px-4 py-2 font-semibold">
             {t("Cancel")}
           </button>
           <button

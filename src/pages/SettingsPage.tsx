@@ -270,13 +270,13 @@ function SettingsPage() {
 
   const positive = (text: string) => Math.max(1, Math.round(Number(text)) || 1);
   const numberField =
-    "w-16 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink";
+    "w-16 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink";
 
   const section = "mb-2 mt-5 text-[13px] font-semibold text-muted";
   const panel = "divide-y divide-line rounded-lg border border-line bg-surface";
   const row = "flex items-center gap-4 px-4 py-3";
   const ghostButton =
-    "rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
+    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60";
 
   return (
     <>
@@ -382,7 +382,7 @@ function SettingsPage() {
                     setRatePercent(String(value));
                     updateSettings({ extra_character_rate: value / 100 }).catch(console.error);
                   }}
-                  className="w-20 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink"
+                  className="w-20 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right font-bold outline-none focus:border-ink"
                 />
                 %
               </label>
@@ -403,7 +403,7 @@ function SettingsPage() {
                         onChange={(event) => updatePlatform(index, { name: event.target.value })}
                         onBlur={savePlatforms}
                         placeholder="PayPal"
-                        className="min-w-0 flex-1 rounded-md border border-line-strong bg-paper px-2 py-1.5 outline-none focus:border-ink"
+                        className="min-w-0 flex-1 rounded-md border border-field-border bg-paper px-2 py-1.5 outline-none focus:border-ink"
                       />
                       <input
                         type="number"
@@ -412,7 +412,7 @@ function SettingsPage() {
                         value={platform.percent}
                         onChange={(event) => updatePlatform(index, { percent: Number(event.target.value) || 0 })}
                         onBlur={savePlatforms}
-                        className="w-20 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
+                        className="w-20 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
                       />
                       <span className="text-muted">% +</span>
                       <input
@@ -422,7 +422,7 @@ function SettingsPage() {
                         value={platform.fixed}
                         onChange={(event) => updatePlatform(index, { fixed: Number(event.target.value) || 0 })}
                         onBlur={savePlatforms}
-                        className="w-20 rounded-md border border-line-strong bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
+                        className="w-20 rounded-md border border-field-border bg-paper px-2 py-1.5 text-right outline-none focus:border-ink"
                       />
                       <span className="w-28 text-xs whitespace-nowrap text-faint">
                         200 → {formatMoney(receivedAfterFees(200, platform), currency)}
@@ -618,7 +618,7 @@ function SettingsPage() {
                           console.error,
                         )
                       }
-                      className="w-16 rounded-md border border-line-strong bg-paper px-2 py-1 text-right font-bold outline-none focus:border-ink"
+                      className="w-16 rounded-md border border-field-border bg-paper px-2 py-1 text-right font-bold outline-none focus:border-ink"
                     />
                     <span className="text-muted">{t("copies")}</span>
 

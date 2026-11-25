@@ -18,7 +18,8 @@
   --color-muted: var(--muted); /* texto secundario */
   --color-faint: var(--faint); /* etiquetas, texto de apoyo */
   --color-line: var(--line); /* bordes */
-  --color-line-strong: var(--line-strong); /* bordes de campos y zonas punteadas */
+  --color-line-strong: var(--line-strong); /* zonas punteadas y separadores marcados */
+  --color-field-border: var(--field-border); /* borde de campos y botones secundarios: 3:1 (WCAG 1.4.11) */
   --color-primary: var(--primary); /* botones principales */
   --color-primary-hover: var(--primary-hover);
   --color-on-primary: var(--on-primary); /* texto sobre botones principales */
@@ -47,9 +48,10 @@
   --highlight: #f1e8da;
   --ink: #1f2933;
   --muted: #4f473c;
-  --faint: #5e564a;
+  --faint: #6f685f;
   --line: #e6ded2;
   --line-strong: #d8cec0;
+  --field-border: #998e7f;
   --primary: #1f2933;
   --primary-hover: #2c3947;
   --on-primary: #ffffff;
@@ -69,10 +71,11 @@
     --paper: #262a30;
     --highlight: #30353c;
     --ink: #ece6dc;
-    --muted: #b8b0a3;
-    --faint: #a79f93;
+    --muted: #cfc8bc;
+    --faint: #a39c92;
     --line: #33373e;
     --line-strong: #464b53;
+    --field-border: #6f757e;
     --primary: #ece6dc;
     --primary-hover: #ffffff;
     --on-primary: #1f2933;
@@ -91,10 +94,11 @@
   --paper: #262a30;
   --highlight: #30353c;
   --ink: #ece6dc;
-  --muted: #b8b0a3;
-  --faint: #a79f93;
+  --muted: #cfc8bc;
+  --faint: #a39c92;
   --line: #33373e;
   --line-strong: #464b53;
+  --field-border: #6f757e;
   --primary: #ece6dc;
   --primary-hover: #ffffff;
   --on-primary: #1f2933;

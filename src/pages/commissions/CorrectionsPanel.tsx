@@ -108,7 +108,7 @@ function CorrectionsPanel({
           }
         }}
         placeholder={t("What did the client ask to change? Enter to add")}
-        className="mt-2 w-full rounded-md border border-line-strong bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
+        className="mt-2 w-full rounded-md border border-field-border bg-surface px-3 py-1.5 text-sm outline-none focus:border-ink"
       />
 
       {stageImages.length > 0 && (

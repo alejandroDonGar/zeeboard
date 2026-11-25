@@ -49,8 +49,8 @@ function TagEditor({
   const strengths = tintStrengths(draft.color);
   const heroStyle = { "--tint": draft.color, "--ts-light": strengths.light, "--ts-dark": strengths.dark } as CSSProperties;
   const btn =
-    "rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
-  const field = "rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
+    "rounded-2xl border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink shadow-sm transition hover:bg-highlight active:scale-[0.97] disabled:opacity-50";
+  const field = "rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
 
   return (
     <div

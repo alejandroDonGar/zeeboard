@@ -187,7 +187,7 @@ function FinishedPage({
   const dateFormatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
 
   const dateInput =
-    "w-[132px] rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm text-ink outline-none focus:border-ink";
+    "w-[132px] rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm text-ink outline-none focus:border-ink";
   const viewedCommission = viewed ? commissions.find((commission) => commission.id === viewed.commissionId) : undefined;
 
   return (

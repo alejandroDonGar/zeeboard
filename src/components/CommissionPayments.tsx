@@ -95,7 +95,7 @@ function CommissionPayments({
   }
 
   const status = PAYMENT_STATUS_STYLE[summary.status];
-  const field = "min-w-0 rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
+  const field = "min-w-0 rounded-md border border-field-border bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
   const paidShare = commission.price ? Math.min(100, (summary.paid / commission.price) * 100) : summary.paid > 0 ? 100 : 0;
 
   const renderRow = (payment: CommissionPayment) => (

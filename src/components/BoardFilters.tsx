@@ -138,7 +138,7 @@ function BoardFilters({
           aria-haspopup="true"
           aria-expanded={menuOpen}
           className={`inline-flex items-center gap-1.5 rounded-2xl border bg-surface px-2.5 py-1.5 text-sm font-medium whitespace-nowrap transition hover:bg-highlight ${
-            activeCount > 0 ? "border-ink text-ink" : "border-line-strong text-ink"
+            activeCount > 0 ? "border-ink text-ink" : "border-field-border text-ink"
           }`}
         >
           <IconFilter size={16} stroke={1.75} aria-hidden="true" />
