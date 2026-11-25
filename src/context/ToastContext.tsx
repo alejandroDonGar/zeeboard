@@ -24,18 +24,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [toastAction, setToastAction] = useState<ToastAction | null>(null);
   const timer = useRef<number>(0);
 
+  const closeIn = useCallback((ms: number) => {
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      setToastMessage("");
+      setToastAction(null);
+    }, ms);
+  }, []);
+
   const showToast = useCallback((message: string, type: ToastType = "success", action?: ToastAction) => {
     setToastType(type);
     setToastMessage(t(message));
     setToastAction(action ?? null);
 
-    // The previous toast must not close this one early; one with an action stays longer
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => {
-      setToastMessage("");
-      setToastAction(null);
-    }, action ? 8000 : 2500);
-  }, []);
+    // The previous toast must not close this one early; one with an action (Undo) stays longer
+    closeIn(action ? 8000 : 2500);
+  }, [closeIn]);
+
+  // While the pointer or the keyboard is on the toast it stays, so Undo can't slip away mid-reach (M6.2)
+  const hold = () => window.clearTimeout(timer.current);
+  const release = () => closeIn(3000);
 
   return (
     <ToastContext.Provider value={{ showToast }}>
@@ -44,6 +52,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {toastMessage && (
         <div
           role={toastType === "success" ? "status" : "alert"}
+          onMouseEnter={hold}
+          onMouseLeave={release}
+          onFocus={hold}
+          onBlur={release}
           className={
             toastType === "success"
               ? "fixed bottom-6 right-6 z-[60] rounded-control bg-tone-ok px-5 py-3 text-sm font-bold text-on-tone shadow-xl"

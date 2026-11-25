@@ -51,7 +51,6 @@ import TopBar from "../components/TopBar";
 import GlassPanel from "../components/GlassPanel";
 import Money from "../components/Money";
 import DialogBehavior from "../components/DialogBehavior";
-import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
 
@@ -75,7 +74,6 @@ function ClientsPage({
   // null = closed, "new" = create, Client = edit
   const [clientForm, setClientForm] = useState<Client | "new" | null>(null);
   const [clientSearch, setClientSearch] = useState("");
-  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
   const [savingClient, setSavingClient] = useState(false);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
   const [zoomedImage, setZoomedImage] = useState<string | null>(null);
@@ -94,7 +92,6 @@ function ClientsPage({
   const [editingCharacter, setEditingCharacter] = useState(false);
   const [editCharacterName, setEditCharacterName] = useState("");
   const [editCharacterNotes, setEditCharacterNotes] = useState("");
-  const [characterToDelete, setCharacterToDelete] = useState<ClientCharacter | null>(null);
   const { showToast } = useToast();
 
   async function loadClients() {
@@ -749,7 +746,7 @@ function ClientsPage({
                           role="menuitem"
                           onClick={() => {
                             setClientMenuOpen(false);
-                            setClientToDelete(selectedClient);
+                            handleDeleteClient(selectedClient.id);
                           }}
                           className="block w-full rounded-chip px-2.5 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
                         >
@@ -1025,7 +1022,7 @@ function ClientsPage({
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setCharacterToDelete(character)}
+                                onClick={() => handleDeleteCharacter(character.id)}
                                 className="rounded-control px-3 py-1.5 text-sm font-medium text-tone-bad transition hover:bg-tone-bad/10"
                               >
                                 {t("Delete")}
@@ -1267,33 +1264,6 @@ function ClientsPage({
         </div>
       )}
 
-      {characterToDelete && (
-        <ConfirmModal
-          eyebrow={t("Delete character")}
-          title={characterToDelete.name}
-          message={t("Its references are deleted too, and it's removed from any commissions. You can undo it right after with Ctrl+Z.")}
-          confirmLabel={t("Delete")}
-          onConfirm={async () => {
-            await handleDeleteCharacter(characterToDelete.id);
-            setCharacterToDelete(null);
-          }}
-          onCancel={() => setCharacterToDelete(null)}
-        />
-      )}
-
-      {clientToDelete && (
-        <ConfirmModal
-            eyebrow={t("Delete client")}
-            title={clientToDelete.name}
-            message={t("You can undo it right after with Ctrl+Z.")}
-            confirmLabel={t("Delete")}
-            onConfirm={async () => {
-            await handleDeleteClient(clientToDelete.id);
-            setClientToDelete(null);
-            }}
-            onCancel={() => setClientToDelete(null)}
-        />
-        )}
     </>
   );
 }

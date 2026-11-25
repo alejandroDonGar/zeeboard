@@ -51,8 +51,6 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
   const [payments, setPayments] = useState<CommissionPayment[]>([]);
   const [ready, setReady] = useState(false);
   const [selection, setSelection] = useState<Selection | null>(null);
-  const [templateToDelete, setTemplateToDelete] = useState<Template | null>(null);
-  const [tagToDelete, setTagToDelete] = useState<Tag | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { showToast } = useToast();
 
@@ -134,17 +132,14 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
     }
   }
 
-  async function confirmDeleteTemplate() {
-    if (!templateToDelete) return;
-
+  // Deleted at once, with Undo in the message (it goes to the trash): no "are you sure?" for something reversible
+  async function confirmDeleteTemplate(template: Template) {
     try {
-      const trashId = await deleteTemplate(templateToDelete.id);
-      setTemplateToDelete(null);
+      const trashId = await deleteTemplate(template.id);
       await load(null);
       undoToast(showToast, "Template deleted.", trashId);
     } catch (error) {
       console.error(error);
-      setTemplateToDelete(null);
       setErrorMessage(error instanceof Error ? error.message : "Could not delete template.");
     }
   }
@@ -179,17 +174,13 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
     }
   }
 
-  async function confirmDeleteTag() {
-    if (!tagToDelete) return;
-
+  async function confirmDeleteTag(tag: Tag) {
     try {
-      const trashId = await deleteTag(tagToDelete.id);
-      setTagToDelete(null);
+      const trashId = await deleteTag(tag.id);
       await load(null);
       undoToast(showToast, "Tag deleted.", trashId);
     } catch (error) {
       console.error(error);
-      setTagToDelete(null);
       showToast("Could not delete tag.", "error");
     }
   }
@@ -306,7 +297,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
                 onSaved={() => load()}
                 onColor={handleColor}
                 onDuplicate={() => handleDuplicate(selectedTemplate.id)}
-                onDelete={() => setTemplateToDelete(selectedTemplate)}
+                onDelete={() => confirmDeleteTemplate(selectedTemplate)}
                 onOpenCommission={openCommission}
               />
             ) : selection?.kind === "tag" && selectedTag ? (
@@ -316,7 +307,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
                 categories={categoryNames}
                 usage={usageByTagId[selectedTag.id] ?? 0}
                 onSave={handleSaveTag}
-                onDelete={() => setTagToDelete(selectedTag)}
+                onDelete={() => confirmDeleteTag(selectedTag)}
                 onCancel={() => undefined}
               />
             ) : selection?.kind === "new-tag" ? (
@@ -342,32 +333,6 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
           </div>
         </section>
       </div>
-
-      {templateToDelete && (
-        <ConfirmModal
-          eyebrow={t("Delete template")}
-          title={templateToDelete.name}
-          message={t("Its stages are deleted too. You can undo it right after with Ctrl+Z.")}
-          confirmLabel={t("Delete")}
-          onConfirm={confirmDeleteTemplate}
-          onCancel={() => setTemplateToDelete(null)}
-        />
-      )}
-
-      {tagToDelete && (
-        <ConfirmModal
-          eyebrow={t("Delete tag")}
-          title={tagToDelete.name}
-          message={
-            usageByTagId[tagToDelete.id]
-              ? t("It will be removed from {usage}. You can undo it right after with Ctrl+Z.", { usage: usageLabel(tagToDelete.id).toLowerCase() })
-              : t("You can undo it right after with Ctrl+Z.")
-          }
-          confirmLabel={t("Delete")}
-          onConfirm={confirmDeleteTag}
-          onCancel={() => setTagToDelete(null)}
-        />
-      )}
 
       {errorMessage && (
         <ConfirmModal

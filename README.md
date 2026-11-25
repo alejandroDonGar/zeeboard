@@ -245,7 +245,7 @@ How the business is doing, from your payments and your finished commissions.
 
 Nothing is deleted for good at once. Commissions, clients, characters, templates, tags, requests, payments and corrections go to the **trash**.
 
-- The "deleted" message has an **Undo** button, and **Ctrl+Z** (outside a text field) restores the last deleted item.
+- Because of that, deleting doesn't ask "are you sure?": it happens at once, and the "deleted" message has an **Undo** button (it stays while the pointer is on it). **Ctrl+Z** (outside a text field) also restores the last deleted item. Only what can't be undone asks first: emptying the trash, deleting for good, restoring a backup and cleaning up unused images.
 - **Settings → Trash** lists everything with its date, to restore it or delete it for good. Items are removed after **30 days**.
 - Image files are kept while an item is in the trash, so restoring brings its images back.
 

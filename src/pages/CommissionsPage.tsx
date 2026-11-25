@@ -92,7 +92,6 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
   const [templateStagesByTemplateId, setTemplateStagesByTemplateId] = useState<Record<number, TemplateStage[]>>({});
   const activeCommission = commissions.find((commission) => commission.id === activeCommissionId) ?? null;
   const [duplicatingCommission, setDuplicatingCommission] = useState(false);
-  const [showDeleteCommissionModal, setShowDeleteCommissionModal] = useState(false);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [deletingCommission, setDeletingCommission] = useState(false);
@@ -514,7 +513,6 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
         setActiveCommissionId(null);
         undoToast(showToast, "Commission deleted.", trashId);
 
-        setShowDeleteCommissionModal(false);
     } catch (error) {
         console.error(error);
         showToast("Could not delete commission.", "error");
@@ -1050,9 +1048,10 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
                         <button
                           type="button"
                           role="menuitem"
+                          disabled={deletingCommission}
                           onClick={() => {
                             setCommissionMenuOpen(false);
-                            setShowDeleteCommissionModal(true);
+                            handleDeleteCommission();
                           }}
                           className="block w-full rounded-chip px-2.5 py-2 text-left text-sm text-tone-bad hover:bg-tone-bad/10"
                         >
@@ -1251,18 +1250,6 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
         />
       )}
 
-      {showDeleteCommissionModal && (
-        <ConfirmModal
-            eyebrow={t("Delete commission")}
-            title={activeCommission?.title ?? ""}
-            message={t("You can undo it right after with Ctrl+Z.")}
-            confirmLabel={t("Delete")}
-            confirmingLabel={t("Deleting...")}
-            isConfirming={deletingCommission}
-            onConfirm={handleDeleteCommission}
-            onCancel={() => setShowDeleteCommissionModal(false)}
-        />
-        )}
       {cancelReason !== null && (
         <ConfirmModal
           eyebrow={t("Cancel commission")}
