@@ -12,7 +12,7 @@ import {
   type StageDraft,
   type Template,
 } from "../../lib/database";
-import { formatMoney, parsePrice } from "../../lib/commissionHelpers";
+import { formatMoney, formatNumber, parsePrice } from "../../lib/commissionHelpers";
 import { PALETTE } from "../../lib/catalog";
 import { tintStrengths } from "../../lib/ambient";
 import { useToast } from "../../context/ToastContext";
@@ -257,7 +257,7 @@ function TypeEditor({
                 {[
                   [t("Delivered"), figures.n],
                   [t("Average price"), figures.avgPrice !== null ? formatMoney(figures.avgPrice) : "—"],
-                  [t("Average hours"), figures.avgHours !== null ? `${String(figures.avgHours).replace(".", ",")} h` : "—"],
+                  [t("Average hours"), figures.avgHours !== null ? `${formatNumber(figures.avgHours)} h` : "—"],
                   [t("Per hour"), figures.rate !== null ? formatMoney(figures.rate) : "—"],
                 ].map(([label, value], index) => (
                   <div key={label} className={`flex items-baseline justify-between gap-2.5 py-2 ${index > 0 ? "border-t border-line" : ""}`}>

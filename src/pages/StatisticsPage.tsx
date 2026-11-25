@@ -4,7 +4,7 @@ import GlassPanel from "../components/GlassPanel";
 import Money from "../components/Money";
 import LineChart from "../components/LineChart";
 import { Segmented } from "../components/BoardFilters";
-import { formatMoney, isoDay, parsePrice } from "../lib/commissionHelpers";
+import { formatMoney, formatNumber, isoDay, parsePrice } from "../lib/commissionHelpers";
 import {
   appSettings,
   addExpense,
@@ -203,7 +203,7 @@ function StatisticsPage() {
                           <td className="py-2.5 pl-3 text-muted">{row.pieces}</td>
                           <td className="py-2.5 pl-3 font-semibold">{formatMoney(row.net)}</td>
                           <td className="py-2.5 pl-3 text-muted">{formatMoney(row.avgNet)}</td>
-                          <td className="py-2.5 pl-3 text-muted">{row.avgHours ?? "—"}</td>
+                          <td className="py-2.5 pl-3 text-muted">{row.avgHours === null ? "—" : formatNumber(row.avgHours)}</td>
                           <td className="py-2.5 pl-3 text-muted">{row.avgDays ?? "—"}</td>
                           <td className="py-2.5 pl-3 font-semibold">{row.rate === null ? "—" : `${formatMoney(row.rate)}/h`}</td>
                         </tr>

@@ -1,3 +1,4 @@
+import { formatNumber } from "../lib/commissionHelpers";
 import { locale, t } from "../lib/i18n";
 import { inDefaultCurrency } from "../lib/commissionHelpers";
 import { appSettings } from "../lib/database";
@@ -324,7 +325,7 @@ function FinishedPage({
                                     ? hide(commission.client_name || t("No client"))
                                     : dateFormatter.format(new Date(`${deliveryDay(commission)}T12:00:00`))}
                                   {" · "}
-                                  {hours !== null ? `${hours} h${rate !== null ? ` · ${formatMoney(rate)}/h` : ""}` : t("no hours")}
+                                  {hours !== null ? `${formatNumber(hours)} h${rate !== null ? ` · ${formatMoney(rate)}/h` : ""}` : t("no hours")}
                                 </small>
                               </button>
                             </div>

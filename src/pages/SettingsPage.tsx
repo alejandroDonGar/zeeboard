@@ -36,7 +36,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { cleanUpOrphanedImages, getStorageStats, type StorageStats } from "../lib/images";
 import ConfirmModal from "../components/ConfirmModal";
-import { getLanguage, setLanguage, t, type Language } from "../lib/i18n";
+import { getLanguage, locale, setLanguage, t, type Language } from "../lib/i18n";
 import PaypalImport, { pickPaypalFile, type PaypalPreview } from "../components/PaypalImport";
 import IpadSettings from "../components/IpadSettings";
 
@@ -624,7 +624,7 @@ function SettingsPage() {
 
                     <span className="ml-auto text-xs text-faint">
                       {auto.last_auto_backup
-                        ? t("Last backup: {date}", { date: new Date(auto.last_auto_backup).toLocaleString() })
+                        ? t("Last backup: {date}", { date: new Date(auto.last_auto_backup).toLocaleString(locale) })
                         : t("No automatic backup yet")}
                     </span>
                     <button type="button" onClick={handleBackUpNow} disabled={autoRunning} className={ghostButton}>

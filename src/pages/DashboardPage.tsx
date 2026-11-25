@@ -1,3 +1,4 @@
+import { formatNumber } from "../lib/commissionHelpers";
 import { useEffect, useState, type ReactNode } from "react";
 import { inDefaultCurrency } from "../lib/commissionHelpers";
 import { appSettings } from "../lib/database";
@@ -328,7 +329,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
                 <p className="mt-0.5 text-xs text-faint">
                   {t(recent.length === 1 ? "{n} piece · {hours} h" : "{n} pieces · {hours} h", {
                     n: recent.length,
-                    hours: Math.round(recentHours * 10) / 10,
+                    hours: formatNumber(Math.round(recentHours * 10) / 10),
                   })}
                 </p>
               </section>

@@ -19,7 +19,7 @@ import {
   invoiceDescription,
 } from "../lib/commissionHelpers";
 import { TYPE_CATEGORY } from "../lib/catalog";
-import { fillMessage, formatMoney as formatAmount, paymentSummary as summaryOfPayments, trackedHours } from "../lib/commissionHelpers";
+import { fillMessage, formatMoney as formatAmount, formatNumber, paymentSummary as summaryOfPayments, trackedHours } from "../lib/commissionHelpers";
 import {
   getTemplateStages,
   getTemplates,
@@ -1117,7 +1117,7 @@ function CommissionsPage() {
                         {t("✓ Finished")}
                         {activeCommission.delivered_at &&
                           ` · ${new Date(`${activeCommission.delivered_at}T12:00:00`).toLocaleDateString(locale, { day: "numeric", month: "short", year: "numeric" })}`}
-                        {activeCommission.hours !== null && ` · ${activeCommission.hours} h`}
+                        {activeCommission.hours !== null && ` · ${formatNumber(activeCommission.hours)} h`}
                       </span>
                       <button
                         type="button"

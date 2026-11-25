@@ -14,6 +14,7 @@ import {
   inDefaultCurrency,
   typicalDays,
   fillMessage,
+  formatNumber,
 } from "../src/lib/commissionHelpers";
 import type { Commission, CommissionStageImage, TemplateStage } from "../src/lib/database";
 
@@ -52,6 +53,13 @@ describe("price typed by hand", () => {
     expect(parsePrice("   ")).toBeNull();
     expect(() => parsePrice("abc")).toThrow('"abc"');
     expect(() => parsePrice("-5")).toThrow();
+  });
+
+  test("hours and money follow the app's language, not Windows' (English here: dot decimals, comma thousands)", () => {
+    expect(formatNumber(10.25)).toBe("10.25");
+    expect(formatNumber(4.2)).toBe("4.2");
+    expect(formatNumber(1630.316)).toBe("1,630.32");
+    expect(formatMoney(1630.5, "EUR")).toBe("1,630.50 EUR");
   });
 
   test("money shows decimals only when there are some, and euros when the currency is missing", () => {

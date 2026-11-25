@@ -418,7 +418,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                 <small className="block truncate text-xs text-faint" title={settings.responses_file ?? undefined}>
                   {settings.responses_file
                     ? settings.last_form_sync
-                      ? t("Checked {date} · again every 30 minutes", { date: new Date(settings.last_form_sync).toLocaleString() })
+                      ? t("Checked {date} · again every 30 minutes", { date: new Date(settings.last_form_sync).toLocaleString(locale) })
                       : t("Not checked yet")
                     : t("Pick the CSV your Google script keeps up to date.")}
                 </small>

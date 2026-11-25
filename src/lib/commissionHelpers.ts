@@ -1,4 +1,4 @@
-import { t } from "./i18n";
+import { locale, t } from "./i18n";
 import { isPrivate } from "./privacy";
 import {
   getCommissions,
@@ -250,10 +250,15 @@ export function formatMoney(amount: number, currency?: string | null): string {
   const rounded = round2(amount);
   const decimals = Number.isInteger(rounded) ? 0 : 2;
 
-  return `${rounded.toLocaleString(undefined, {
+  return `${rounded.toLocaleString(locale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   })} ${currency || "EUR"}`;
+}
+
+/** Hours and other plain numbers in the app's language (not Windows'), up to 2 decimals: 10.25 / 10,25 */
+export function formatNumber(value: number): string {
+  return value.toLocaleString(locale, { maximumFractionDigits: 2 });
 }
 
 /** Local date as "2026-10-06" (toISOString uses UTC and can be off by a day). */

@@ -1,4 +1,4 @@
-import { t } from "../lib/i18n";
+import { locale, t } from "../lib/i18n";
 import { inDefaultCurrency } from "../lib/commissionHelpers";
 import { appSettings } from "../lib/database";
 import { takeAction } from "../lib/actions";
@@ -1131,7 +1131,7 @@ function ClientsPage({
                       { label: t("Email"), value: selectedClient.email && hide(selectedClient.email), empty: t("No email") },
                       {
                         label: t("Client since"),
-                        value: new Date(selectedClient.created_at.replace(" ", "T")).toLocaleDateString(undefined, { month: "short", year: "numeric" }),
+                        value: new Date(selectedClient.created_at.replace(" ", "T")).toLocaleDateString(locale, { month: "short", year: "numeric" }),
                       },
                     ].map((row) => (
                       <div key={row.label} className="min-w-0">
