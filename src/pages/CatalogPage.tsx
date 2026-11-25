@@ -10,7 +10,7 @@ import {
   getCommissions,
   getTagUsageCounts,
   getTags,
-  getTemplateStages,
+  getStagesByTemplate,
   getTemplates,
   updateTag,
   updateTemplateColor,
@@ -65,12 +65,12 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
       getAllPayments(),
     ]);
     const sorted = [...templateData].sort((a, b) => a.name.localeCompare(b.name));
-    const stageEntries = await Promise.all(sorted.map(async (template) => [template.id, await getTemplateStages(template.id)] as const));
+    const stagesByTemplate = await getStagesByTemplate(sorted.map((template) => template.id));
 
     setTemplates(sorted);
     setTags(tagData);
     setUsageByTagId(usage);
-    setStagesByTemplateId(Object.fromEntries(stageEntries));
+    setStagesByTemplateId(stagesByTemplate);
     setCommissions(commissionData);
     setPayments(paymentData);
     setSelection((current) => {
@@ -218,8 +218,9 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
       <span className="font-medium text-faint tabular-nums">{count}</span>
     </p>
   );
-  const row = (active: boolean, onClick: () => void, color: string, round: boolean, name: string, sub: string, right: string) => (
+  const row = (key: string, active: boolean, onClick: () => void, color: string, round: boolean, name: string, sub: string, right: string) => (
     <button
+      key={key}
       type="button"
       onClick={onClick}
       aria-current={active ? "true" : undefined}
@@ -262,6 +263,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
                   const stages = stagesByTemplateId[template.id]?.length ?? 0;
 
                   return row(
+                    `type-${template.id}`,
                     selection?.kind === "type" && selection.id === template.id,
                     () => setSelection({ kind: "type", id: template.id }),
                     template.color,
@@ -277,6 +279,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
                     {group(category, categoryTags.length)}
                     {categoryTags.map((tag) =>
                       row(
+                        `tag-${tag.id}`,
                         selection?.kind === "tag" && selection.id === tag.id,
                         () => setSelection({ kind: "tag", id: tag.id }),
                         tag.color,

@@ -36,9 +36,11 @@ import {
   createCommissionStageImage,
   createImageVersion,
   deleteCommissionStageImage,
-  getClientCharacters,
-  getCharacterReferences,
-  getCommissionCharacterIds,
+  getCharactersByClient,
+  getStagesByTemplate,
+  getTagsByCommission,
+  getReferencesByCharacter,
+  getCharacterIdsByCommission,
   getTags,
   type ClientCharacter,
   type CharacterReference,
@@ -161,14 +163,7 @@ function CommissionsPage() {
       .then(async (data) => {
         setTemplates(data);
 
-        const entries = await Promise.all(
-          data.map(async (template) => {
-            const stages = await getTemplateStages(template.id);
-            return [template.id, stages] as const;
-          }),
-        );
-
-        setTemplateStagesByTemplateId(Object.fromEntries(entries));
+        setTemplateStagesByTemplateId(await getStagesByTemplate(data.map((template) => template.id)));
       })
       .catch(console.error);
 
@@ -186,15 +181,7 @@ function CommissionsPage() {
       .then(async (data) => {
         setClients(data);
 
-        const characterEntries = await Promise.all(
-          data.map(async (client) => {
-            const characters = await getClientCharacters(client.id);
-            return [client.id, characters] as const;
-          }),
-        );
-
-        const nextCharactersByClientId =
-          Object.fromEntries(characterEntries);
+        const nextCharactersByClientId = await getCharactersByClient(data.map((client) => client.id));
 
         setCharactersByClientId(nextCharactersByClientId);
 
@@ -292,14 +279,7 @@ function CommissionsPage() {
     loadPayments().catch(console.error);
     getAllCorrections().then(setCorrections).catch(console.error);
 
-    const entries = await Promise.all(
-      data.map(async (commission) => {
-        const tags = await getCommissionTags(commission.id);
-        return [commission.id, tags] as const;
-      }),
-    );
-
-    setCommissionTagsById(Object.fromEntries(entries));
+    setCommissionTagsById(await getTagsByCommission(data.map((commission) => commission.id)));
   }
 
   async function loadStageImagesForCommissions(data: Commission[]) {
@@ -307,14 +287,7 @@ function CommissionsPage() {
   }
 
   async function loadCharactersForCommissions(data: Commission[]) {
-    const entries = await Promise.all(
-      data.map(async (commission) => {
-        const characterIds = await getCommissionCharacterIds(commission.id);
-        return [commission.id, characterIds] as const;
-      }),
-    );
-
-    setCommissionCharactersById(Object.fromEntries(entries));
+    setCommissionCharactersById(await getCharacterIdsByCommission(data.map((commission) => commission.id)));
   }
 
   async function loadReferencesForCharactersFromClients(
@@ -322,14 +295,7 @@ function CommissionsPage() {
   ) {
     const allCharacters = Object.values(charactersByClient).flat();
 
-    const entries = await Promise.all(
-      allCharacters.map(async (character) => {
-        const references = await getCharacterReferences(character.id);
-        return [character.id, references] as const;
-      }),
-    );
-
-    setReferencesByCharacterId(Object.fromEntries(entries));
+    setReferencesByCharacterId(await getReferencesByCharacter(allCharacters.map((character) => character.id)));
   }
 
   /** +1 advances to the next stage, -1 goes back to the previous one */

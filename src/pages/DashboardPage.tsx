@@ -14,8 +14,8 @@ import {
 import {
   getCommissions,
   getAllPayments,
-  getCommissionTags,
-  getTemplateStages,
+  getTagsByCommission,
+  getStagesByTemplate,
   getTemplates,
   type Template,
   type Commission,
@@ -55,19 +55,13 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
       .then(async (data) => {
         setCommissions(data);
 
-        const tagEntries = await Promise.all(
-          data.map(async (commission) => [commission.id, await getCommissionTags(commission.id)] as const),
-        );
-        setCommissionTagsById(Object.fromEntries(tagEntries));
+        setCommissionTagsById(await getTagsByCommission(data.map((commission) => commission.id)));
         setTemplates(await getTemplates());
 
         const templateIds = [
           ...new Set(data.map((commission) => commission.template_id).filter((id): id is number => id !== null)),
         ];
-        const stageEntries = await Promise.all(
-          templateIds.map(async (templateId) => [templateId, await getTemplateStages(templateId)] as const),
-        );
-        setTemplateStagesByTemplateId(Object.fromEntries(stageEntries));
+        setTemplateStagesByTemplateId(await getStagesByTemplate(templateIds));
 
         setStageImagesByCommissionId(await loadStageImagesForCommissions(data));
         setPayments(await getAllPayments());

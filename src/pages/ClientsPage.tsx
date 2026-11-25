@@ -16,7 +16,9 @@ import {
   paymentSummary,
 } from "../lib/commissionHelpers";
 import {
-  getTemplateStages,
+  getStagesByTemplate,
+  getReferencesByCharacter,
+  getCharactersByClient,
   getTemplates,
   getCommissions,
   getAllPayments,
@@ -34,7 +36,7 @@ import {
   getCharacterReferences,
   createCharacterReference,
   deleteCharacterReference,
-  getCommissionCharacterIds,
+  getCharacterIdsByCommission,
   type ClientCharacter,
   type CharacterReference,
   type CommissionStageImage,
@@ -180,14 +182,7 @@ function ClientsPage({
   }
 
   async function loadCharactersForCommissions(data: Commission[]) {
-    const entries = await Promise.all(
-      data.map(async (commission) => {
-        const characterIds = await getCommissionCharacterIds(commission.id);
-        return [commission.id, characterIds] as const;
-      }),
-    );
-
-    setCommissionCharactersById(Object.fromEntries(entries));
+    setCommissionCharactersById(await getCharacterIdsByCommission(data.map((commission) => commission.id)));
   }
 
   async function loadReferencesForCharacters(
@@ -195,14 +190,7 @@ function ClientsPage({
   ) {
     const allCharacters = Object.values(charactersByClient).flat();
 
-    const entries = await Promise.all(
-      allCharacters.map(async (character) => {
-        const refs = await getCharacterReferences(character.id);
-        return [character.id, refs] as const;
-      }),
-    );
-
-    setReferencesByCharacterId(Object.fromEntries(entries));
+    setReferencesByCharacterId(await getReferencesByCharacter(allCharacters.map((character) => character.id)));
 
   }
 
@@ -219,14 +207,7 @@ function ClientsPage({
         data.find((client) => client.id === wanted)?.id ?? [...data].sort((a, b) => a.name.localeCompare(b.name))[0]?.id ?? null,
       );
 
-      const characterEntries = await Promise.all(
-        data.map(async (client) => {
-          const characters = await getClientCharacters(client.id);
-          return [client.id, characters] as const;
-        }),
-      );
-
-      const nextCharactersByClientId = Object.fromEntries(characterEntries);
+      const nextCharactersByClientId = await getCharactersByClient(data.map((client) => client.id));
 
       setCharactersByClientId(nextCharactersByClientId);
 
@@ -252,14 +233,7 @@ function ClientsPage({
           ),
         );
 
-        const entries = await Promise.all(
-          templateIds.map(async (templateId) => {
-            const stages = await getTemplateStages(templateId);
-            return [templateId, stages] as const;
-          }),
-        );
-
-        setTemplateStagesByTemplateId(Object.fromEntries(entries));
+        setTemplateStagesByTemplateId(await getStagesByTemplate(templateIds));
       })
       .catch(console.error);
   }, []);

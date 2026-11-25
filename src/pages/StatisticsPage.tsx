@@ -11,7 +11,7 @@ import {
   getCommissions,
   getRequests,
   getTemplates,
-  getTemplateStages,
+  getStagesByTemplate,
   type Commission,
   type CommissionPayment,
   type CommissionRequest,
@@ -50,9 +50,7 @@ function StatisticsPage() {
   useEffect(() => {
     (async () => {
       const [commissions, payments, requests, templates] = await Promise.all([getCommissions(), getAllPayments(), getRequests(), getTemplates()]);
-      const stages = Object.fromEntries(
-        await Promise.all(templates.map(async (template) => [template.id, await getTemplateStages(template.id)] as const)),
-      );
+      const stages = await getStagesByTemplate(templates.map((template) => template.id));
 
       setData({ commissions, payments, requests, templates, stages });
     })().catch(console.error);

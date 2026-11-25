@@ -16,7 +16,7 @@ import {
   getAllPayments,
   getCommissions,
   getTemplates,
-  getTemplateStages,
+  getStagesByTemplate,
   type Commission,
   type CommissionPayment,
   type CommissionStageImage,
@@ -72,14 +72,7 @@ function FinishedPage({
           ),
         );
 
-        const stageEntries = await Promise.all(
-          templateIds.map(async (templateId) => {
-            const stages = await getTemplateStages(templateId);
-            return [templateId, stages] as const;
-          }),
-        );
-
-        setTemplateStagesByTemplateId(Object.fromEntries(stageEntries));
+        setTemplateStagesByTemplateId(await getStagesByTemplate(templateIds));
         setReady(true);
 
         setStageImagesByCommissionId(await loadStageImagesForCommissions(data));

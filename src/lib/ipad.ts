@@ -3,7 +3,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { groupAlternatives, loadOpenCommissions } from "./commissionHelpers";
-import { createCommissionStageImage, createImageVersion, finishCommission, getCommissionReferences, getCommissionStageImages, getCommissions, getTemplateStages, type Commission, type TemplateStage } from "./database";
+import { createCommissionStageImage, createImageVersion, finishCommission, getCommissionReferences, getCommissionStageImages, getCommissions, getStageImagesByCommission, getStagesByTemplate, getTemplateStages, type Commission } from "./database";
 import { getThumbPath, isProcessedImage } from "./images";
 import { latestOfAlternative } from "./ipadLink";
 import { hide } from "./privacy";
@@ -52,15 +52,16 @@ export async function pushSnapshot(): Promise<void> {
   const withTemplate = (await loadOpenCommissions()).filter(
     (commission): commission is Commission & { template_id: number } => commission.template_id !== null,
   );
-  const stagesOf: Record<number, TemplateStage[]> = {};
+  const [stagesOf, imagesOf] = await Promise.all([
+    getStagesByTemplate(withTemplate.map((commission) => commission.template_id)),
+    getStageImagesByCommission(withTemplate.map((commission) => commission.id)),
+  ]);
 
-  for (const { template_id } of withTemplate) {
-    stagesOf[template_id] ??= await getTemplateStages(template_id);
-  }
-
+  // ponytail: references stay one query per commission (open ones only, a handful); group them if that list grows
   const entries = await Promise.all(withTemplate.map(async (commission) => {
     const stages = stagesOf[commission.template_id];
-    const [images, references] = await Promise.all([getCommissionStageImages(commission.id), getCommissionReferences(commission.id)]);
+    const images = imagesOf[commission.id];
+    const references = await getCommissionReferences(commission.id);
 
     return {
       id: commission.id,

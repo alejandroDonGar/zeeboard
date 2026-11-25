@@ -21,7 +21,7 @@ import {
   getCommissions,
   getRequests,
   getTemplates,
-  getTemplateStages,
+  getStagesByTemplate,
   type Client,
   type Commission,
   type CommissionRequest,
@@ -108,13 +108,13 @@ function CommandPalette({
         getRequests(),
         getTemplates(),
       ]);
-      const stageEntries = await Promise.all(templates.map(async (template) => [template.id, await getTemplateStages(template.id)] as const));
+      const stagesByTemplate = await getStagesByTemplate(templates.map((template) => template.id));
 
       setData({
         commissions,
         clients,
         requests,
-        stages: Object.fromEntries(stageEntries),
+        stages: stagesByTemplate,
         templates: Object.fromEntries(templates.map((template) => [template.id, template.name])),
       });
     })().catch(console.error);

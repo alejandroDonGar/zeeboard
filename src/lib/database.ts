@@ -1583,23 +1583,6 @@ export async function getCommissionReferences(
   );
 }
 
-export async function getCommissionCharacterIds(
-  commissionId: number,
-): Promise<number[]> {
-  const database = await getDatabase();
-
-  const rows = await database.select<{ character_id: number }[]>(
-    `
-    SELECT character_id
-    FROM commission_characters
-    WHERE commission_id = ?;
-    `,
-    [commissionId],
-  );
-
-  return rows.map((row) => row.character_id);
-}
-
 export async function replaceCommissionCharacters(
   commissionId: number,
   characterIds: number[],
@@ -2222,4 +2205,61 @@ export async function setClientEmail(clientId: number, email: string): Promise<v
   const database = await getDatabase();
 
   await database.execute(`UPDATE clients SET email = ? WHERE id = ? AND (email IS NULL OR email = '');`, [email, clientId]);
+}
+
+// ---- Loading many at once: one query per kind instead of one per item (N+1) ----
+
+/** Rows grouped by id, with an empty list for every id asked for (so a lookup never misses). */
+function grouped<Row, Value = Row>(rows: Row[], key: (row: Row) => number, ids: number[], value: (row: Row) => Value = (row) => row as unknown as Value): Record<number, Value[]> {
+  const byId: Record<number, Value[]> = Object.fromEntries(ids.map((id) => [id, []]));
+
+  for (const row of rows) {
+    (byId[key(row)] ??= []).push(value(row));
+  }
+
+  return byId;
+}
+
+export async function getStagesByTemplate(templateIds: number[]): Promise<Record<number, TemplateStage[]>> {
+  const rows = await (await getDatabase()).select<TemplateStage[]>(
+    `SELECT id, template_id, name, stage_order FROM template_stages ORDER BY template_id, stage_order ASC;`,
+  );
+  return grouped(rows, (row) => row.template_id, templateIds);
+}
+
+export async function getStageImagesByCommission(commissionIds: number[]): Promise<Record<number, CommissionStageImage[]>> {
+  const rows = await (await getDatabase()).select<CommissionStageImage[]>(
+    `SELECT id, commission_id, stage_id, alt, version, label, image_data_url, created_at
+     FROM commission_stage_images ORDER BY commission_id, stage_id ASC, alt ASC, version ASC, id ASC;`,
+  );
+  return grouped(rows, (row) => row.commission_id, commissionIds);
+}
+
+export async function getTagsByCommission(commissionIds: number[]): Promise<Record<number, Tag[]>> {
+  const rows = await (await getDatabase()).select<(Tag & { commission_id: number })[]>(
+    `SELECT commission_tags.commission_id, tags.id, tags.name, tags.color, tags.category
+     FROM tags JOIN commission_tags ON tags.id = commission_tags.tag_id ORDER BY tags.name ASC;`,
+  );
+  return grouped(rows, (row) => row.commission_id, commissionIds, ({ id, name, color, category }) => ({ id, name, color, category }));
+}
+
+export async function getCharacterIdsByCommission(commissionIds: number[]): Promise<Record<number, number[]>> {
+  const rows = await (await getDatabase()).select<{ commission_id: number; character_id: number }[]>(
+    `SELECT commission_id, character_id FROM commission_characters ORDER BY character_id;`,
+  );
+  return grouped(rows, (row) => row.commission_id, commissionIds, (row) => row.character_id);
+}
+
+export async function getCharactersByClient(clientIds: number[]): Promise<Record<number, ClientCharacter[]>> {
+  const rows = await (await getDatabase()).select<ClientCharacter[]>(
+    `SELECT id, client_id, name, notes, created_at FROM client_characters ORDER BY name ASC;`,
+  );
+  return grouped(rows, (row) => row.client_id, clientIds);
+}
+
+export async function getReferencesByCharacter(characterIds: number[]): Promise<Record<number, CharacterReference[]>> {
+  const rows = await (await getDatabase()).select<CharacterReference[]>(
+    `SELECT id, character_id, label, image_data_url, created_at FROM character_references ORDER BY id ASC;`,
+  );
+  return grouped(rows, (row) => row.character_id, characterIds);
 }

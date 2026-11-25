@@ -266,7 +266,7 @@ describe("commissions", () => {
     await db.replaceCommissionCharacters(id, [luna.id, sol.id]);
     await db.replaceCommissionCharacters(id, [sol.id]);
 
-    expect(await db.getCommissionCharacterIds(id)).toEqual([sol.id]);
+    expect((await db.getCharacterIdsByCommission([id]))[id]).toEqual([sol.id]);
   });
 });
 
@@ -568,6 +568,49 @@ describe("trash", () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+});
+
+describe("loading many at once", () => {
+  test("each grouped loader gives, for every id, exactly what the one-by-one function gives (empty lists included)", async () => {
+    const { id: bust } = await template("Bust", ["Sketch", "Colour"]);
+    const { id: empty } = await template("Empty", []);
+    const ana = await db.createClient("Ana", "X", "ana", "");
+    const bea = await db.createClient("Bea", "X", "bea", "");
+    await db.createClientCharacter(ana, "Sol", "");
+    await db.createClientCharacter(ana, "Luna", "");
+    const [luna, sol] = await db.getClientCharacters(ana);
+    await db.createCharacterReference(luna.id, "images/l2.webp");
+    await db.createCharacterReference(luna.id, "images/l1.webp");
+    await db.createTag("Rush", "#ff0000", "Extras");
+    await db.createTag("Commercial", "#00ff00", "Extras");
+    const tagIds = (await db.getTags()).map((tag) => tag.id);
+    const first = await newCommission("First", ana, bust);
+    const second = await newCommission("Second", bea, bust);
+    const stages = await db.getTemplateStages(bust);
+    await db.createCommissionStageImage(first, stages[1].id, "images/b.webp");
+    await db.createCommissionStageImage(first, stages[0].id, "images/a.webp");
+    await db.replaceCommissionTags(first, tagIds);
+    await db.replaceCommissionCharacters(first, [sol.id, luna.id]);
+    const commissions = [first, second];
+
+    const same = async <T>(grouped: Record<number, T>, ids: number[], one: (id: number) => Promise<T>) => {
+      for (const id of ids) expect([id, grouped[id]]).toEqual([id, await one(id)]);
+    };
+    await same(await db.getStagesByTemplate([bust, empty]), [bust, empty], db.getTemplateStages);
+    await same(await db.getStageImagesByCommission(commissions), commissions, db.getCommissionStageImages);
+    await same(await db.getTagsByCommission(commissions), commissions, db.getCommissionTags);
+    expect(await db.getCharacterIdsByCommission(commissions)).toEqual({ [first]: [luna.id, sol.id].sort((a, b) => a - b), [second]: [] });
+    await same(await db.getCharactersByClient([ana, bea]), [ana, bea], db.getClientCharacters);
+    await same(await db.getReferencesByCharacter([luna.id, sol.id]), [luna.id, sol.id], db.getCharacterReferences);
+  });
+
+  test("a grouped load is one query, however many items there are", async () => {
+    const { id } = await template("Bust", ["Sketch"]);
+    const ids = await Promise.all(Array.from({ length: 20 }, (_, n) => newCommission(`C${n}`, null, id)));
+    resetStatementCount();
+    await db.getStageImagesByCommission(ids);
+    expect(statementCount()).toBe(1);
   });
 });
 

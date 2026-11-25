@@ -2,25 +2,15 @@ import { t } from "./i18n";
 import { isPrivate } from "./privacy";
 import {
   getCommissions,
-  getTemplateStages,
-  getCommissionStageImages,
+  getStagesByTemplate,
+  getStageImagesByCommission,
   type Commission,
   type CommissionStageImage,
   type TemplateStage,
 } from "./database";
 
-export async function loadStageImagesForCommissions(
-  data: Commission[],
-): Promise<Record<number, CommissionStageImage[]>> {
-  const entries = await Promise.all(
-    data.map(async (commission) => {
-      const images = await getCommissionStageImages(commission.id);
-      return [commission.id, images] as const;
-    }),
-  );
-
-  return Object.fromEntries(entries);
-}
+export const loadStageImagesForCommissions = (data: Commission[]): Promise<Record<number, CommissionStageImage[]>> =>
+  getStageImagesByCommission(data.map((commission) => commission.id));
 
 /** One stage's images grouped by alternative; each has its versions, oldest first (the last one is the current). */
 export function groupAlternatives(images: CommissionStageImage[]): { alt: number; versions: CommissionStageImage[] }[] {
@@ -273,9 +263,7 @@ export function isoDay(date: Date): string {
 export async function loadOpenCommissions(): Promise<Commission[]> {
   const commissions = await getCommissions();
   const templateIds = [...new Set(commissions.map((c) => c.template_id).filter((id): id is number => id !== null))];
-  const stages = Object.fromEntries(
-    await Promise.all(templateIds.map(async (id) => [id, await getTemplateStages(id)] as const)),
-  );
+  const stages = await getStagesByTemplate(templateIds);
 
   return commissions.filter((commission) => !isCommissionCompleted(commission, stages));
 }

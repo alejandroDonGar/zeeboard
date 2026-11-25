@@ -9,7 +9,7 @@ import {
 import {
   getAllPayments,
   getCommissions,
-  getTemplateStages,
+  getStagesByTemplate,
   getTemplates,
   type Commission,
   type CommissionPayment,
@@ -164,9 +164,7 @@ export const openCsv = (title: string, remember: boolean) =>
 /** Asks where to save and writes the CSV (Rust adds the BOM Excel needs). Returns the path, or null if cancelled. */
 export async function exportCsv(kind: ExportKind): Promise<string | null> {
   const [commissions, payments, templates] = await Promise.all([getCommissions(), getAllPayments(), getTemplates()]);
-  const stages = Object.fromEntries(
-    await Promise.all(templates.map(async (template) => [template.id, await getTemplateStages(template.id)] as const)),
-  );
+  const stages = await getStagesByTemplate(templates.map((template) => template.id));
   const data = { commissions, payments, templates, stages };
 
   const csv =
