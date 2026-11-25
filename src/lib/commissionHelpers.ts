@@ -269,3 +269,20 @@ export async function loadOpenCommissions(): Promise<Commission[]> {
 
   return commissions.filter((commission) => !isCommissionCompleted(commission, stages));
 }
+
+/** Hours tracked with the timer: the total and per stage. The running entry counts until `now`. */
+export function trackedHours(
+  entries: { stage_id: number | null; started_at: string; ended_at: string | null }[],
+  now: Date,
+): { total: number; byStage: Record<number, number> } {
+  const byStage: Record<number, number> = {};
+  let total = 0;
+
+  for (const entry of entries) {
+    const hours = ((entry.ended_at ? new Date(entry.ended_at) : now).getTime() - new Date(entry.started_at).getTime()) / 3600000;
+    total += hours;
+    if (entry.stage_id !== null) byStage[entry.stage_id] = round2((byStage[entry.stage_id] ?? 0) + hours);
+  }
+
+  return { total: round2(total), byStage };
+}

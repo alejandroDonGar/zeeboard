@@ -102,6 +102,10 @@ What is on your desk today, at a glance.
 
 The **···** menu on a commission lets you **duplicate** it, **copy the invoice description** or **delete** it.
 
+### Timing your work
+
+**▷ Time** (at the bottom of an open commission) starts a timer on its current stage; **■ Stop** ends it. Only one runs at a time: starting another commission's stops the first. The button shows the total so far, and its tooltip each stage's share. When you mark the commission as finished, the hours fill in with what you timed (you can still change them), and finishing stops its timer.
+
 ### Stages and images
 
 The image of the stage you pick is shown **large**, with its alternatives, and below it a **numbered strip of stages** (thumbnail, a ✓ once done). Click a stage to see its image, or move between stages with **← →**; the current one is selected by default.

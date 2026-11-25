@@ -696,6 +696,9 @@ export const es: Record<string, string> = {
   "Commission cancelled. Its payments stay.": "Comisión cancelada. Sus pagos se quedan.",
   "Could not save the change.": "No se pudo guardar el cambio.",
   "Waiting for the client": "Esperando al cliente",
+  Time: "Cronometrar",
+  Stop: "Parar",
+  "Time the current stage: the hours fill in when you finish": "Cronometra la etapa actual: las horas se rellenan al terminar",
   "Error report": "Informe de errores",
   "The last errors, kept on this computer. Copy them to send them if something doesn't work.":
     "Los últimos errores, guardados en este ordenador. Cópialos para enviarlos si algo no funciona.",

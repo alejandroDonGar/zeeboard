@@ -1947,3 +1947,34 @@ export async function setCommissionWaiting(commissionId: number, waiting: boolea
 
   await database.execute(`UPDATE commissions SET waiting_since = ? WHERE id = ?;`, [waiting ? new Date().toISOString() : null, commissionId]);
 }
+
+export type TimeEntry = { id: number; commission_id: number; stage_id: number | null; started_at: string; ended_at: string | null };
+
+export async function getTimeEntries(commissionId: number): Promise<TimeEntry[]> {
+  return (await getDatabase()).select<TimeEntry[]>(
+    `SELECT id, commission_id, stage_id, started_at, ended_at FROM time_entries WHERE commission_id = ? ORDER BY started_at;`,
+    [commissionId],
+  );
+}
+
+/** The timer that is running now, if any (only one runs at a time). */
+export async function getRunningTimer(): Promise<TimeEntry | null> {
+  const [running] = await (await getDatabase()).select<TimeEntry[]>(
+    `SELECT id, commission_id, stage_id, started_at, ended_at FROM time_entries WHERE ended_at IS NULL LIMIT 1;`,
+  );
+  return running ?? null;
+}
+
+export async function stopTimer(): Promise<void> {
+  await (await getDatabase()).execute(`UPDATE time_entries SET ended_at = ? WHERE ended_at IS NULL;`, [new Date().toISOString()]);
+}
+
+/** Starts timing a commission's stage; whatever was running stops first. */
+export async function startTimer(commissionId: number, stageId: number | null): Promise<void> {
+  await stopTimer();
+  await (await getDatabase()).execute(`INSERT INTO time_entries (commission_id, stage_id, started_at) VALUES (?, ?, ?);`, [
+    commissionId,
+    stageId,
+    new Date().toISOString(),
+  ]);
+}

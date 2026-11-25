@@ -10,6 +10,7 @@ import {
   parsePrice,
   paymentSummary,
   ratePerHour,
+  trackedHours,
 } from "../src/lib/commissionHelpers";
 import type { Commission, CommissionStageImage, TemplateStage } from "../src/lib/database";
 
@@ -101,6 +102,16 @@ describe("money", () => {
     expect(ratePerHour([{ net: 100, hours: 4 }, { net: 50, hours: null }, { net: 30, hours: 0 }])).toBe(25);
     expect(ratePerHour([{ net: 100, hours: null }])).toBeNull();
   });
+});
+
+test("tracked time: the total and each stage's share, with the running entry counted until now", () => {
+  const entries = [
+    { stage_id: 1, started_at: "2026-11-25T10:00:00.000Z", ended_at: "2026-11-25T11:30:00.000Z" },
+    { stage_id: 2, started_at: "2026-11-25T12:00:00.000Z", ended_at: null },
+    { stage_id: 1, started_at: "2026-11-25T09:00:00.000Z", ended_at: "2026-11-25T09:15:00.000Z" },
+  ];
+  expect(trackedHours(entries, new Date("2026-11-25T12:15:00.000Z"))).toEqual({ total: 2, byStage: { 1: 1.75, 2: 0.25 } });
+  expect(trackedHours([], new Date())).toEqual({ total: 0, byStage: {} });
 });
 
 test("versions uploaded in the same second keep the order they were saved in", () => {

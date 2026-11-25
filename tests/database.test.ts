@@ -614,6 +614,40 @@ describe("loading many at once", () => {
   });
 });
 
+describe("stage timer", () => {
+  test("one timer at a time: starting another stops the running one; stopping ends it", async () => {
+    const { id: templateId, stages } = await template("Bust", ["Sketch", "Colour"]);
+    const first = await newCommission("First", null, templateId);
+    const second = await newCommission("Second", null, templateId);
+
+    expect(await db.getRunningTimer()).toBeNull();
+    await db.startTimer(first, stages[0].id);
+    expect(await db.getRunningTimer()).toMatchObject({ commission_id: first, stage_id: stages[0].id, ended_at: null });
+
+    await db.startTimer(second, stages[1].id);
+    expect(await db.getRunningTimer()).toMatchObject({ commission_id: second });
+    expect((await db.getTimeEntries(first))[0].ended_at).not.toBeNull();
+
+    await db.stopTimer();
+    expect(await db.getRunningTimer()).toBeNull();
+    expect((await db.getTimeEntries(second))[0].ended_at).not.toBeNull();
+  });
+
+  test("tracked time goes to the trash with its commission and comes back with it; nothing can track a missing one", async () => {
+    const { id: templateId, stages } = await template("Bust", ["Sketch"]);
+    const id = await newCommission("Bust", null, templateId);
+    await db.startTimer(id, stages[0].id);
+    await db.stopTimer();
+
+    const trashId = await db.deleteCommission(id);
+    expect(await db.getTimeEntries(id)).toEqual([]);
+    await db.restoreTrash(trashId);
+    expect(await db.getTimeEntries(id)).toHaveLength(1);
+
+    await expect(db.startTimer(999, stages[0].id)).rejects.toThrow();
+  });
+});
+
 describe("waiting for the client", () => {
   test("it is marked and unmarked by hand, and moving to another stage unmarks it (the ball is back with you)", async () => {
     const { id: templateId, stages } = await template("Bust", ["Sketch", "Colour"]);

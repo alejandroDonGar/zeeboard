@@ -294,7 +294,22 @@ async function addColumn(database: ZeeDatabase, table: string, definition: strin
  * A new change is a new function at the end; one that has shipped is never edited. Each must be safe to run twice:
  * there is no transaction (the plugin's pool doesn't guarantee one connection), so a crash before the version is saved repeats it.
  */
-const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity, cancelling, waiting];
+const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity, cancelling, waiting, timer];
+
+/** Migration 6: time tracked per stage (a timer). Its links (deleted and restored with its commission) come from REFS. */
+async function timer(database: ZeeDatabase): Promise<void> {
+  await database.execute(`
+    CREATE TABLE IF NOT EXISTS time_entries (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      commission_id INTEGER NOT NULL,
+      stage_id INTEGER,
+      started_at TEXT NOT NULL,
+      ended_at TEXT
+    );
+  `);
+  await database.execute(`CREATE INDEX IF NOT EXISTS idx_time_entries_commission_id ON time_entries (commission_id);`);
+  await integrity(database);
+}
 
 /** Migration 5: "waiting for the client" (their feedback or payment): no stalled alert meanwhile. */
 async function waiting(database: ZeeDatabase): Promise<void> {
@@ -331,7 +346,10 @@ async function indexes(database: ZeeDatabase): Promise<void> {
 
 /** Migration 3: the links between tables, kept by the database (see integrityStatements in trash.ts). */
 async function integrity(database: ZeeDatabase): Promise<void> {
-  for (const statement of integrityStatements()) {
+  // Only tables that exist by now: a later migration that creates one runs this again (it can run any number of times)
+  const tables = await database.select<{ name: string }[]>(`SELECT name FROM sqlite_master WHERE type = 'table';`);
+
+  for (const statement of integrityStatements(new Set(tables.map((table) => table.name)))) {
     await database.execute(statement);
   }
 

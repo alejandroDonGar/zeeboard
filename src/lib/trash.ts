@@ -24,6 +24,7 @@ export const KINDS = {
       rows("commission_corrections", "commission_id = ?"),
       rows("commission_stage_images", "commission_id = ?"),
       rows("commission_characters", "commission_id = ?"),
+      rows("time_entries", "commission_id = ?"),
     ],
   },
   client: {
@@ -90,6 +91,7 @@ const REFS: Record<string, { required?: Record<string, string>; nullable?: Recor
   client_characters: { required: { client_id: "clients" } },
   character_references: { required: { character_id: "client_characters" } },
   template_stages: { required: { template_id: "templates" } },
+  time_entries: { required: { commission_id: "commissions" } },
   commission_requests: { nullable: { template_id: "templates", commission_id: "commissions" } },
   client_links: { required: { id: "commissions" } },
 };
@@ -100,9 +102,10 @@ const REFS: Record<string, { required?: Record<string, string>; nullable?: Recor
  * ponytail: triggers, not FOREIGN KEY, because SQLite only adds those by rebuilding each table, which needs one connection
  * and a transaction (the plugin's pool gives neither); swap them for real foreign keys when the database moves to Rust.
  */
-export function integrityStatements(): string[] {
+export function integrityStatements(existing: Set<string>): string[] {
   return Object.entries(REFS)
-    .filter(([table]) => table !== "client_links") // not a table: the commissions a deleted client had
+    // client_links isn't a table (the commissions a deleted client had); a table a later migration creates is skipped until then
+    .filter(([table]) => existing.has(table))
     .flatMap(([table, { required = {}, nullable = {} }]) => [
       ...Object.entries(required).flatMap(([column, target]) => link(table, column, target, true)),
       ...Object.entries(nullable).flatMap(([column, target]) => link(table, column, target, false)),

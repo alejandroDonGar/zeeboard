@@ -1,7 +1,7 @@
 import { locale, t } from "../lib/i18n";
 import { takeAction } from "../lib/actions";
 import { useEffect, useState, type CSSProperties } from "react";
-import { IconCheck, IconDots, IconLayoutGrid, IconList } from "@tabler/icons-react";
+import { IconCheck, IconDots, IconLayoutGrid, IconList, IconPlayerPlay, IconPlayerStop } from "@tabler/icons-react";
 import { importImage, pickImagePaths } from "../lib/images";
 import { IPAD_IMAGE_ADDED } from "../lib/ipad";
 import { useImageInput } from "../lib/useImageInput";
@@ -19,6 +19,7 @@ import {
   invoiceDescription,
 } from "../lib/commissionHelpers";
 import { TYPE_CATEGORY } from "../lib/catalog";
+import { trackedHours } from "../lib/commissionHelpers";
 import {
   getTemplateStages,
   getTemplates,
@@ -32,6 +33,11 @@ import {
   duplicateCommission,
   setCommissionCancelled,
   setCommissionWaiting,
+  getRunningTimer,
+  getTimeEntries,
+  startTimer,
+  stopTimer,
+  type TimeEntry,
   deleteCommission,
   getCommissionTags,
   getClients,
@@ -90,6 +96,10 @@ function CommissionsPage() {
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [deletingCommission, setDeletingCommission] = useState(false);
+  // Timer: the running entry (any commission) and the active commission's tracked time; `now` ticks while it runs
+  const [runningTimer, setRunningTimer] = useState<TimeEntry | null>(null);
+  const [timeEntries, setTimeEntries] = useState<TimeEntry[]>([]);
+  const [now, setNow] = useState(() => new Date());
   // Cancel dialog: null = closed, otherwise the reason being typed
   const [cancelReason, setCancelReason] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<Tag[]>([]);
@@ -257,6 +267,36 @@ function CommissionsPage() {
     loadWorkflowStages();
   }, [activeCommission]);
 
+  async function loadTimer() {
+    setRunningTimer(await getRunningTimer());
+    setTimeEntries(activeCommission ? await getTimeEntries(activeCommission.id) : []);
+  }
+
+  useEffect(() => {
+    loadTimer().catch(console.error);
+  }, [activeCommission?.id]);
+
+  useEffect(() => {
+    if (!runningTimer) return;
+    const tick = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(tick);
+  }, [runningTimer]);
+
+  /** ▶ times the current stage (stopping any other timer); ■ stops it */
+  async function toggleTimer() {
+    if (!activeCommission) return;
+
+    try {
+      if (runningTimer?.commission_id === activeCommission.id) await stopTimer();
+      else await startTimer(activeCommission.id, activeCommission.current_stage_id);
+      setNow(new Date());
+      await loadTimer();
+    } catch (error) {
+      console.error(error);
+      showToast("Could not save the change.", "error");
+    }
+  }
+
   function openNewCommissionForm() {
     setForm({ mode: "new", tagIds: [] });
   }
@@ -336,6 +376,12 @@ function CommissionsPage() {
 
     try {
       setFinishing(true);
+
+      // Finishing stops this commission's timer
+      if (runningTimer?.commission_id === activeCommission.id) {
+        await stopTimer();
+        await loadTimer();
+      }
 
       if (details.imagePaths.length > 0) {
         await handleAddStageImages(lastStage.id, details.imagePaths);
@@ -617,6 +663,16 @@ function CommissionsPage() {
   // ponytail: a template with a single stage keeps it visible and works as before.
   const visibleStages = workflowStages.length > 1 && !isLastStage ? workflowStages.slice(0, -1) : workflowStages;
   const nextIsFinish = workflowStages.length > 1 && currentStageIndex === workflowStages.length - 2;
+  const tracked = trackedHours(timeEntries, now);
+  const timing = Boolean(activeCommission && runningTimer?.commission_id === activeCommission.id);
+  const trackedLabel = (hours: number) => {
+    const minutes = Math.round(hours * 60); // in whole minutes, so 1.999 h reads 2:00, never 1:60
+    return `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, "0")}`;
+  };
+  const trackedByStage = workflowStages
+    .filter((stage) => tracked.byStage[stage.id])
+    .map((stage) => `${stage.name} ${trackedLabel(tracked.byStage[stage.id])}`)
+    .join(" · ");
 
   // Inbox: those already in a stage, and queued ones not started yet; nearest delivery first
   const byDeadline = (a: Commission, b: Commission) => (a.deadline ?? "9999").localeCompare(b.deadline ?? "9999");
@@ -1054,6 +1110,20 @@ function CommissionsPage() {
                     </button>
                   )}
 
+                  {!isLastStage && !activeCommission.cancelled_at && (
+                    <button
+                      type="button"
+                      onClick={toggleTimer}
+                      aria-pressed={timing}
+                      title={trackedByStage || t("Time the current stage: the hours fill in when you finish")}
+                      className="inline-flex items-center gap-1.5 rounded-2xl border border-line-strong bg-surface px-3 py-1.5 text-sm font-medium text-ink tabular-nums transition hover:bg-highlight active:scale-[0.97]"
+                    >
+                      {timing ? <IconPlayerStop size={15} stroke={2} aria-hidden="true" /> : <IconPlayerPlay size={15} stroke={2} aria-hidden="true" />}
+                      {timing ? t("Stop") : t("Time")}
+                      {tracked.total > 0 && <span className="text-muted">{trackedLabel(tracked.total)}</span>}
+                    </button>
+                  )}
+
                   {pasteStage && (
                     <span className="ml-1 text-xs text-faint">
                       {t("Ctrl+V adds to")} <b className="font-semibold text-muted">{pasteStage.name}</b>
@@ -1123,7 +1193,7 @@ function CommissionsPage() {
       {showFinishModal && activeCommission && (
         <FinishCommissionModal
           title={activeCommission.title}
-          hours={activeCommission.hours}
+          hours={activeCommission.hours ?? (tracked.total || null)}
           notes={activeCommission.final_notes}
           isSaving={finishing}
           onConfirm={handleFinishCommission}
