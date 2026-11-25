@@ -10,8 +10,8 @@ jobs:
     name: TypeScript (tipos y tests)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24 # node:sqlite, que usa el test de la base de datos nueva
           cache: npm
@@ -24,8 +24,8 @@ jobs:
     # Windows: es la plataforma de la app y no necesita instalar las librerías de WebKit de Linux
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: npm
