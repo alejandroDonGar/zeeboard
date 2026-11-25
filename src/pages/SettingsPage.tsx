@@ -11,7 +11,7 @@ import {
 import TopBar from "../components/TopBar";
 import { Segmented } from "../components/BoardFilters";
 import { useEffect, useState } from "react";
-import { backupBeforeCleanup, exportBackup, pickBackupFolder, pickFolder, restoreBackup, runAutoBackup } from "../lib/backup";
+import { backupBeforeCleanup, chooseAutoBackupFolder, exportBackup, pickBackupFolder, restoreBackup, runAutoBackup } from "../lib/backup";
 import { applyTheme, getTheme, type ThemeChoice } from "../lib/theme";
 import {
   appSettings,
@@ -115,7 +115,7 @@ function SettingsPage() {
 
   async function handleToggleAuto(enabled: boolean) {
     // Without a folder there's nowhere to copy: asked on enabling
-    const folder = auto.auto_backup_folder ?? (enabled ? await pickFolder(t("Choose a folder for automatic backups")) : null);
+    const folder = auto.auto_backup_folder ?? (enabled ? await chooseAutoBackupFolder(t("Choose a folder for automatic backups")) : null);
 
     if (enabled && !folder) {
       return;
@@ -597,7 +597,7 @@ function SettingsPage() {
                     <button
                       type="button"
                       onClick={async () => {
-                        const folder = await pickFolder(t("Choose a folder for automatic backups"));
+                        const folder = await chooseAutoBackupFolder(t("Choose a folder for automatic backups"));
                         if (folder) await saveAuto({ auto_backup_folder: folder });
                       }}
                       className={ghostButton}

@@ -49,8 +49,12 @@ export async function exportBackup(): Promise<string | null> {
 /** Automatic backup: the first app open each day, if enabled and a folder is set. */
 export async function runAutoBackup(force = false): Promise<string | null> {
   const settings = appSettings();
+  // The folder Rust remembered when it was chosen: the one in the settings is only shown
+  const folder = await invoke<string | null>("remembered_backup_folder");
 
-  if (!settings.auto_backup_folder) {
+  if (!folder) {
+    // Chosen in a version that didn't remember it in Rust: shown as missing, to choose it once more
+    if (settings.auto_backup_folder) await updateSettings({ auto_backup_folder: null });
     if (force) throw new Error("Choose a folder for automatic backups first");
     return null;
   }
@@ -63,7 +67,7 @@ export async function runAutoBackup(force = false): Promise<string | null> {
     return null;
   }
 
-  const path = await createBackup(settings.auto_backup_folder, settings.auto_backup_keep);
+  const path = await createBackup(folder, settings.auto_backup_keep);
   await updateSettings({ last_auto_backup: new Date().toISOString() });
 
   return path;
@@ -77,6 +81,17 @@ export async function backupBeforeCleanup(): Promise<void> {
 export async function pickFolder(title: string): Promise<string | null> {
   const folder = await open({ directory: true, title });
   return !folder || Array.isArray(folder) ? null : folder;
+}
+
+/** The folder for automatic backups: chosen in the dialog and remembered by Rust, so it works after a restart. */
+export async function chooseAutoBackupFolder(title: string): Promise<string | null> {
+  const folder = await pickFolder(title);
+
+  if (folder) {
+    await invoke("remember_backup_folder", { folder });
+  }
+
+  return folder;
 }
 
 /** Asks for the folder of a backup made with "Export backup". */

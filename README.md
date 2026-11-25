@@ -338,7 +338,7 @@ The whole app is also available in **Spanish**. Switching the language reloads t
 ## Privacy and data
 
 - **Everything is stored locally** in `%APPDATA%\com.zeeboard.app\`: `zeeboard.db` (SQLite) and an `images/` folder. Uninstalling does not delete it unless you ask.
-- **Files outside that folder** are only touched through a dialog ZeeBoard opens itself: an export is written where you choose to save it, and a CSV (PayPal, form responses) is read only after you pick it. The interface can't name any other file.
+- **Files and folders outside that folder** are only touched if you chose or dropped them: an export is written where you choose to save it, a CSV (PayPal, form responses) or an image is read only after you pick or drop it, and backups go only to a folder you chose (the one for automatic backups is remembered when you choose it). The interface can't name any other path. If you set up automatic backups with a version before 0.3, choose their folder once more.
 - **Images** are processed on your machine: a lightweight WebP copy for viewing and a thumbnail. Your originals are never touched.
 - **The only connection ZeeBoard makes to the internet** is the optional *Fetch photo* feature. It runs in the app's Rust side with a **closed list of servers** (Bluesky and Telegram), only over `https`, with time and size limits. Nothing else is sent anywhere.
 - The **iPad receiver** is off by default. While its switch is on, ZeeBoard listens on one port of your PC; every request needs the secret key of your link and only images are accepted. ZeeBoard never opens it to the internet itself: to reach it from mobile data you use Tailscale, a private network between your own devices.

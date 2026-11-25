@@ -791,6 +791,7 @@ describe("around the data: undo, form sync, backups and the iPad", () => {
       await expect(backup.runAutoBackup(true)).rejects.toThrow();
 
       await db.updateSettings({ auto_backup_folder: folder });
+      tauri.rust.remembered_backup_folder = () => folder; // the folder Rust remembered when it was chosen
       expect(await backup.runAutoBackup()).toBeNull(); // not enabled
 
       vi.useFakeTimers({ toFake: ["Date"] });
@@ -806,6 +807,29 @@ describe("around the data: undo, form sync, backups and the iPad", () => {
       } finally {
         vi.useRealTimers();
       }
+    });
+
+    test("choosing the automatic-backup folder asks Rust to remember it; cancelling remembers nothing", async () => {
+      const backup = await import("../src/lib/backup");
+      const { open } = await import("@tauri-apps/plugin-dialog");
+      const { invoke } = await import("@tauri-apps/api/core");
+      tauri.rust.remember_backup_folder = () => undefined;
+      vi.mocked(open).mockResolvedValueOnce(null).mockResolvedValueOnce(folder);
+
+      expect(await backup.chooseAutoBackupFolder("Choose a folder")).toBeNull();
+      expect(invoke).not.toHaveBeenCalled();
+      expect(await backup.chooseAutoBackupFolder("Choose a folder")).toBe(folder);
+      expect(invoke).toHaveBeenCalledWith("remember_backup_folder", { folder });
+    });
+
+    test("automatic backups use the folder Rust remembers; one chosen in an older version asks to be chosen again", async () => {
+      const backup = await import("../src/lib/backup");
+      await db.updateSettings({ auto_backup_enabled: true, auto_backup_folder: "D:/Backups" });
+      tauri.rust.remembered_backup_folder = () => null;
+
+      expect(await backup.runAutoBackup()).toBeNull();
+      expect(db.appSettings().auto_backup_folder).toBeNull();
+      expect(await finishCalls()).toEqual([]);
     });
 
     test("if the database copy fails, the half-made folder is cleaned up and the error is reported", async () => {

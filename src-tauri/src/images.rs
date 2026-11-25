@@ -194,6 +194,9 @@ pub(crate) fn read_image(app: &AppHandle, relative: &str) -> Option<Vec<u8>> {
 #[tauri::command]
 pub async fn import_image_from_path(app: AppHandle, path: String) -> Result<StoredImage, String> {
     let base_dir = data_dir(&app)?;
+    // Only an image the user picked or dropped (or one already in the data folder): never any path the web names
+    let scope = app.asset_protocol_scope();
+    crate::access::check(Path::new(&path), &base_dir, |chosen| scope.is_allowed(chosen), None)?;
 
     tauri::async_runtime::spawn_blocking(move || {
         let original = fs::read(&path).map_err(|error| format!("No se pudo abrir {path}: {error}"))?;

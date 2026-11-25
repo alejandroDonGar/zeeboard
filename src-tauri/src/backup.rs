@@ -147,10 +147,53 @@ fn finish(data_dir: &Path, dir: &Path, keep: Option<usize>) -> Result<u32, Strin
     })
 }
 
+/// The automatic-backup folder, remembered in the data folder when the user chooses it (see `remember_backup_folder`).
+const REMEMBERED_FOLDER: &str = "backup-folder.txt";
+
+fn remembered_folder(data_dir: &Path) -> Option<PathBuf> {
+    fs::read_to_string(data_dir.join(REMEMBERED_FOLDER)).ok().map(|text| PathBuf::from(text.trim()))
+}
+
+fn remember_folder(data_dir: &Path, folder: &Path) -> Result<(), String> {
+    fs::create_dir_all(data_dir).map_err(|error| error.to_string())?;
+    fs::write(data_dir.join(REMEMBERED_FOLDER), folder.to_string_lossy().as_bytes()).map_err(|error| error.to_string())
+}
+
+/// A backup folder (or the root a backup goes into) may be used only if the rules in access.rs allow it.
+fn check_folder(app: &AppHandle, folder: &Path) -> Result<PathBuf, String> {
+    let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let scope = app.asset_protocol_scope();
+    crate::access::check(folder, &data_dir, |chosen| scope.is_allowed(chosen), remembered_folder(&data_dir).as_deref())?;
+    Ok(data_dir)
+}
+
+/// A backup is made inside a folder (`root/zeeboard-backup-…`): the root is what the user chose.
+fn root_of(dir: &Path) -> Result<&Path, String> {
+    dir.parent().ok_or_else(|| format!("{} is not inside a folder", dir.display()))
+}
+
+/// Remembers the folder for automatic backups, so they keep working after a restart. Only a folder the user has just
+/// chosen in the folder dialog: the path saved in the settings comes from the web side and is never trusted.
+#[tauri::command]
+pub fn remember_backup_folder(app: AppHandle, folder: String) -> Result<(), String> {
+    let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let scope = app.asset_protocol_scope();
+    crate::access::check(Path::new(&folder), &data_dir, |chosen| scope.is_allowed(chosen), None)?;
+    remember_folder(&data_dir, Path::new(&folder))
+}
+
+/// The remembered folder for automatic backups; None if none was chosen yet (or it was chosen in an older version).
+#[tauri::command]
+pub fn remembered_backup_folder(app: AppHandle) -> Result<Option<String>, String> {
+    let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    Ok(remembered_folder(&data_dir).map(|folder| folder.display().to_string()))
+}
+
 /// First half of a backup: creates the folder (and any missing parents).
 #[tauri::command]
-pub fn prepare_backup(dir: String) -> Result<(), String> {
+pub fn prepare_backup(app: AppHandle, dir: String) -> Result<(), String> {
     let dir = Path::new(&dir);
+    check_folder(&app, root_of(dir)?)?;
 
     if dir.exists() {
         return Err(format!("{} already exists. Wait a minute and try again", dir.display()));
@@ -161,14 +204,15 @@ pub fn prepare_backup(dir: String) -> Result<(), String> {
 
 #[tauri::command]
 pub fn finish_backup(app: AppHandle, dir: String, keep: Option<usize>) -> Result<u32, String> {
-    let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let dir = Path::new(&dir);
+    let data_dir = check_folder(&app, root_of(dir)?)?;
 
-    finish(&data_dir, Path::new(&dir), keep)
+    finish(&data_dir, dir, keep)
 }
 
 #[tauri::command]
 pub fn restore_backup(app: AppHandle, backup_dir: String, stamp: String) -> Result<String, String> {
-    let data_dir = app.path().app_data_dir().map_err(|error| error.to_string())?;
+    let data_dir = check_folder(&app, Path::new(&backup_dir))?;
 
     restore(Path::new(&backup_dir), &data_dir, &stamp).map(|path| path.display().to_string())
 }
@@ -233,6 +277,16 @@ mod tests {
         }
         assert_eq!(fs::read(data.join(DB_FILE)).unwrap(), b"SQLite format 3\0current");
         assert!(!data.join("before-restore").exists());
+    }
+
+    #[test]
+    fn the_automatic_backup_folder_is_remembered_across_restarts() {
+        let data = temp_dir("remembered-folder");
+        assert_eq!(remembered_folder(&data), None);
+
+        remember_folder(&data, Path::new(r"D:\Backups")).unwrap();
+        assert_eq!(remembered_folder(&data), Some(PathBuf::from(r"D:\Backups")));
+        assert_eq!(root_of(Path::new(r"D:\Backups\zeeboard-backup-2026-11-25-101500")).unwrap(), Path::new(r"D:\Backups"));
     }
 
     #[test]

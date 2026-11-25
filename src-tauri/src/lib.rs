@@ -1,4 +1,5 @@
 mod avatars;
+mod access;
 mod backup;
 mod export;
 mod images;
@@ -22,6 +23,8 @@ pub fn run() {
             images::storage_stats,
             avatars::fetch_avatar_resource,
             backup::restore_backup,
+            backup::remember_backup_folder,
+            backup::remembered_backup_folder,
             export::save_csv,
             export::open_csv,
             export::read_remembered_csv,
