@@ -194,7 +194,7 @@ The inbox for people who want a commission.
 
 - A client has a name, platform and handle, an **email** (used to match PayPal payments), the **account to tag** when you post their work, and free notes. The header is tinted with the colours of their photo.
 - The figures show how much they have **spent** (and the average), how many commissions they have (active and done) and what is **still pending** to be paid. Their commissions are listed below with the colour bar of the type.
-- The side column has the **social account**, contact, email and the date they became a client, plus **Notes**, which are saved by themselves when you leave the field.
+- The side column has the account to **tag when posting**, contact, email and the date they became a client, plus **Notes**, which are saved by themselves when you leave the field.
 - The **photo** can be fetched from Bluesky or Telegram (**··· → Fetch photo**: tag account first, then contact account), or set by hand by clicking the avatar, dropping an image on it or pasting with Ctrl+V. Photos are downloaded once and stored on your disk. **Edit** and **··· → Delete client…** are in the header.
 
 <img src="docs/images/character.png" alt="A character with its references" width="900">
