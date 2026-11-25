@@ -425,6 +425,7 @@ function App() {
             <DashboardPage
               onOpenCommissionsPage={() => setCurrentPage("commissions")}
               onOpenRequestsPage={() => setCurrentPage("requests")}
+              onOpenCatalogPage={() => setCurrentPage("catalog")}
               onNewCommission={() => {
                 requestAction("new-commission");
                 go("commissions");

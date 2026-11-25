@@ -27,6 +27,7 @@ import { thumbUrl } from "../lib/images";
 import { hide } from "../lib/privacy";
 import { ATTENTION_STYLE, loadAttention, type Attention, type AttentionKind } from "../lib/reminders";
 import { useToast } from "../context/ToastContext";
+import { loadSampleData } from "../lib/sampleData";
 import TopBar from "../components/TopBar";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -46,10 +47,12 @@ const GROUPS: { title: string; kinds: AttentionKind[] }[] = [
 function DashboardPage({
   onOpenCommissionsPage,
   onOpenRequestsPage,
+  onOpenCatalogPage,
   onNewCommission,
 }: {
   onOpenCommissionsPage: () => void;
   onOpenRequestsPage: () => void;
+  onOpenCatalogPage: () => void;
   onNewCommission: () => void;
 }) {
   const [commissions, setCommissions] = useState<Commission[]>([]);
@@ -61,24 +64,43 @@ function DashboardPage({
   const [newRequests, setNewRequests] = useState<string[]>([]);
   const { showToast } = useToast();
 
+  // Null until loaded, so the first-time welcome doesn't flash before the data arrive
+  const [empty, setEmpty] = useState<boolean | null>(null);
+  const [loadingSample, setLoadingSample] = useState(false);
+
   const reloadAttention = () => loadAttention().then(setAttention);
 
+  async function load() {
+    await reloadAttention();
+    const requests = await getRequests();
+    setNewRequests(requests.filter((request) => request.status === "new").map((request) => request.name));
+    const data = await getCommissions();
+    const templateList = await getTemplates();
+    setCommissions(data);
+    setTemplates(templateList);
+    setStagesByTemplateId(await getStagesByTemplate(templateList.map((template) => template.id)));
+    setImagesByCommissionId(await loadStageImagesForCommissions(data));
+    setPayments(await getAllPayments());
+    setEmpty(data.length === 0 && templateList.length === 0 && requests.length === 0);
+  }
+
   useEffect(() => {
-    reloadAttention().catch(console.error);
-    getRequests()
-      .then((requests) => setNewRequests(requests.filter((request) => request.status === "new").map((request) => request.name)))
-      .catch(console.error);
-    getCommissions()
-      .then(async (data) => {
-        const templateList = await getTemplates();
-        setCommissions(data);
-        setTemplates(templateList);
-        setStagesByTemplateId(await getStagesByTemplate(templateList.map((template) => template.id)));
-        setImagesByCommissionId(await loadStageImagesForCommissions(data));
-        setPayments(await getAllPayments());
-      })
-      .catch(console.error);
+    load().catch(console.error);
   }, []);
+
+  async function startWithExamples() {
+    setLoadingSample(true);
+    try {
+      await loadSampleData();
+      await load();
+      showToast("Example data loaded. Remove it any time in Settings › Data and storage.", "success");
+    } catch (error) {
+      console.error(error);
+      showToast("Could not load the example data.", "error");
+    } finally {
+      setLoadingSample(false);
+    }
+  }
 
   function open(commission: Commission) {
     localStorage.setItem("zeeboard-active-commission-id", String(commission.id));
@@ -142,7 +164,7 @@ function DashboardPage({
             {new Date().toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}
           </p>
           {/* The money at a glance, as one sentence (like Stripe's summary line), instead of a column of figures */}
-          <p className="mt-3 text-muted">
+          <p className={`mt-3 text-muted ${empty ? "hidden" : ""}`}>
             {t("{collect} to collect, {received} received this month, {active} in progress and {due} due within 7 days.", {
               collect: formatMoney(toCollect),
               received: formatMoney(receivedThisMonth),
@@ -151,7 +173,25 @@ function DashboardPage({
             })}
           </p>
 
-          {attention.length === 0 && newRequests.length === 0 && <p className="mt-8 text-muted">{t("Nothing urgent.")}</p>}
+          {/* First time: an empty app says where to start instead of showing nothing (M7.1) */}
+          {empty ? (
+            <section className="mt-8 max-w-[60ch] border-t border-line pt-6">
+              <h3 className="text-lg font-semibold">{t("Welcome to ZeeBoard")}</h3>
+              <p className="mt-2 leading-relaxed text-muted">
+                {t("Start by creating a commission type in Catalog: its price and its stages. Or load some example data to see how everything fits together; you can remove it later in Settings.")}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" onClick={onOpenCatalogPage} className="rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
+                  {t("Create a commission type")}
+                </button>
+                <button type="button" onClick={() => startWithExamples()} disabled={loadingSample} className="rounded-control border border-field-border bg-surface px-4 py-2 text-sm font-semibold text-ink transition hover:bg-highlight disabled:opacity-50">
+                  {loadingSample ? t("Loading…") : t("Load example data")}
+                </button>
+              </div>
+            </section>
+          ) : (
+            empty === false && attention.length === 0 && newRequests.length === 0 && <p className="mt-8 text-muted">{t("Nothing urgent.")}</p>
+          )}
 
           {GROUPS.map((group) => {
             const items = attention.filter((item) => group.kinds.includes(item.kind));

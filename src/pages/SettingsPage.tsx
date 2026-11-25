@@ -32,6 +32,7 @@ import { useToast } from "../context/ToastContext";
 import { formatMoney, isoDay, receivedAfterFees } from "../lib/commissionHelpers";
 import { exportCsv, type ExportKind } from "../lib/export";
 import { clearErrorLog, errorReport } from "../lib/errorLog";
+import { hasSampleData, removeSampleData } from "../lib/sampleData";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { cleanUpOrphanedImages, getStorageStats, type StorageStats } from "../lib/images";
@@ -228,6 +229,7 @@ function SettingsPage() {
   }
 
   const [cleaningUp, setCleaningUp] = useState(false);
+  const [sampleLoaded, setSampleLoaded] = useState(hasSampleData);
   const [cleanUpMessage, setCleanUpMessage] = useState<string | null>(null);
 
   async function handleCleanUpOrphanedImages() {
@@ -796,6 +798,26 @@ function SettingsPage() {
                 {cleaningUp ? t("Cleaning up…") : t("Clean up")}
               </button>
             </div>
+
+            {sampleLoaded && (
+              <div className={row}>
+                <div className="flex-1">
+                  <p className="font-semibold">{t("Example data")}</p>
+                  <p className="text-sm text-muted">{t("The made-up types, clients and commissions loaded to try the app. Removing them leaves what you created untouched.")}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await removeSampleData();
+                    setSampleLoaded(false);
+                    showToast("Example data removed. It's in the trash if you need it back.", "success");
+                  }}
+                  className={ghostButton}
+                >
+                  {t("Remove example data")}
+                </button>
+              </div>
+            )}
 
             <div className={row}>
               <div className="flex-1">

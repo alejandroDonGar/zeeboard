@@ -78,6 +78,8 @@ Along the way, **reminders** warn you about deadlines, stalled work and unpaid c
 
 What needs you today, in one column, and the action to deal with it right there.
 
+**The first time**, with nothing created yet, it shows where to start: **Create a commission type** (opens Catalog) or **Load example data**, which fills the app with made-up types, clients, commissions and a request so you can see how everything fits together. **Settings → Data and storage → Remove example data** takes away only those (to the trash), never what you created yourself.
+
 <img src="docs/images/dashboard.png" alt="Dashboard" width="900">
 
 - Under **Today** and the date, one sentence with the money: what is left to collect, what you received this month, how many commissions are in progress and how many are due within 7 days.

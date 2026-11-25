@@ -121,6 +121,16 @@ export const es: Record<string, string> = {
 
   // Dashboard
   "Nothing urgent.": "Nada urgente.",
+  "Welcome to ZeeBoard": "Te damos la bienvenida a ZeeBoard",
+  "Start by creating a commission type in Catalog: its price and its stages. Or load some example data to see how everything fits together; you can remove it later in Settings.": "Empieza creando un tipo de comisión en Catálogo: su precio y sus etapas. O carga unos datos de ejemplo para ver cómo encaja todo; podrás quitarlos después en Ajustes.",
+  "Create a commission type": "Crear un tipo de comisión",
+  "Load example data": "Cargar datos de ejemplo",
+  "Example data loaded. Remove it any time in Settings › Data and storage.": "Datos de ejemplo cargados. Puedes quitarlos cuando quieras en Ajustes › Datos y almacenamiento.",
+  "Could not load the example data.": "No se pudieron cargar los datos de ejemplo.",
+  "Example data": "Datos de ejemplo",
+  "The made-up types, clients and commissions loaded to try the app. Removing them leaves what you created untouched.": "Los tipos, clientes y comisiones inventados que cargaste para probar la app. Al quitarlos, lo que creaste tú no se toca.",
+  "Remove example data": "Quitar datos de ejemplo",
+  "Example data removed. It's in the trash if you need it back.": "Datos de ejemplo quitados. Están en la papelera por si los necesitas.",
   "{collect} to collect, {received} received this month, {active} in progress and {due} due within 7 days.": "{collect} por cobrar, {received} cobrados este mes, {active} en curso y {due} que vencen en 7 días.",
   "Copy reminder": "Copiar recordatorio",
   "Requests to answer": "Solicitudes por contestar",
