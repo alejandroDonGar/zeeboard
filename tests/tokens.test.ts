@@ -1,7 +1,8 @@
 // The colour tokens in App.css, checked with the WCAG formula: text that can be read, fields that can be seen.
 import { readdirSync, readFileSync } from "node:fs";
 import { describe, expect, test } from "vitest";
-import { contrastRatio } from "../src/lib/ambient";
+import { accentButton, contrastRatio } from "../src/lib/ambient";
+import { PALETTE } from "../src/lib/catalog";
 
 const css = readFileSync(new URL("../src/App.css", import.meta.url), "utf8");
 
@@ -24,6 +25,15 @@ test("corners only use the three named radii: Tailwind's smâ€¦3xl would draw 4â€
   const sources = readdirSync(new URL("../src/", import.meta.url), { recursive: true, encoding: "utf8" }).filter((file) => file.endsWith(".tsx"));
   const offenders = sources.filter((file) => /\brounded-(?:sm|md|lg|xl|2xl|3xl|4xl)\b/.test(readFileSync(new URL(`../src/${file}`, import.meta.url), "utf8")));
   expect(offenders).toEqual([]);
+});
+
+test("the main button of a commission, tinted with its type's colour, reads at 4.5:1 with every palette colour", () => {
+  for (const colour of [...PALETTE, "#ffffff", "#000000", "#e6c200"]) {
+    const button = accentButton(colour);
+    expect(contrastRatio(button.background, button.color), colour).toBeGreaterThanOrEqual(4.5);
+  }
+  // A colour that already reads well keeps its exact shade
+  expect(accentButton("#1d4ed8").background).toBe("#1d4ed8");
 });
 
 test("dark by Windows setting and dark chosen in Settings use the same colours", () => {

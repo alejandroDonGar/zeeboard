@@ -65,11 +65,22 @@ function StageViewer({
   const isDone = stageIndex < currentStageIndex;
   const isCurrent = stageIndex === currentStageIndex;
   const isDropTarget = dragZoneId === `stage:${stage.id}`;
+  // A stage without an image yet shows the latest earlier one, faded, so the drawing is always in view (M3.2)
+  const previous = image
+    ? null
+    : (stages
+        .slice(0, stageIndex)
+        .reverse()
+        .map((item) => {
+          const itemImages = getStageImages(commissionId, item.id);
+          return itemImages[getActiveIndex(item.id, itemImages)];
+        })
+        .find(Boolean) ?? null);
   const overlay = "flex h-7 items-center justify-center rounded-chip bg-black/65 px-2 text-xs font-bold text-white hover:bg-black/85 disabled:opacity-50";
 
   return (
     <div className="grid min-h-0 min-w-0 gap-3.5 p-4 @min-[760px]:h-full @min-[760px]:grid-rows-[minmax(14rem,1fr)_auto] @min-[760px]:overflow-y-auto">
-      <div data-image-drop={`stage:${stage.id}`} className={`relative grid ${image ? "h-[clamp(280px,48vh,520px)]" : "h-36"} min-h-0 place-items-center [container-type:size] @min-[760px]:h-auto ${isDropTarget ? "opacity-60" : ""}`}>
+      <div data-image-drop={`stage:${stage.id}`} className={`relative grid ${image || previous ? "h-[clamp(280px,48vh,520px)]" : "h-36"} min-h-0 place-items-center [container-type:size] @min-[760px]:h-auto ${isDropTarget ? "opacity-60" : ""}`}>
         {image ? (
           <div className="group relative inline-block">
             <button
@@ -129,6 +140,27 @@ function StageViewer({
 
             {importingStageId === stage.id && <span className="absolute right-2 bottom-2 rounded-chip bg-black/65 px-1.5 py-0.5 text-xs text-white">{t("Optimizing…")}</span>}
           </div>
+        ) : previous ? (
+          <button
+            type="button"
+            disabled={importingStageId !== null}
+            onClick={() => addImages(stage.id)}
+            // Fills the drop area whatever the image's size (or while it loads), so the invitation never gets squeezed
+            className="group relative grid h-full w-full place-items-center"
+          >
+            <img
+              src={imageUrl(previous.image_data_url)}
+              alt=""
+              className={`block max-h-[100cqh] max-w-[100cqw] rounded-control object-contain opacity-35 transition ${isDropTarget ? "opacity-20" : "group-hover:opacity-25"}`}
+            />
+            <span className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center text-sm font-medium text-ink">              <IconPhotoPlus size={28} stroke={1.5} aria-hidden="true" />
+              {importingStageId === stage.id
+                ? t("Optimizing…")
+                : isCurrent
+                  ? t("Drop the {stage} image here, or press Ctrl+V", { stage: stage.name })
+                  : t("Drop here")}
+            </span>
+          </button>
         ) : (
           <button
             type="button"

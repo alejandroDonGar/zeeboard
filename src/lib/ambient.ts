@@ -203,6 +203,18 @@ const contrast = (a: number[], b: number[]) => {
 export const contrastRatio = (a: string, b: string) => contrast(rgb(a), rgb(b));
 
 /**
+ * A button tinted with a type's colour whose label reads at 4.5:1 (WCAG 1.4.3): white or ink text on the colour, and
+ * for mid-tone colours where neither reaches it (a cyan, an orange) the colour is darkened just enough for white text.
+ */
+export function accentButton(colour: string): { background: string; color: string } {
+  const ink = "#1f2933";
+  if (contrastRatio(colour, ink) >= 4.5) return { background: colour, color: ink };
+  let [r, g, b] = rgb(colour);
+  while (contrast([r, g, b], [255, 255, 255]) < 4.5) [r, g, b] = [r, g, b].map((c) => Math.floor(c * 0.95));
+  return { background: `#${[r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")}`, color: "#ffffff" };
+}
+
+/**
  * Cuánto puede teñir un color la cabecera del detalle sin que el texto deje de leerse: la mayor intensidad (con tope)
  * con la que el texto principal y el secundario siguen en ≥ 4,8:1 sobre el cristal. Una por tema; el CSS elige.
  */

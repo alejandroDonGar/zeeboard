@@ -62,7 +62,7 @@ import {
   type TemplateStage,
 } from "../lib/database";
 import TopBar from "../components/TopBar";
-import { tintStrengths, useAmbient, useAmbientImage } from "../lib/ambient";
+import { accentButton, tintStrengths, useAmbient, useAmbientImage } from "../lib/ambient";
 import ConfirmModal from "../components/ConfirmModal";
 import { useToast } from "../context/ToastContext";
 import { undoToast } from "../lib/undo";
@@ -921,6 +921,23 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
                   </p>
                 </div>
 
+                {/* The timer is a state of the commission, so it sits up here where it can be seen, not with the final actions */}
+                {workflowStages.length > 0 && !isLastStage && !activeCommission.cancelled_at && (
+                  <button
+                    type="button"
+                    onClick={toggleTimer}
+                    aria-pressed={timing}
+                    title={trackedByStage || t("Time the current stage: the hours fill in when you finish")}
+                    className={`inline-flex items-center gap-1.5 rounded-control border px-3 py-1.5 text-sm font-medium tabular-nums shadow-sm transition active:scale-[0.97] ${
+                      timing ? "border-ink bg-ink text-surface" : "border-field-border bg-surface text-ink hover:bg-highlight"
+                    }`}
+                  >
+                    {timing ? <IconPlayerStop size={15} stroke={2} aria-hidden="true" /> : <IconPlayerPlay size={15} stroke={2} aria-hidden="true" />}
+                    {timing ? t("Stop") : t("Time")}
+                    {tracked.total > 0 && <span className={timing ? "opacity-80" : "text-muted"}>{trackedLabel(tracked.total)}</span>}
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={handleOpenEditCommission}
@@ -957,6 +974,19 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
                           className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                         >
                           {duplicatingCommission ? t("Duplicating…") : t("Duplicate")}
+                        </button>
+                        {/* Undoes work, so it lives here and not next to the main button (one slip of the mouse) */}
+                        <button
+                          type="button"
+                          role="menuitem"
+                          disabled={workflowStages.length === 0 || currentStageIndex <= 0}
+                          onClick={() => {
+                            setCommissionMenuOpen(false);
+                            handleMoveStage(-1);
+                          }}
+                          className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight disabled:opacity-40 disabled:hover:bg-transparent"
+                        >
+                          {t("Back to the previous stage")}
                         </button>
                         <button
                           type="button"
@@ -1107,16 +1137,14 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
               </div>
 
               {workflowStages.length > 0 && (
+                // One main action, on the right where reading ends, tinted with the type's colour (M3.5)
                 <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-line bg-surface/60 px-4 py-2.5">
-                  <button
-                    type="button"
-                    title={t("Back to the previous stage")}
-                    onClick={() => handleMoveStage(-1)}
-                    disabled={currentStageIndex <= 0}
-                    className="rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink transition hover:bg-highlight active:scale-[0.97] disabled:opacity-40"
-                  >
-                    {t("‹ Back")}
-                  </button>
+                  {pasteStage && (
+                    <span className="text-xs text-faint">
+                      {t("Ctrl+V adds to")} <b className="font-semibold text-muted">{pasteStage.name}</b>
+                    </span>
+                  )}
+                  <span className="flex-1" />
 
                   {isLastStage ? (
                     <>
@@ -1139,7 +1167,8 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
                     <button
                       type="button"
                       onClick={() => (nextIsFinish ? setShowFinishModal(true) : handleMoveStage(1))}
-                      className="inline-flex items-center gap-2 rounded-control bg-primary px-4 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover active:scale-[0.97]"
+                      style={typeOf(activeCommission)?.color ? accentButton(typeOf(activeCommission)!.color) : undefined}
+                      className="inline-flex items-center gap-2 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow-sm transition hover:brightness-110 active:scale-[0.97]"
                     >
                       <IconCheck size={16} stroke={2} aria-hidden="true" />
                       {nextIsFinish
@@ -1150,25 +1179,6 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
                     </button>
                   )}
 
-                  {!isLastStage && !activeCommission.cancelled_at && (
-                    <button
-                      type="button"
-                      onClick={toggleTimer}
-                      aria-pressed={timing}
-                      title={trackedByStage || t("Time the current stage: the hours fill in when you finish")}
-                      className="inline-flex items-center gap-1.5 rounded-control border border-field-border bg-surface px-3 py-1.5 text-sm font-medium text-ink tabular-nums transition hover:bg-highlight active:scale-[0.97]"
-                    >
-                      {timing ? <IconPlayerStop size={15} stroke={2} aria-hidden="true" /> : <IconPlayerPlay size={15} stroke={2} aria-hidden="true" />}
-                      {timing ? t("Stop") : t("Time")}
-                      {tracked.total > 0 && <span className="text-muted">{trackedLabel(tracked.total)}</span>}
-                    </button>
-                  )}
-
-                  {pasteStage && (
-                    <span className="ml-1 text-xs text-faint">
-                      {t("Ctrl+V adds to")} <b className="font-semibold text-muted">{pasteStage.name}</b>
-                    </span>
-                  )}
                 </div>
               )}
             </>

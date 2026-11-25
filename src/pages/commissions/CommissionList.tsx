@@ -37,7 +37,7 @@ function CommissionList({
           .filter((group) => group.items.length > 0)
           .map((group) => (
             <div key={group.label} className="mb-2 last:mb-0">
-              <p className="flex items-baseline gap-2 px-2.5 pt-2.5 pb-1.5 text-xs font-semibold text-muted">
+              <p className="flex items-baseline gap-2 px-2.5 pt-4 pb-1.5 text-sm font-semibold text-ink first:pt-2">
                 {group.label}
                 <span className="font-medium text-faint tabular-nums">{group.items.length}</span>
               </p>
@@ -85,11 +85,18 @@ function CommissionList({
                       </span>
                     </span>
 
+                    {/* Late is red text, not a red block that outshouts the title; only "due today" keeps the solid fill */}
                     {deadlineStatus ? (
-                      <span className={`shrink-0 whitespace-nowrap ${deadlineStatus.className}`}>{deadlineStatus.short}</span>
+                      <span
+                        className={`shrink-0 whitespace-nowrap ${
+                          deadlineStatus.label === t("Due today") ? deadlineStatus.className : deadlineStatus.className.replace("chip-solid", "")
+                        }`}
+                      >
+                        {deadlineStatus.short}
+                      </span>
                     ) : (
                       <span title={t("Days since you accepted it")} className={`shrink-0 text-xs font-semibold tabular-nums ${ageTone || "text-faint"}`}>
-                        {ageInDays(commission, new Date())}d
+                        {ageInDays(commission, new Date())} d
                       </span>
                     )}
                   </button>

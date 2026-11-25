@@ -104,7 +104,7 @@ The **···** menu on a commission lets you **duplicate** it, **copy the invoic
 
 ### Timing your work
 
-**▷ Time** (at the bottom of an open commission) starts a timer on its current stage; **■ Stop** ends it. Only one runs at a time: starting another commission's stops the first. The button shows the total so far, and its tooltip each stage's share. When you mark the commission as finished, the hours fill in with what you timed (you can still change them), and finishing stops its timer.
+**▷ Time** (at the top of an open commission, next to Edit) starts a timer on its current stage; **■ Stop** ends it. Only one runs at a time: starting another commission's stops the first. The button shows the total so far, and its tooltip each stage's share. When you mark the commission as finished, the hours fill in with what you timed (you can still change them), and finishing stops its timer.
 
 ### Stages and images
 
@@ -114,7 +114,9 @@ The image of the stage you pick is shown **large**, with its alternatives, and b
 - A stage can hold several **alternatives** (**Alt 1**, **Alt 2**…): the options you show the client, for example with and without glasses. Hover an image for **+ Alt** (another alternative), **+ v** (a retouched **version** of that image) and **×** (remove it).
 - The big image and the strip show the **latest version of each alternative**, with a `v2` badge, or `final` once the commission has moved past that stage. Older versions are never lost.
 - **Focus mode** opens an image full screen, lets you move through all the images of all the stages with the arrow keys, and has chips to see every version of the alternative and a **+ New version** button.
-- The footer has **[Stage] done →**, which moves the commission to the next stage, **Back** (returns to the previous one) and, on the last working stage, **Mark as finished**. It also reminds you where **Ctrl+V** will paste.
+- The footer has one main button, on the right and in the colour of the commission type: **[Stage] done →** moves the commission to the next stage and, on the last working stage, **Mark as finished**. It also reminds you where **Ctrl+V** will paste. To go back a stage, use **··· → Back to the previous stage** (or ← →  to look at other stages).
+- If the stage you are on has no image yet, you see the latest earlier one faded, with the invitation to drop the new one on it.
+- The side column is split into **Commission**, **Money**, **Characters** and **Notes**; click a title to fold it.
 
 ### Corrections and revisions
 
@@ -223,7 +225,7 @@ Everything you have delivered, as a register. It's the other view of **Commissio
 - A gallery grouped by **month** or by **client**, with a sticky header for each group (count and total). Search by title or client and filter by **date range**.
 - Each tile shows the image, the title, the amount and the client (or date), hours and rate per hour. The top line has how many you finished, the total and your **rate per hour** (the rate of each type is in [Statistics](#statistics)). A commission not collected yet shows its hours without a rate. Click an image to see it large (the background takes its colours); click the text to open the commission.
 
-**Marking a commission as finished.** On the last working stage, the button reads **Mark as finished**: you set the **delivery date**, the **hours spent** (typed by hand), an optional **final image** and **final notes** (a link to the post, how it went…). **Back** reopens it, and **Edit delivery** changes those details later. Hours and delivery date feed the register and [Statistics](#statistics).
+**Marking a commission as finished.** On the last working stage, the button reads **Mark as finished**: you set the **delivery date**, the **hours spent** (typed by hand), an optional **final image** and **final notes** (a link to the post, how it went…). **··· → Back to the previous stage** reopens it, and **Edit delivery** changes those details later. Hours and delivery date feed the register and [Statistics](#statistics).
 
 ## Statistics
 

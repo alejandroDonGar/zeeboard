@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { IconChevronDown } from "@tabler/icons-react";
 import { t } from "../../lib/i18n";
 import { imageUrl, thumbUrl } from "../../lib/images";
 import { hide } from "../../lib/privacy";
@@ -42,12 +43,24 @@ function CommissionInfo({
   const label = "pt-2.5 text-faint first:pt-0";
   const value = "flex min-w-0 flex-wrap items-center gap-1.5 pt-2.5 first:pt-0";
   const heading = "mb-2 text-sm font-semibold";
+  // An inspector section (like Lightroom's or Figma's): a title that folds what's under it. Native <details>, so the
+  // keyboard and screen readers already know it. ponytail: not remembered; add localStorage if people fold the same ones
+  const section = (title: string, body: ReactNode) => (
+    <details open className="group min-w-0 border-b border-line pb-4 last:border-b-0 [&:not([open])]:pb-0">
+      <summary className="mb-2.5 flex cursor-pointer list-none items-center justify-between text-sm font-semibold [&::-webkit-details-marker]:hidden">
+        {t(title)}
+        <IconChevronDown size={15} stroke={1.75} aria-hidden="true" className="text-faint transition group-open:rotate-180" />
+      </summary>
+      {body}
+    </details>
+  );
   const showRevisions = revisions.included !== null || revisions.count > 0;
   const revisionTone =
     revisions.included === null ? "" : revisions.count > revisions.included ? "chip-bad" : revisions.count === revisions.included ? "chip-warn" : "";
 
   return (
     <div className="grid min-w-0 grid-cols-[repeat(auto-fit,minmax(240px,1fr))] content-start gap-x-8 gap-y-5 border-t border-line p-4 @min-[760px]:grid-cols-1 @min-[760px]:overflow-y-auto @min-[760px]:border-t-0 @min-[760px]:border-l">
+      {section("Commission", <>
       <dl className="grid grid-cols-[84px_minmax(0,1fr)] items-center gap-x-2.5">
         {type && (
           <>
@@ -102,36 +115,19 @@ function CommissionInfo({
       </dl>
 
       {tags.length > 0 && (
-        <div>
-          <p className={heading}>{t("Tags")}</p>
-          <div className="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
-              <TagChip key={tag.id} name={tag.name} color={tag.color} />
-            ))}
-          </div>
+        <div className="mt-3 flex flex-wrap gap-1.5" aria-label={t("Tags")}>
+          {tags.map((tag) => (
+            <TagChip key={tag.id} name={tag.name} color={tag.color} />
+          ))}
         </div>
       )}
+      </>)}
 
-      {payments}
+      {section("Money", payments)}
 
-      {(commission.notes || (isLastStage && commission.final_notes)) && (
-        <div>
-          <p className={heading}>{t("Notes")}</p>
-          <p className="line-clamp-6 whitespace-pre-wrap text-muted">{commission.notes ? <Linkified text={commission.notes} /> : t("No notes.")}</p>
-          {isLastStage && commission.final_notes && (
-            <>
-              <p className={`${heading} mt-3`}>{t("Final notes")}</p>
-              <p className="line-clamp-6 whitespace-pre-wrap text-muted">
-                <Linkified text={commission.final_notes} />
-              </p>
-            </>
-          )}
-        </div>
-      )}
-
-      {characters.length > 0 && (
-        <div>
-          <p className={heading}>{t("Characters")}</p>
+      {characters.length > 0 &&
+        section(
+          "Characters",
           <div className="space-y-2">
             {characters.map((character) => (
               <div key={character.id} className="flex items-center gap-2">
@@ -145,9 +141,24 @@ function CommissionInfo({
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      )}
+          </div>,
+        )}
+
+      {(commission.notes || (isLastStage && commission.final_notes)) &&
+        section(
+          "Notes",
+          <>
+            <p className="line-clamp-6 whitespace-pre-wrap text-muted">{commission.notes ? <Linkified text={commission.notes} /> : t("No notes.")}</p>
+            {isLastStage && commission.final_notes && (
+              <>
+                <p className={`${heading} mt-3`}>{t("Final notes")}</p>
+                <p className="line-clamp-6 whitespace-pre-wrap text-muted">
+                  <Linkified text={commission.final_notes} />
+                </p>
+              </>
+            )}
+          </>,
+        )}
     </div>
   );
 }
