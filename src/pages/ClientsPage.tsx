@@ -779,7 +779,7 @@ function ClientsPage({
                       {
                         label: t("Pending payment"),
                         value: <span className={pendingAmount > 0 ? "text-tone-warn" : ""}><Money amount={pendingAmount} /></span>,
-                        detail: pendingAmount > 0 ? t("There are payments pending") : t("All paid"),
+                        detail: pendingAmount > 0 ? "" : t("All paid"),
                       },
                     ].map((figure) => (
                       <div key={figure.label} className="border-l border-line px-[18px] first:border-l-0 first:pl-0">
@@ -915,7 +915,7 @@ function ClientsPage({
                                   ? t("Optimizing…")
                                   : isDropTarget
                                     ? t("Drop to add references")
-                                    : t("{refs} refs · {used} commissions", { refs: references.length, used: usedIn })}
+                                    : t(usedIn === 1 ? "{refs} refs · {used} commission" : "{refs} refs · {used} commissions", { refs: references.length, used: usedIn })}
                               </p>
                             </div>
                           </button>
@@ -1117,11 +1117,12 @@ function ClientsPage({
                   <dl className="grid content-start gap-y-2.5">
                     {[
                       {
-                        label: t("Social account"),
+                        // The account to tag when posting (the form asks it that way); the contact row below is a separate thing
+                        label: t("Tag when posting"),
                         value:
                           selectedClient.tag_handle &&
                           `${selectedClient.tag_platform && selectedClient.tag_platform !== "Other" ? `${selectedClient.tag_platform} ` : ""}${hide(selectedClient.tag_handle)}`,
-                        empty: t("No social account"),
+                        empty: t("Not set"),
                       },
                       {
                         label: selectedClient.platform || t("Contact"),

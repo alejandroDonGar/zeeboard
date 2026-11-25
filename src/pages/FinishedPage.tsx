@@ -130,7 +130,9 @@ function FinishedPage({
   // What each finished commission brought in per hour (only those with hours)
   const net = (commission: Commission) =>
     netIncome(paymentSummary(converted.get(commission.id)?.price ?? null, money.payments.filter((payment) => payment.commission_id === commission.id)));
-  const rateOf = (commission: Commission) => (converted.has(commission.id) ? ratePerHour([{ net: net(commission), hours: commission.hours }]) : null);
+  // Nothing collected yet: no rate, rather than a "0 EUR/h" that looks like a real figure
+  const rateOf = (commission: Commission) =>
+    converted.has(commission.id) && net(commission) !== 0 ? ratePerHour([{ net: net(commission), hours: commission.hours }]) : null;
   const overallRate = ratePerHour(money.commissions.map((commission) => ({ net: net(commission), hours: commission.hours })));
   const rateByTemplate = templates
     .map((template) => ({
