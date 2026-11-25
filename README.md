@@ -76,15 +76,15 @@ Along the way, **reminders** warn you about deadlines, stalled work and unpaid c
 
 ## Dashboard
 
-What is on your desk today, at a glance.
+What needs you today, in one column, and the action to deal with it right there.
 
 <img src="docs/images/dashboard.png" alt="Dashboard" width="900">
 
-- **Today**: what needs attention, with the reason next to each item: past its limit, due today or soon, stalled, or past the sketch without any payment.
-- **In progress**: every open commission with the colour bar of its type, its current stage, a thin progress bar and its deadline. Click one to open it.
-- **Received per month**: a line chart of the money that actually reached you (net of platform fees, by payment date). The last point is the month still running, drawn dashed.
-- **This month** (right column): what you received (with the platform fees), what is waiting for payment, how many are in progress and how many are due within 7 days (overdue included).
-- **Not paid yet**: what each commission still owes. Below it, **your hourly rate** over the last 90 days (what you kept after fees divided by the hours of the commissions you finished) and your **most used types and tags**.
+- Under **Today** and the date, one sentence with the money: what is left to collect, what you received this month, how many commissions are in progress and how many are due within 7 days.
+- Then what needs attention, grouped by reason: **Overdue** (past the limit or due today), **Due within 7 days**, **Not paid yet** (past the sketch without any payment) and **Stalled**. Click a row to open the commission.
+- Each row has its action: **Copy reminder** copies a polite payment reminder, filled in, ready to paste to the client; **Waiting for the client** marks a stalled commission as waiting, and it leaves the list.
+- **Requests to answer** lists who is waiting for an answer, with a button to go to Requests.
+- The board of all commissions is in [Commissions](#commissions), and the charts and rates in [Statistics](#statistics).
 
 ## Commissions
 
