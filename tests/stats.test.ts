@@ -56,7 +56,7 @@ test("stats", async () => {
   assert.strictEqual(stats.current.avgPerPiece, 145);
   // (90 + 200) / (4 + 8) hours
   assert.strictEqual(stats.current.rate, 24.17);
-  assert.deepStrictEqual(stats.previous, { received: 100, pieces: 1, avgPerPiece: 100, rate: 20 });
+  assert.deepStrictEqual(stats.previous, { received: 100, pieces: 1, avgPerPiece: 100, rate: 20, expenses: 0, profit: 100 });
   
   assert.strictEqual(stats.months.length, 12);
   assert.strictEqual(stats.months[0].key, "2026-01");
@@ -70,6 +70,13 @@ test("stats", async () => {
   assert.deepStrictEqual(stats.fees, { total: 15, percent: 10, pending: 1 });
   
   assert.strictEqual(computeStats({ commissions, payments, templates: [], stages, currency: "EUR", now }, "all").previous, null);
+
+  // Expenses: only the ones in the period; profit = what came in minus what went out
+  const expenses = [{ spent_at: "2026-02-01", amount: 35 }, { spent_at: "2026-09-30", amount: 0.5 }, { spent_at: "2025-12-31", amount: 120 }];
+  const withExpenses = computeStats({ commissions, payments, expenses, templates: [], stages, currency: "EUR", now }, "year");
+  assert.strictEqual(withExpenses.current.expenses, 35.5);
+  assert.strictEqual(withExpenses.current.profit, 299.5);
+  assert.strictEqual(withExpenses.previous?.profit, -20); // 2025: 100 in, 120 out
   assert.strictEqual(computeStats({ commissions: [], payments: [], templates: [], stages, currency: "EUR", now }, "year").current.rate, null);
   
   // ---- Clients: top and returning share ----

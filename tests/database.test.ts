@@ -626,6 +626,20 @@ describe("exchange rate", () => {
   });
 });
 
+describe("expenses", () => {
+  test("added with a day, an amount and a note, listed newest first, and deleted", async () => {
+    const brushes = await db.addExpense("2026-03-01", 30, " Brushes ");
+    await db.addExpense("2026-05-10", 12.5, "");
+    expect(await db.getExpenses()).toMatchObject([
+      { spent_at: "2026-05-10", amount: 12.5, note: "" },
+      { id: brushes, spent_at: "2026-03-01", amount: 30, note: "Brushes" },
+    ]);
+
+    await db.deleteExpense(brushes);
+    expect((await db.getExpenses()).map((expense) => expense.amount)).toEqual([12.5]);
+  });
+});
+
 describe("stage timer", () => {
   test("one timer at a time: starting another stops the running one; stopping ends it", async () => {
     const { id: templateId, stages } = await template("Bust", ["Sketch", "Colour"]);

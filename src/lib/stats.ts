@@ -16,7 +16,8 @@ export type Period = "year" | "12m" | "all";
 /** Inclusive days, YYYY-MM-DD */
 export type Range = { from: string; to: string };
 
-export type Summary = { received: number; pieces: number; avgPerPiece: number | null; rate: number | null };
+/** profit = received − expenses: what is really left */
+export type Summary = { received: number; pieces: number; avgPerPiece: number | null; rate: number | null; expenses: number; profit: number };
 
 export type TemplateRow = {
   name: string;
@@ -99,6 +100,8 @@ export function computeStats(
     templates: { id: number; name: string }[];
     stages: Record<number, TemplateStage[]>;
     requests?: { status: RequestStatus; created_at: string }[];
+    /** Money spent on the work, already in the default currency */
+    expenses?: { spent_at: string; amount: number }[];
     /** Default currency: commissions without one count as this */
     currency: string;
     now: Date;
@@ -123,12 +126,16 @@ export function computeStats(
   const summary = (range: Range): Summary => {
     const pieces = piecesIn(range);
     const total = round2(pieces.reduce((sum, piece) => sum + piece.net, 0));
+    const received = round2(payments.filter((payment) => inRange(payment.paid_at, range)).reduce((sum, payment) => sum + paymentNet(payment), 0));
+    const expenses = round2((input.expenses ?? []).filter((expense) => inRange(expense.spent_at, range)).reduce((sum, expense) => sum + expense.amount, 0));
 
     return {
-      received: round2(payments.filter((payment) => inRange(payment.paid_at, range)).reduce((sum, payment) => sum + paymentNet(payment), 0)),
+      received,
       pieces: pieces.length,
       avgPerPiece: pieces.length > 0 ? round2(total / pieces.length) : null,
       rate: ratePerHour(pieces.map((piece) => ({ net: piece.net, hours: piece.commission.hours }))),
+      expenses,
+      profit: round2(received - expenses),
     };
   };
 

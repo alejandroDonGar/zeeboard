@@ -1987,3 +1987,20 @@ export async function startTimer(commissionId: number, stageId: number | null): 
 export async function setCommissionExchangeRate(commissionId: number, rate: number | null): Promise<void> {
   await (await getDatabase()).execute(`UPDATE commissions SET exchange_rate = ? WHERE id = ?;`, [rate, commissionId]);
 }
+
+/** Money spent on the work, in the default currency. ponytail: one currency only; add a currency column if you buy in others. */
+export type Expense = { id: number; spent_at: string; amount: number; note: string };
+
+export async function getExpenses(): Promise<Expense[]> {
+  return (await getDatabase()).select<Expense[]>(`SELECT id, spent_at, amount, note FROM expenses ORDER BY spent_at DESC, id DESC;`);
+}
+
+export async function addExpense(spentAt: string, amount: number, note: string): Promise<number> {
+  const result = await (await getDatabase()).execute(`INSERT INTO expenses (spent_at, amount, note) VALUES (?, ?, ?);`, [spentAt, amount, note.trim()]);
+  return Number(result.lastInsertId);
+}
+
+/** Gone for good: an expense is one line, easy to type again (no trash). */
+export async function deleteExpense(expenseId: number): Promise<void> {
+  await (await getDatabase()).execute(`DELETE FROM expenses WHERE id = ?;`, [expenseId]);
+}

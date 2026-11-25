@@ -231,12 +231,13 @@ How the business is doing, from your payments and your finished commissions.
 
 <img src="docs/images/statistics.png" alt="Statistics screen" width="900">
 
-- Choose **This year**, **Last 12 months** or **All time**. The key figures (received, pieces delivered, average per piece, per hour) show the change against the previous period.
+- Choose **This year**, **Last 12 months** or **All time**. The key figures (received, pieces delivered, average per piece, profit, per hour) show the change against the previous period.
 - **Received per month** counts money by the day it reached you, net of platform fees. Pieces, averages and hours count by delivery date.
 - **By type of commission**: pieces, received, average, hours, days from request to delivery and rate per hour for each template.
 - **Requests**: one bar with how many came in and how many were accepted, declined, waiting or unanswered, plus the acceptance rate.
 - **Top clients** with the share of income that comes from clients who come back, and the **platform fees** you paid.
-- Only commissions in your default currency are counted; currencies are never added together.
+- **Expenses**: materials, software, platform plans… typed with a day, an amount and a note, in your default currency. **Profit** is what came in during the period minus what you spent. Removing an expense is immediate (it doesn't go to the trash).
+- Only commissions in your default currency are counted, or ones in another currency with their exchange rate; currencies are never added together without one.
 
 ## Trash and undo
 

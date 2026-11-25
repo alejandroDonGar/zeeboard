@@ -4,10 +4,13 @@ import GlassPanel from "../components/GlassPanel";
 import Money from "../components/Money";
 import LineChart from "../components/LineChart";
 import { Segmented } from "../components/BoardFilters";
-import { formatMoney } from "../lib/commissionHelpers";
+import { formatMoney, isoDay, parsePrice } from "../lib/commissionHelpers";
 import {
   appSettings,
+  addExpense,
+  deleteExpense,
   getAllPayments,
+  getExpenses,
   getCommissions,
   getRequests,
   getTemplates,
@@ -15,12 +18,14 @@ import {
   type Commission,
   type CommissionPayment,
   type CommissionRequest,
+  type Expense,
   type Template,
   type TemplateStage,
 } from "../lib/database";
 import { locale, t } from "../lib/i18n";
 import { hide } from "../lib/privacy";
-import { changePercent, computeStats, type Period } from "../lib/stats";
+import { changePercent, computeStats, periodRanges, type Period } from "../lib/stats";
+import { useToast } from "../context/ToastContext";
 
 /** ▲ 12 % / ▼ 5 % against the previous period (nothing when there is nothing to compare) */
 function Change({ now, before }: { now: number | null; before: number | null }) {
@@ -46,6 +51,30 @@ function StatisticsPage() {
     templates: Template[];
     stages: Record<number, TemplateStage[]>;
   } | null>(null);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  const [newExpense, setNewExpense] = useState({ spentAt: isoDay(new Date()), amount: "", note: "" });
+  const { showToast } = useToast();
+
+  const reloadExpenses = () => getExpenses().then(setExpenses);
+  useEffect(() => {
+    reloadExpenses().catch(console.error);
+  }, []);
+
+  async function handleAddExpense() {
+    let amount: number | null;
+    try {
+      amount = parsePrice(newExpense.amount);
+    } catch {
+      amount = null;
+    }
+    if (amount === null || amount <= 0) {
+      showToast("Type how much it was.", "error");
+      return;
+    }
+    await addExpense(newExpense.spentAt, amount, newExpense.note);
+    setNewExpense({ ...newExpense, amount: "", note: "" });
+    await reloadExpenses();
+  }
 
   useEffect(() => {
     (async () => {
@@ -57,8 +86,8 @@ function StatisticsPage() {
   }, []);
 
   const stats = useMemo(
-    () => (data ? computeStats({ ...data, currency: appSettings().default_currency, now: new Date() }, period) : null),
-    [data, period],
+    () => (data ? computeStats({ ...data, expenses, currency: appSettings().default_currency, now: new Date() }, period) : null),
+    [data, expenses, period],
   );
 
   const monthFormatter = new Intl.DateTimeFormat(locale, { month: "short" });
@@ -78,6 +107,11 @@ function StatisticsPage() {
       change: <Change now={stats.current.avgPerPiece} before={stats.previous?.avgPerPiece ?? null} />,
     },
     {
+      label: t("Profit"),
+      value: <Money amount={stats.current.profit} />,
+      change: <Change now={stats.current.profit} before={stats.previous?.profit ?? null} />,
+    },
+    {
       label: t("Per hour"),
       value: stats.current.rate === null ? "—" : <><Money amount={stats.current.rate} />/h</>,
       change: <Change now={stats.current.rate} before={stats.previous?.rate ?? null} />,
@@ -91,6 +125,9 @@ function StatisticsPage() {
     { label: t("on the waitlist"), n: stats.requests.waitlist, color: "bg-tone-warn" },
     { label: t("unanswered"), n: stats.requests.open, color: "bg-tone-info" },
   ];
+  const range = periodRanges(period, now).current;
+  const periodExpenses = expenses.filter((expense) => expense.spent_at >= range.from && expense.spent_at <= range.to);
+  const field = "min-w-0 rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink";
   const bestClient = Math.max(...(stats?.topClients.map((client) => client.net) ?? []), 1);
 
   return (
@@ -253,6 +290,38 @@ function StatisticsPage() {
               )}
             </section>
           </div>
+        )}
+
+        {stats && (
+          <section className="border-t border-line py-5">
+            <h3 className={h3}>
+              {t("Expenses")} <span className="font-medium text-faint tabular-nums">{formatMoney(stats.current.expenses)}</span>
+            </h3>
+            <p className="mb-3 text-muted">{t("Materials, software, platform plans… Profit is what came in minus this.")}</p>
+            <div className="mb-3 flex flex-wrap gap-2">
+              <input type="date" value={newExpense.spentAt} onChange={(event) => setNewExpense({ ...newExpense, spentAt: event.target.value })} aria-label={t("Date")} className={field} />
+              <input value={newExpense.amount} onChange={(event) => setNewExpense({ ...newExpense, amount: event.target.value })} placeholder={t("Amount")} aria-label={t("Amount")} inputMode="decimal" className={`${field} w-28`} />
+              <input value={newExpense.note} onChange={(event) => setNewExpense({ ...newExpense, note: event.target.value })} placeholder={t("What was it?")} aria-label={t("What was it?")} className={`${field} flex-1`} />
+              <button type="button" onClick={() => handleAddExpense().catch(console.error)} className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
+                {t("Add expense")}
+              </button>
+            </div>
+            {periodExpenses.map((expense) => (
+              <div key={expense.id} className="group grid grid-cols-[110px_minmax(0,1fr)_auto_24px] items-center gap-x-3 border-t border-line py-2 tabular-nums">
+                <span className="text-muted">{expense.spent_at}</span>
+                <span className="truncate">{expense.note}</span>
+                <span className="font-semibold">{formatMoney(expense.amount)}</span>
+                <button
+                  type="button"
+                  title={t("Remove expense")}
+                  onClick={() => deleteExpense(expense.id).then(reloadExpenses).catch(console.error)}
+                  className="rounded-sm text-faint opacity-0 transition group-hover:opacity-100 hover:bg-tone-bad/10 hover:text-tone-bad focus-visible:opacity-100"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </section>
         )}
       </GlassPanel>
     </div>
