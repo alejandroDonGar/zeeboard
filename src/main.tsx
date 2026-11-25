@@ -5,6 +5,10 @@ import "@fontsource-variable/manrope";
 import { MotionConfig } from "framer-motion";
 import App from "./App";
 import { applyTheme, getTheme } from "./lib/theme";
+import { installErrorLog } from "./lib/errorLog";
+
+// First of all, so even a failure while starting leaves a trace (Settings › Storage › Error report)
+installErrorLog();
 
 // Before first paint, to avoid a flash of the wrong theme
 applyTheme(getTheme());

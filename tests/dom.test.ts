@@ -171,6 +171,45 @@ describe("dropping and pasting images", () => {
   });
 });
 
+describe("error log", () => {
+  test("errors from console.error, uncaught errors and rejected promises are kept to copy, the last 50", async () => {
+    localStorage.clear();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const log = await import("../src/lib/errorLog");
+    log.installErrorLog();
+
+    console.error("Could not save", new Error("disk full"));
+    window.dispatchEvent(new ErrorEvent("error", { error: new Error("boom"), message: "boom" }));
+    window.dispatchEvent(new ErrorEvent("error", { message: "Script error." })); // from another origin: no Error object
+    const rejection = new Event("unhandledrejection") as Event & { reason: unknown };
+    rejection.reason = { code: 7 };
+    window.dispatchEvent(rejection);
+
+    const report = log.errorReport();
+    expect(report).toContain("Could not save Error: disk full");
+    expect(report).toContain("Script error.");
+    expect(report).toContain("boom");
+    expect(report).toContain('Unhandled: {"code":7}');
+
+    for (let n = 0; n < 60; n++) console.error(`error ${n}`);
+    expect(log.errorReport().split("\n\n").filter((entry) => entry.startsWith("["))).toHaveLength(50);
+    expect(log.errorReport()).toContain("error 59");
+
+    log.clearErrorLog();
+    expect(log.errorReport()).toBe("");
+  });
+
+  test("without storage it keeps nothing and the app keeps working", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.stubGlobal("localStorage", { getItem: () => { throw new Error("off"); }, setItem: () => { throw new Error("off"); }, removeItem: () => { throw new Error("off"); } });
+    const log = await import("../src/lib/errorLog");
+    log.installErrorLog();
+    console.error("lost");
+    expect(log.errorReport()).toBe("");
+    log.clearErrorLog();
+  });
+});
+
 test("private mode repaints whoever is listening, until they stop", async () => {
   const privacy = await import("../src/lib/privacy");
   const hook = renderHook(() => privacy.usePrivacy());

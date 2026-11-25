@@ -31,6 +31,7 @@ import { KINDS, TRASH_DAYS, type TrashKind } from "../lib/trash";
 import { useToast } from "../context/ToastContext";
 import { formatMoney, isoDay, receivedAfterFees } from "../lib/commissionHelpers";
 import { exportCsv, type ExportKind } from "../lib/export";
+import { clearErrorLog, errorReport } from "../lib/errorLog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { appDataDir, join } from "@tauri-apps/api/path";
 import { cleanUpOrphanedImages, getStorageStats, type StorageStats } from "../lib/images";
@@ -793,6 +794,28 @@ function SettingsPage() {
                 className={ghostButton}
               >
                 {cleaningUp ? t("Cleaning up…") : t("Clean up")}
+              </button>
+            </div>
+
+            <div className={row}>
+              <div className="flex-1">
+                <p className="font-semibold">{t("Error report")}</p>
+                <p className="text-sm text-muted">{t("The last errors, kept on this computer. Copy them to send them if something doesn't work.")}</p>
+              </div>
+              <button
+                type="button"
+                onClick={async () => {
+                  const report = errorReport();
+                  if (!report) return showToast("No errors so far.", "success");
+                  await navigator.clipboard.writeText(report);
+                  showToast("Error report copied.", "success");
+                }}
+                className={ghostButton}
+              >
+                {t("Copy")}
+              </button>
+              <button type="button" onClick={() => { clearErrorLog(); showToast("Error report cleared.", "success"); }} className={ghostButton}>
+                {t("Clear")}
               </button>
             </div>
           </div>

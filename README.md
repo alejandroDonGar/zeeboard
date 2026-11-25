@@ -309,7 +309,7 @@ Sections on the left, the chosen one on the right. Everything saves by itself.
 - **Prices and payments**: default currency (EUR, USD or GBP), the extra-character percentage, and your **payment platforms** with their fixed and percentage fees, with a live example (`200 → 193.85`).
 - **Deadlines and alerts**: the longest time you promise, delivery reminders and stalled alerts, each with its own number of days and an on/off switch.
 - **iPad**: the [iPad receiver](#receiving-images-from-the-ipad).
-- **Backups**, **Data and storage** (PayPal import, CSV export, disk use, unused images) and **Trash**, below.
+- **Backups**, **Data and storage** (PayPal import, CSV export, disk use, unused images, and an **error report** with the last errors to copy and send if something doesn't work) and **Trash**, below.
 
 ### Backups
 

@@ -696,6 +696,14 @@ export const es: Record<string, string> = {
   "Commission cancelled. Its payments stay.": "Comisión cancelada. Sus pagos se quedan.",
   "Could not save the change.": "No se pudo guardar el cambio.",
   "Waiting for the client": "Esperando al cliente",
+  "Error report": "Informe de errores",
+  "The last errors, kept on this computer. Copy them to send them if something doesn't work.":
+    "Los últimos errores, guardados en este ordenador. Cópialos para enviarlos si algo no funciona.",
+  Copy: "Copiar",
+  Clear: "Borrar",
+  "No errors so far.": "Ningún error por ahora.",
+  "Error report copied.": "Informe de errores copiado.",
+  "Error report cleared.": "Informe de errores borrado.",
   "Not waiting any more": "Ya no espero al cliente",
   "No stalled alert while you wait for their feedback or payment": "Sin aviso de parada mientras esperas su respuesta o su pago",
 };
