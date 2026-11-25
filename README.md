@@ -241,7 +241,7 @@ Nothing is deleted for good at once. Commissions, clients, characters, templates
 ZeeBoard watches your commissions and tells you what needs attention, in the dashboard and as **Windows notifications** (each alert is shown once).
 
 - **Delivery**: a few days before the limit and on the day. If a commission has no deadline, the limit is the day you accepted it plus the longest time you promise (60 days by default).
-- **Stalled**: no new image, correction, payment or stage change for a number of days (21 by default).
+- **Stalled**: no new image, correction, payment or stage change for a number of days (21 by default). Not while it is marked **··· → Waiting for the client** (their feedback or payment); moving it to another stage unmarks it.
 - **Unpaid**: the commission left the first stage of its template (your sketch was approved) and nothing has been paid yet.
 
 Alerts are checked when the app opens and every 30 minutes while it stays open. All the numbers are in [Settings](#settings).
