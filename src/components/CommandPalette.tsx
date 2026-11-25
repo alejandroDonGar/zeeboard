@@ -60,6 +60,7 @@ const SHORTCUTS: [string, string][] = [
   ["Ctrl+Z", "Restore what you just deleted"],
   ["Ctrl+Shift+P", "Toggle private mode"],
   ["[", "Hide or show the list (more room for the drawing)"],
+  ["A · W · D", "In Requests: accept, waitlist or decline the open one"],
   ["?", "Show this list"],
   ["Esc", "Close"],
 ];

@@ -277,6 +277,29 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   const typical = current?.template_id != null ? daysByTemplate[current.template_id] : undefined;
   const delivery = typical === undefined ? null : isoDay(new Date(Date.now() + typical * 86400000));
   const live = current?.status === "new" || current?.status === "waitlist";
+
+  // Decide and move on: forgetting the selection opens the next request waiting (like HEY or Superhuman) (M5.2)
+  function decide(request: CommissionRequest, status: "waitlist" | "declined") {
+    run(async () => {
+      await setRequestStatus(request.id, status);
+      setSelectedId(null);
+    }, status === "waitlist" ? "Could not move it" : "Could not decline");
+  }
+
+  // A accepts, W waitlists, D declines the open request (not while typing in a field)
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      const target = event.target as HTMLElement;
+      if (!current || !live || busy || draft || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName) || target.isContentEditable) return;
+      const key = event.key.toLowerCase();
+      if (key === "a" && current.template_id !== null) startAccept(current);
+      else if (key === "w" && current.status === "new") decide(current, "waitlist");
+      else if (key === "d") decide(current, "declined");
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  });
   const dot = { new: "bg-tone-info", waitlist: "bg-tone-warn", accepted: "bg-tone-ok", declined: "bg-faint" } as const;
   const statusLabel = { new: "New", waitlist: "Waitlist", accepted: "Accepted", declined: "Declined" } as const;
 
@@ -504,6 +527,62 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                     ) : (
                       <p className="text-faint">{t("No details.")}</p>
                     )}
+                  {/* The decision right under what they ask for (like HEY Screener), not at the bottom of the window (M5.1) */}
+                    <div className="mt-6 flex flex-wrap items-center gap-2">
+                  {live && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => startAccept(current)}
+                        disabled={busy || current.template_id === null}
+                        className={primaryBtn}
+                      >
+                        <IconCheck size={16} stroke={2} aria-hidden="true" />
+                        {t("Accept")}
+                        <kbd className="text-xs font-medium opacity-70">A</kbd>
+                      </button>
+                      {current.status === "new" && (
+                        <button type="button" onClick={() => decide(current, "waitlist")} disabled={busy} className={btn}>
+                          {t("Waitlist")} <kbd className="ml-1 text-xs text-faint">W</kbd>
+                        </button>
+                      )}
+                      <button type="button" onClick={() => decide(current, "declined")} disabled={busy} className={btn}>
+                        {t("Decline")} <kbd className="ml-1 text-xs text-faint">D</kbd>
+                      </button>
+                      {current.template_id === null && <span className="text-xs text-faint">{t("Choose the type first")}</span>}
+                    </>
+                  )}
+
+                  {current.status === "accepted" && current.commission_id !== null && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        localStorage.setItem("zeeboard-active-commission-id", String(current.commission_id));
+                        onOpenCommissionsPage();
+                      }}
+                      className={btn}
+                    >
+                      {t("Open commission")}
+                    </button>
+                  )}
+
+                  {current.status === "declined" && (
+                    <button type="button" onClick={() => run(() => setRequestStatus(current.id, "new"), "Could not restore")} disabled={busy} className={btn}>
+                      {t("Restore")}
+                    </button>
+                  )}
+
+                  {!live && (
+                    <button
+                      type="button"
+                      onClick={() => run(async () => undoToast(showToast, "Removed from the list.", await deleteRequest(current.id)), "Could not remove it")}
+                      disabled={busy}
+                      className={btn}
+                    >
+                      {t("Remove from the list")}
+                    </button>
+                  )}
+                </div>
                   </div>
 
                   <dl className="grid min-w-0 content-start gap-y-2.5 border-t border-line p-4 @min-[700px]:overflow-y-auto @min-[700px]:border-t-0 @min-[700px]:border-l">
@@ -547,60 +626,6 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
                   </dl>
                 </div>
 
-                <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-line bg-surface/60 px-4 py-2.5">
-                  {live && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => startAccept(current)}
-                        disabled={busy || current.template_id === null}
-                        className={primaryBtn}
-                      >
-                        <IconCheck size={16} stroke={2} aria-hidden="true" />
-                        {t("Accept")}
-                      </button>
-                      {current.status === "new" && (
-                        <button type="button" onClick={() => run(() => setRequestStatus(current.id, "waitlist"), "Could not move it")} disabled={busy} className={btn}>
-                          {t("Waitlist")}
-                        </button>
-                      )}
-                      <button type="button" onClick={() => run(() => setRequestStatus(current.id, "declined"), "Could not decline")} disabled={busy} className={btn}>
-                        {t("Decline")}
-                      </button>
-                      {current.template_id === null && <span className="text-xs text-faint">{t("Choose the type first")}</span>}
-                    </>
-                  )}
-
-                  {current.status === "accepted" && current.commission_id !== null && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        localStorage.setItem("zeeboard-active-commission-id", String(current.commission_id));
-                        onOpenCommissionsPage();
-                      }}
-                      className={btn}
-                    >
-                      {t("Open commission")}
-                    </button>
-                  )}
-
-                  {current.status === "declined" && (
-                    <button type="button" onClick={() => run(() => setRequestStatus(current.id, "new"), "Could not restore")} disabled={busy} className={btn}>
-                      {t("Restore")}
-                    </button>
-                  )}
-
-                  {!live && (
-                    <button
-                      type="button"
-                      onClick={() => run(async () => undoToast(showToast, "Removed from the list.", await deleteRequest(current.id)), "Could not remove it")}
-                      disabled={busy}
-                      className={btn}
-                    >
-                      {t("Remove from the list")}
-                    </button>
-                  )}
-                </div>
               </>
             )}
           </div>

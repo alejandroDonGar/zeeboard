@@ -568,6 +568,7 @@ export const es: Record<string, string> = {
   "New commission": "Nueva comisión",
   "Toggle private mode": "Activar o quitar el modo privado",
   "Hide or show the list (more room for the drawing)": "Ocultar o mostrar la lista (más sitio para el dibujo)",
+  "In Requests: accept, waitlist or decline the open one": "En Solicitudes: aceptar, poner en espera o rechazar la abierta",
   "Show this list": "Mostrar esta lista",
   Close: "Cerrar",
   "Search commissions, clients, screens and actions…": "Busca comisiones, clientes, pantallas y acciones…",
