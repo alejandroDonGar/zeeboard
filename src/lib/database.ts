@@ -438,6 +438,8 @@ export type Commission = {
   /** Set when it was cancelled (ISO): it stops being open but keeps its payments and history */
   cancelled_at?: string | null;
   cancel_reason?: string | null;
+  /** Set while it waits for the client (their feedback or payment): no stalled alert meanwhile */
+  waiting_since?: string | null;
 };
 
 export async function getCommissions(): Promise<Commission[]> {
@@ -541,7 +543,7 @@ export async function updateCommissionStage(
   await database.execute(
     `
     UPDATE commissions
-    SET current_stage_id = ?, stage_changed_at = ?
+    SET current_stage_id = ?, stage_changed_at = ?, waiting_since = NULL
     WHERE id = ?;
     `,
     [stageId, new Date().toISOString(), commissionId],
@@ -1937,4 +1939,11 @@ export async function setCommissionCancelled(commissionId: number, reason: strin
     reason?.trim() || null,
     commissionId,
   ]);
+}
+
+/** Marks (or unmarks) a commission as waiting for the client. Moving it to another stage unmarks it. */
+export async function setCommissionWaiting(commissionId: number, waiting: boolean): Promise<void> {
+  const database = await getDatabase();
+
+  await database.execute(`UPDATE commissions SET waiting_since = ? WHERE id = ?;`, [waiting ? new Date().toISOString() : null, commissionId]);
 }

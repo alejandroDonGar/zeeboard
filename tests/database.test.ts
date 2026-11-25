@@ -614,6 +614,22 @@ describe("loading many at once", () => {
   });
 });
 
+describe("waiting for the client", () => {
+  test("it is marked and unmarked by hand, and moving to another stage unmarks it (the ball is back with you)", async () => {
+    const { id: templateId, stages } = await template("Bust", ["Sketch", "Colour"]);
+    const id = await newCommission("Bust", null, templateId);
+
+    await db.setCommissionWaiting(id, true);
+    expect((await commission(id))?.waiting_since).not.toBeNull();
+    await db.setCommissionWaiting(id, false);
+    expect((await commission(id))?.waiting_since).toBeNull();
+
+    await db.setCommissionWaiting(id, true);
+    await db.updateCommissionStage(id, stages[1].id);
+    expect((await commission(id))?.waiting_since).toBeNull();
+  });
+});
+
 describe("cancelling", () => {
   test("a cancelled commission keeps its payments, leaves the open ones, and can be reopened", async () => {
     const helpers = await import("../src/lib/commissionHelpers");

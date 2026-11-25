@@ -695,4 +695,7 @@ export const es: Record<string, string> = {
   "Commission reopened.": "Comisión reabierta.",
   "Commission cancelled. Its payments stay.": "Comisión cancelada. Sus pagos se quedan.",
   "Could not save the change.": "No se pudo guardar el cambio.",
+  "Waiting for the client": "Esperando al cliente",
+  "Not waiting any more": "Ya no espero al cliente",
+  "No stalled alert while you wait for their feedback or payment": "Sin aviso de parada mientras esperas su respuesta o su pago",
 };

@@ -31,6 +31,7 @@ import {
   finishCommission,
   duplicateCommission,
   setCommissionCancelled,
+  setCommissionWaiting,
   deleteCommission,
   getCommissionTags,
   getClients,
@@ -385,6 +386,18 @@ function CommissionsPage() {
       await loadTagsForCommissions(data);
       setCancelReason(null);
       showToast(reason === null ? "Commission reopened." : "Commission cancelled. Its payments stay.", "success");
+    } catch (error) {
+      console.error(error);
+      showToast("Could not save the change.", "error");
+    }
+  }
+
+  async function toggleWaiting() {
+    if (!activeCommission) return;
+
+    try {
+      await setCommissionWaiting(activeCommission.id, !activeCommission.waiting_since);
+      setCommissions(await getCommissions());
     } catch (error) {
       console.error(error);
       showToast("Could not save the change.", "error");
@@ -812,6 +825,9 @@ function CommissionsPage() {
               <div className="hero-tint flex shrink-0 items-start gap-3 px-6 pt-5 pb-4" style={heroStyle}>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-display text-3xl leading-tight font-semibold tracking-tight [overflow-wrap:anywhere]">{activeCommission.title}</h2>
+                  {activeCommission.waiting_since && !activeCommission.cancelled_at && (
+                    <span className="chip chip-info mt-1">{t("Waiting for the client")}</span>
+                  )}
                   {activeCommission.cancelled_at && (
                     <span className="chip chip-bad mt-1" title={activeCommission.cancel_reason ?? undefined}>
                       {t("Cancelled")}{activeCommission.cancel_reason ? ` · ${activeCommission.cancel_reason}` : ""}
@@ -889,6 +905,21 @@ function CommissionsPage() {
                         >
                           {activeCommission.cancelled_at ? t("Reopen") : t("Cancel commission…")}
                         </button>
+                        {!activeCommission.cancelled_at && (
+                          <button
+                            type="button"
+                            role="menuitem"
+                            aria-pressed={Boolean(activeCommission.waiting_since)}
+                            title={t("No stalled alert while you wait for their feedback or payment")}
+                            onClick={() => {
+                              setCommissionMenuOpen(false);
+                              toggleWaiting();
+                            }}
+                            className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                          >
+                            {activeCommission.waiting_since ? t("Not waiting any more") : t("Waiting for the client")}
+                          </button>
+                        )}
                         <hr className="my-1 border-line" />
                         <button
                           type="button"

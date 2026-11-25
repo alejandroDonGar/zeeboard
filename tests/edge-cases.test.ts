@@ -90,6 +90,13 @@ describe("reminders", () => {
     expect(computeAttention([old], {}, options, now).map((item) => [item.kind, item.days])).toEqual([["stalled", 35]]);
   });
 
+  test("waiting for the client is not stalled, but its deadline still counts", () => {
+    const old = new Date(2026, 8, 1, 10).toISOString();
+    const waiting = { id: 1, title: "Waiting", created_at: old, deadline: "2026-12-31", waiting_since: "2026-09-20T10:00:00.000Z" };
+    const late = { id: 2, title: "Late", created_at: old, deadline: "2026-10-01", waiting_since: "2026-09-20T10:00:00.000Z" };
+    expect(computeAttention([waiting, late], {}, options, now).map((item) => [item.commission.id, item.kind])).toEqual([[2, "overdue"]]);
+  });
+
   test("among late ones, the latest goes first", () => {
     const late = (id: number, deadline: string) => ({ id, title: `C${id}`, created_at: new Date(2026, 9, 1).toISOString(), deadline });
     const items = computeAttention([late(1, "2026-10-04"), late(2, "2026-10-01")], {}, options, now);

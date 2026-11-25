@@ -22,7 +22,7 @@ export type Attention<T> = {
   text: string;
 };
 
-type Reminderable = { id: number; title: string; deadline: string | null; created_at: string };
+type Reminderable = { id: number; title: string; deadline: string | null; created_at: string; waiting_since?: string | null };
 type Options = Pick<
   AppSettings,
   "promise_max_days" | "reminders_enabled" | "reminder_days_before" | "stalled_enabled" | "stalled_days"
@@ -111,7 +111,7 @@ export function computeAttention<T extends Reminderable>(
         key: `${deadlineKey}:soon`,
         text: t("{title} reaches {limit} in {days}", { title: commission.title, limit, days: days(daysLeft) }),
       });
-    } else if (options.stalled_enabled) {
+    } else if (options.stalled_enabled && !commission.waiting_since) {
       const last = new Date(lastActivity[commission.id] ?? commission.created_at);
       const idle = Math.round((startOfDay(now).getTime() - startOfDay(last).getTime()) / DAY);
 
