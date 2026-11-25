@@ -30,6 +30,7 @@ import {
   updateCommissionStage,
   finishCommission,
   duplicateCommission,
+  setCommissionCancelled,
   deleteCommission,
   getCommissionTags,
   getClients,
@@ -88,6 +89,8 @@ function CommissionsPage() {
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [finishing, setFinishing] = useState(false);
   const [deletingCommission, setDeletingCommission] = useState(false);
+  // Cancel dialog: null = closed, otherwise the reason being typed
+  const [cancelReason, setCancelReason] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<Tag[]>([]);
   const [commissionTagsById, setCommissionTagsById] = useState<Record<number, Tag[]>>({});
   const [stageImagesByCommissionId, setStageImagesByCommissionId] = useState<Record<number, CommissionStageImage[]>>({});
@@ -369,6 +372,23 @@ function CommissionsPage() {
     setForm(null);
     setActiveCommissionId(commissionId);
     setViewMode("list");
+  }
+
+  /** Cancels the open commission with the typed reason, or (null) opens a cancelled one again */
+  async function setCancelled(reason: string | null) {
+    if (!activeCommission) return;
+
+    try {
+      await setCommissionCancelled(activeCommission.id, reason);
+      const data = await getCommissions();
+      setCommissions(data);
+      await loadTagsForCommissions(data);
+      setCancelReason(null);
+      showToast(reason === null ? "Commission reopened." : "Commission cancelled. Its payments stay.", "success");
+    } catch (error) {
+      console.error(error);
+      showToast("Could not save the change.", "error");
+    }
   }
 
   async function handleDuplicateCommission() {
@@ -792,6 +812,11 @@ function CommissionsPage() {
               <div className="hero-tint flex shrink-0 items-start gap-3 px-6 pt-5 pb-4" style={heroStyle}>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-display text-3xl leading-tight font-semibold tracking-tight [overflow-wrap:anywhere]">{activeCommission.title}</h2>
+                  {activeCommission.cancelled_at && (
+                    <span className="chip chip-bad mt-1" title={activeCommission.cancel_reason ?? undefined}>
+                      {t("Cancelled")}{activeCommission.cancel_reason ? ` · ${activeCommission.cancel_reason}` : ""}
+                    </span>
+                  )}
                   <p className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-muted">
                     <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-highlight text-[11px] font-bold text-ink">
                       {hide(activeCommission.client_name || "?").slice(0, 2)}
@@ -851,6 +876,18 @@ function CommissionsPage() {
                           className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
                         >
                           {t("Copy description")}
+                        </button>
+                        <button
+                          type="button"
+                          role="menuitem"
+                          onClick={() => {
+                            setCommissionMenuOpen(false);
+                            if (activeCommission.cancelled_at) setCancelled(null);
+                            else setCancelReason("");
+                          }}
+                          className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                        >
+                          {activeCommission.cancelled_at ? t("Reopen") : t("Cancel commission…")}
                         </button>
                         <hr className="my-1 border-line" />
                         <button
@@ -1075,6 +1112,26 @@ function CommissionsPage() {
             onCancel={() => setShowDeleteCommissionModal(false)}
         />
         )}
+      {cancelReason !== null && (
+        <ConfirmModal
+          eyebrow={t("Cancel commission")}
+          title={activeCommission?.title ?? ""}
+          message={t("It leaves the board, the slots and the reminders. Its payments, images and history stay, and you can reopen it from Finished.")}
+          cancelLabel={t("Keep it")}
+          confirmLabel={t("Cancel commission")}
+          onConfirm={() => setCancelled(cancelReason)}
+          onCancel={() => setCancelReason(null)}
+        >
+          <textarea
+            value={cancelReason}
+            onChange={(event) => setCancelReason(event.target.value)}
+            placeholder={t("Reason (optional): the client disappeared, refunded…")}
+            aria-label={t("Reason")}
+            rows={2}
+            className="mt-3 w-full rounded-md border border-line-strong bg-surface px-2 py-1.5 text-sm outline-none focus:border-ink"
+          />
+        </ConfirmModal>
+      )}
       {focusIndex >= 0 && (
         <FocusViewer
           commissionId={activeCommission?.id ?? null}

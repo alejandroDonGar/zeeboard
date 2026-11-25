@@ -143,6 +143,10 @@ Press **Ctrl+N** or **+ New commission**.
 - The **type** comes from the template (and its colour from the Catalog); only the "N Characters" tag is added automatically, and you can add extra tags before saving. The summary on the right shows the price breakdown as you type.
 - The template is locked once the commission exists, because its stages and images depend on it.
 
+### Cancelling a commission
+
+**··· → Cancel commission…** for one that falls through, with an optional reason. Unlike deleting it, it keeps its payments (a deposit you kept still counts as income), images and history: it just leaves the board, the slots, the reminders and the iPad, and isn't counted as a delivered piece. It shows under **Finished** with a *Cancelled* chip; open it there and **··· → Reopen** to bring it back.
+
 ### Invoice description
 
 **··· → Copy description** copies a short text for the PayPal invoice, such as `Rendered, 2 characters (Ana, Beto) - @YourHandle`, built from the template and the characters.
@@ -157,6 +161,7 @@ The payments block, in the properties column of the commission, is the single pl
 - **Payments** unfolds the list in the same column and the form to add one: the date, what the client paid, and what reached you. Pick a **platform** and "received" is filled with the fee already taken off (for example PayPal's 2.9 % + 0.35).
 - You can leave "received" empty and enter it later, when the money arrives. Partial payments (a deposit, then the rest) are supported.
 - **Tips** are added from the same form (switch it to **Tip**), with what the client sent and what reached you. They don't count towards the price, but their money and their fee count everywhere income is counted: the dashboard, the monthly chart, statistics, rate per hour, finished commissions and what a client has spent.
+- **Refunds** (money you give back, or a PayPal dispute) go in the same form too: switch it to **Refund** and type what you gave back. It's saved as a negative payment, so what was paid, what's left to collect, income and rate per hour all go down by it; a fee PayPal keeps shows as a loss.
 - Platforms and their fees are configured in [Settings](#settings).
 
 ## Requests

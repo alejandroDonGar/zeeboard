@@ -294,7 +294,13 @@ async function addColumn(database: ZeeDatabase, table: string, definition: strin
  * A new change is a new function at the end; one that has shipped is never edited. Each must be safe to run twice:
  * there is no transaction (the plugin's pool doesn't guarantee one connection), so a crash before the version is saved repeats it.
  */
-const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity];
+const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity, cancelling];
+
+/** Migration 4: a commission can be cancelled (with an optional reason) instead of deleted, keeping its payments. */
+async function cancelling(database: ZeeDatabase): Promise<void> {
+  await addColumn(database, "commissions", "cancelled_at TEXT");
+  await addColumn(database, "commissions", "cancel_reason TEXT");
+}
 
 /** Migration 2: an index on every column things are looked up by, so lists and deletions don't read whole tables. */
 async function indexes(database: ZeeDatabase): Promise<void> {

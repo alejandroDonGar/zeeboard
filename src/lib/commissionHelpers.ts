@@ -54,7 +54,9 @@ export function isCommissionCompleted(
   commission: Commission,
   templateStagesByTemplateId: Record<number, TemplateStage[]>,
 ): boolean {
+  // "Completed" means closed: a cancelled commission leaves the board, the slots, the reminders and the iPad too
   return (
+    Boolean(commission.cancelled_at) ||
     getCommissionCompletionPercentage(commission, templateStagesByTemplateId) === 100
   );
 }

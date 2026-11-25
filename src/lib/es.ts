@@ -678,4 +678,21 @@ export const es: Record<string, string> = {
   Tip: "Propina",
   "Add tip": "Añadir propina",
   Platform: "Plataforma",
+  // Cancelling and refunds
+  "Enter what you gave back": "Escribe lo que devolviste",
+  Refund: "Reembolso",
+  "Given back": "Devuelto",
+  "Add refund": "Añadir reembolso",
+  Cancelled: "Cancelada",
+  Reopen: "Reabrir",
+  "Cancel commission…": "Cancelar comisión…",
+  "Cancel commission": "Cancelar comisión",
+  "It leaves the board, the slots and the reminders. Its payments, images and history stay, and you can reopen it from Finished.":
+    "Sale del tablero, de las plazas y de los avisos. Sus pagos, imágenes e historial se quedan, y puedes reabrirla desde Terminadas.",
+  "Keep it": "Mantenerla",
+  "Reason (optional): the client disappeared, refunded…": "Motivo (opcional): el cliente desapareció, se le devolvió el dinero…",
+  Reason: "Motivo",
+  "Commission reopened.": "Comisión reabierta.",
+  "Commission cancelled. Its payments stay.": "Comisión cancelada. Sus pagos se quedan.",
+  "Could not save the change.": "No se pudo guardar el cambio.",
 };

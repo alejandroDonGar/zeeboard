@@ -308,7 +308,10 @@ function FinishedPage({
                                 title={t("Open commission")}
                                 className="group mt-2 grid w-full grid-cols-[minmax(0,1fr)_auto] gap-x-2 text-left"
                               >
-                                <strong className="truncate font-semibold group-hover:underline group-hover:underline-offset-[3px]">{commission.title}</strong>
+                                <strong className="truncate font-semibold group-hover:underline group-hover:underline-offset-[3px]">
+                                  {commission.cancelled_at && <span className="chip chip-bad mr-1.5 align-middle">{t("Cancelled")}</span>}
+                                  {commission.title}
+                                </strong>
                                 <b className="font-semibold whitespace-nowrap tabular-nums">{commission.price ? <Money amount={commission.price} currency={commission.currency} /> : "—"}</b>
                                 <small className="col-span-full truncate text-xs text-faint tabular-nums">
                                   {groupMode === "month"

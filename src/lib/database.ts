@@ -435,6 +435,9 @@ export type Commission = {
   final_notes: string | null;
   /** How many characters the price is for; the linked ones can be fewer (clients without a profile) */
   character_count: number | null;
+  /** Set when it was cancelled (ISO): it stops being open but keeps its payments and history */
+  cancelled_at?: string | null;
+  cancel_reason?: string | null;
 };
 
 export async function getCommissions(): Promise<Commission[]> {
@@ -1923,4 +1926,15 @@ export async function getReferencesByCharacter(characterIds: number[]): Promise<
     `SELECT id, character_id, label, image_data_url, created_at FROM character_references ORDER BY id ASC;`,
   );
   return grouped(rows, (row) => row.character_id, characterIds);
+}
+
+/** Cancels a commission (it keeps its payments, history and client) or, with null, opens it again. */
+export async function setCommissionCancelled(commissionId: number, reason: string | null): Promise<void> {
+  const database = await getDatabase();
+
+  await database.execute(`UPDATE commissions SET cancelled_at = ?, cancel_reason = ? WHERE id = ?;`, [
+    reason === null ? null : new Date().toISOString(),
+    reason?.trim() || null,
+    commissionId,
+  ]);
 }

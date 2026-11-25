@@ -66,7 +66,9 @@ export function buildCommissionsCsv(data: Data): string {
       commission.platform,
       data.templates.find((template) => template.id === commission.template_id)?.name ?? "",
       stageName ?? "",
-      isCommissionCompleted(commission, data.stages)
+      commission.cancelled_at
+        ? "Cancelled"
+        : isCommissionCompleted(commission, data.stages)
         ? "Finished"
         : commission.current_stage_id === null
           ? "Queue"

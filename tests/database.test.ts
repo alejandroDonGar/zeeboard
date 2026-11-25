@@ -614,6 +614,32 @@ describe("loading many at once", () => {
   });
 });
 
+describe("cancelling", () => {
+  test("a cancelled commission keeps its payments, leaves the open ones, and can be reopened", async () => {
+    const helpers = await import("../src/lib/commissionHelpers");
+    const { id: templateId } = await template("Bust", ["Sketch", "Delivery"]);
+    const id = await newCommission("Bust", null, templateId);
+    await db.addPayment(id, 30, 28, "2026-11-01", "deposit");
+
+    await db.setCommissionCancelled(id, "  The client disappeared  ");
+    expect(await commission(id)).toMatchObject({ cancel_reason: "The client disappeared" });
+    expect((await commission(id))?.cancelled_at).not.toBeNull();
+    expect(await helpers.loadOpenCommissions()).toEqual([]);
+    expect((await db.getAllPayments()).map((payment) => payment.amount)).toEqual([30]);
+
+    await db.setCommissionCancelled(id, null);
+    expect(await commission(id)).toMatchObject({ cancelled_at: null, cancel_reason: null });
+    expect((await helpers.loadOpenCommissions()).map((item) => item.id)).toEqual([id]);
+  });
+
+  test("a reason is optional", async () => {
+    const id = await newCommission("Bust", null, null);
+    await db.setCommissionCancelled(id, "   ");
+    expect(await commission(id)).toMatchObject({ cancel_reason: null });
+    expect((await commission(id))?.cancelled_at).not.toBeNull();
+  });
+});
+
 describe("helpers that read the database", () => {
   test("open commissions are the ones not at the last stage of their template, or without one", async () => {
     const helpers = await import("../src/lib/commissionHelpers");

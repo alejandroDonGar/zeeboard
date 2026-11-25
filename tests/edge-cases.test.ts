@@ -148,6 +148,11 @@ describe("CSV export", () => {
     expect(row).toBe("Queued;;;;;Queue;;EUR;0,00;;;Unpaid;2026-11-01;");
   });
 
+  test("a cancelled commission exports as cancelled", () => {
+    const [, row] = buildCommissionsCsv({ ...data, commissions: [{ ...queued, cancelled_at: "2026-11-20T10:00:00.000Z" }] }).split("\r\n");
+    expect(row.split(";")[5]).toBe("Cancelled");
+  });
+
   test("a commission at the last stage of its template exports as finished", () => {
     const stages = { 1: [{ id: 10, template_id: 1, name: "Delivery", stage_order: 1 }] };
     const finished = { ...queued, template_id: 1, current_stage_id: 10 };
@@ -188,6 +193,13 @@ describe("statistics", () => {
   test("a commission without a currency counts in the default one", () => {
     const stats = computeStats({ commissions: [delivered(1, { currency: null })], payments: [paid(1, 1)], templates: [], stages, currency: "EUR", now }, "year");
     expect(stats.excluded).toBe(0);
+    expect(stats.current.received).toBe(100);
+  });
+
+  test("a cancelled commission is not a delivered piece, but the deposit it left still counts as income", () => {
+    const cancelled = delivered(1, { cancelled_at: "2026-05-01T10:00:00.000Z" });
+    const stats = computeStats({ commissions: [cancelled], payments: [paid(1, 1)], templates: [], stages, currency: "EUR", now }, "year");
+    expect(stats.current.pieces).toBe(0);
     expect(stats.current.received).toBe(100);
   });
 

@@ -112,7 +112,7 @@ export function computeStats(
 
   const piecesIn = (range: Range) =>
     included
-      .filter((commission) => isCommissionCompleted(commission, input.stages) && inRange(deliveryDay(commission), range))
+      .filter((commission) => !commission.cancelled_at && isCommissionCompleted(commission, input.stages) && inRange(deliveryDay(commission), range))
       .map((commission) => ({
         commission,
         net: netIncome(paymentSummary(commission.price, payments.filter((payment) => payment.commission_id === commission.id))),

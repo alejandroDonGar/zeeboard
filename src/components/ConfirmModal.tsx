@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useDialog } from "../lib/useDialog";
 import { t } from "../lib/i18n";
 
@@ -13,6 +14,7 @@ function ConfirmModal({
   confirmVariant = "danger",
   onConfirm,
   onCancel,
+  children,
 }: {
   eyebrow: string;
   eyebrowTone?: "neutral" | "danger";
@@ -25,6 +27,8 @@ function ConfirmModal({
   confirmVariant?: "danger" | "primary";
   onConfirm: () => void;
   onCancel?: () => void;
+  /** Extra fields under the message (e.g. a reason) */
+  children?: ReactNode;
 }) {
   // Mientras se confirma (borrando, guardando…) Esc no cancela
   const dialogRef = useDialog(isConfirming ? undefined : onCancel);
@@ -49,6 +53,8 @@ function ConfirmModal({
         <p className="mt-4 whitespace-pre-line text-sm text-muted">
           {t(message)}
         </p>
+
+        {children}
 
         <div className="mt-6 flex justify-end gap-3">
           {onCancel && (

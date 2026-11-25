@@ -6,6 +6,7 @@ import {
   getDeadlineStatus,
   groupAlternatives,
   isCommissionCompleted,
+  netIncome,
   parsePrice,
   paymentSummary,
   ratePerHour,
@@ -70,6 +71,10 @@ describe("progress", () => {
     expect(isCommissionCompleted(at(1, 11), stages)).toBe(true);
   });
 
+  test("a cancelled commission is closed wherever it was", () => {
+    expect(isCommissionCompleted({ ...at(1, 10), cancelled_at: "2026-11-20T10:00:00.000Z" }, stages)).toBe(true);
+  });
+
   test("no template, no stage, a template without stages or a stage from elsewhere count as 0 %", () => {
     expect(getCommissionCompletionPercentage(at(null, 10), stages)).toBe(0);
     expect(getCommissionCompletionPercentage(at(1, null), stages)).toBe(0);
@@ -84,6 +89,12 @@ describe("money", () => {
     expect(paymentSummary(100, [{ amount: 60, received: 57 }, { amount: 40, received: null }])).toMatchObject({
       paid: 100, received: 57, fees: 3, pendingReceived: 1, status: "paid",
     });
+  });
+
+  test("a refund takes the money back: paid goes down, what is left to collect goes up, a kept fee is a loss", () => {
+    const summary = paymentSummary(100, [{ amount: 100, received: 96 }, { amount: -100, received: -100 }]);
+    expect(summary).toMatchObject({ paid: 0, remaining: 100, received: -4, fees: 4, status: "unpaid" });
+    expect(netIncome(summary)).toBe(-4);
   });
 
   test("the rate per hour ignores entries without hours, and is unknown with none", () => {

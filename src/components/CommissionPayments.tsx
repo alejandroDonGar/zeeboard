@@ -47,8 +47,9 @@ function CommissionPayments({
   const [note, setNote] = useState("");
   const [platforms, setPlatforms] = useState<PaymentPlatform[]>([]);
   const [platformId, setPlatformId] = useState<number | null>(null);
-  // What the form adds: a payment towards the price or a tip on top of it
-  const [tip, setTip] = useState(false);
+  // What the form adds: a payment towards the price, a tip on top of it, or money given back (refund, dispute)
+  const [kind, setKind] = useState<"payment" | "tip" | "refund">("payment");
+  const tip = kind === "tip";
 
   useEffect(() => {
     getPaymentPlatforms().then(setPlatforms).catch(console.error);
@@ -56,7 +57,7 @@ function CommissionPayments({
 
   const platform = platforms.find((item) => item.id === platformId) ?? null;
   // What the client paid (or the remainder, for a payment) minus the chosen platform's fee
-  const clientPaidDraft = amount === "" ? (tip ? null : summary.remaining) : parsePriceOrNull(amount);
+  const clientPaidDraft = amount === "" ? (kind === "payment" ? summary.remaining : null) : parsePriceOrNull(amount);
   const suggestedReceived =
     platform && clientPaidDraft ? receivedAfterFees(clientPaidDraft, platform) : null;
   const [open, setOpen] = useState(false);
@@ -73,14 +74,19 @@ function CommissionPayments({
 
   function handleAdd() {
     run(async () => {
-      const clientPaid = parsePrice(amount === "" && !tip ? String(summary.remaining) : amount);
+      const clientPaid = parsePrice(amount === "" && kind === "payment" ? String(summary.remaining) : amount);
 
       if (!clientPaid) {
-        throw new Error(t("Enter what the client paid"));
+        throw new Error(kind === "refund" ? t("Enter what you gave back") : t("Enter what the client paid"));
       }
 
-      // Without a typed "received", use the fee-based estimate (if any)
-      await addPayment(commission.id, clientPaid, parsePrice(received) ?? suggestedReceived, paidAt, note, tip);
+      if (kind === "refund") {
+        // Money going back is stored as a negative payment: every total subtracts it (what you gave back, unless typed)
+        await addPayment(commission.id, -clientPaid, -(parsePrice(received) ?? clientPaid), paidAt, note || t("Refund"));
+      } else {
+        // Without a typed "received", use the fee-based estimate (if any)
+        await addPayment(commission.id, clientPaid, parsePrice(received) ?? suggestedReceived, paidAt, note, tip);
+      }
       setAmount("");
       setReceived("");
       setNote("");
@@ -197,15 +203,15 @@ function CommissionPayments({
             }}
           >
             <div role="group" className="col-span-2 inline-flex w-fit rounded-md border border-line bg-paper p-0.5">
-              {[false, true].map((kind) => (
+              {(["payment", "tip", "refund"] as const).map((option) => (
                 <button
-                  key={String(kind)}
+                  key={option}
                   type="button"
-                  aria-pressed={tip === kind}
-                  onClick={() => setTip(kind)}
-                  className={`rounded-sm px-3 py-1 text-xs ${tip === kind ? "bg-highlight font-bold text-ink" : "font-semibold text-muted hover:text-ink"}`}
+                  aria-pressed={kind === option}
+                  onClick={() => setKind(option)}
+                  className={`rounded-sm px-3 py-1 text-xs ${kind === option ? "bg-highlight font-bold text-ink" : "font-semibold text-muted hover:text-ink"}`}
                 >
-                  {kind ? t("Tip") : t("Payment")}
+                  {option === "tip" ? t("Tip") : option === "refund" ? t("Refund") : t("Payment")}
                 </button>
               ))}
             </div>
@@ -235,7 +241,7 @@ function CommissionPayments({
             <input
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
-              placeholder={!tip && summary.remaining > 0 ? String(summary.remaining).replace(".", ",") : t("Client paid")}
+              placeholder={kind === "payment" && summary.remaining > 0 ? String(summary.remaining).replace(".", ",") : kind === "refund" ? t("Given back") : t("Client paid")}
               aria-label={t("Client paid")}
               title={t("Client paid")}
               inputMode="decimal"
@@ -254,7 +260,7 @@ function CommissionPayments({
             />
             <input value={note} onChange={(event) => setNote(event.target.value)} placeholder={t("Note: PayPal, deposit…")} aria-label={t("Note: PayPal, deposit…")} className={field} />
             <button type="button" onClick={handleAdd} className="rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-on-primary transition hover:bg-primary-hover">
-              {tip ? t("Add tip") : t("Add payment")}
+              {kind === "tip" ? t("Add tip") : kind === "refund" ? t("Add refund") : t("Add payment")}
             </button>
           </div>
         </div>
