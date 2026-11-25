@@ -28,7 +28,7 @@ import { autoTagIds, normalizeHandle, parseResponses } from "../lib/formImport";
 import { REQUESTS_CHANGED, syncFormResponses } from "../lib/formSync";
 import { fetchAvatar } from "../lib/avatars";
 import { hide } from "../lib/privacy";
-import { open } from "@tauri-apps/plugin-dialog";
+import { openCsv } from "../lib/export";
 import { Segmented } from "../components/BoardFilters";
 import ConfirmModal from "../components/ConfirmModal";
 import Linkified from "../components/Linkified";
@@ -77,10 +77,11 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
   }
 
   async function chooseResponsesFile() {
-    const file = await open({ title: t("Choose the responses CSV"), filters: [{ name: "CSV", extensions: ["csv"] }] });
+    // Rust remembers the chosen file; the path in the settings is only shown, never read from
+    const file = await openCsv(t("Choose the responses CSV"), true);
 
-    if (typeof file === "string") {
-      await saveSlots({ responses_file: file });
+    if (file) {
+      await saveSlots({ responses_file: file.path });
       await checkNow();
     }
   }

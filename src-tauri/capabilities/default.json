@@ -19,7 +19,6 @@
     "fs:allow-exists",
     "fs:allow-read-dir",
     "dialog:allow-open",
-    "dialog:allow-save",
     "notification:default"
   ]
 }

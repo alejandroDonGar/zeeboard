@@ -1,4 +1,3 @@
-import { save } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import {
   isCommissionCompleted,
@@ -155,7 +154,14 @@ export function buildQuarterlyCsv(data: Data): string {
 
 export type ExportKind = "commissions" | "payments" | "quarterly";
 
-/** Asks where to save and writes the CSV. Returns the path, or null if cancelled. */
+/**
+ * CSV files never travel as a path from here: Rust opens the dialog and touches only the file chosen there
+ * (src-tauri/src/export.rs). With `remember`, that file can be read later with `read_remembered_csv`.
+ */
+export const openCsv = (title: string, remember: boolean) =>
+  invoke<{ path: string; text: string } | null>("open_csv", { title, rememberIt: remember });
+
+/** Asks where to save and writes the CSV (Rust adds the BOM Excel needs). Returns the path, or null if cancelled. */
 export async function exportCsv(kind: ExportKind): Promise<string | null> {
   const [commissions, payments, templates] = await Promise.all([getCommissions(), getAllPayments(), getTemplates()]);
   const stages = Object.fromEntries(
@@ -166,17 +172,5 @@ export async function exportCsv(kind: ExportKind): Promise<string | null> {
   const csv =
     kind === "commissions" ? buildCommissionsCsv(data) : kind === "payments" ? buildPaymentsCsv(data) : buildQuarterlyCsv(data);
 
-  const path = await save({
-    defaultPath: `zeeboard-${kind}-${isoDay(new Date())}.csv`,
-    filters: [{ name: "CSV", extensions: ["csv"] }],
-  });
-
-  if (!path) {
-    return null;
-  }
-
-  // The leading BOM makes Excel read accents and the ñ correctly
-  await invoke("write_text_file", { path, contents: `﻿${csv}` });
-
-  return path;
+  return invoke<string | null>("save_csv", { fileName: `zeeboard-${kind}-${isoDay(new Date())}.csv`, contents: csv });
 }

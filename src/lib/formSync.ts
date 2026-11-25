@@ -11,13 +11,19 @@ export const REQUESTS_CHANGED = "zeeboard-requests-changed";
  * Returns null if no file is chosen yet. Already imported ones aren't repeated.
  */
 export async function syncFormResponses(): Promise<{ added: number; skipped: number } | null> {
-  const path = appSettings().responses_file;
-
-  if (!path) {
+  if (!appSettings().responses_file) {
     return null;
   }
 
-  const text = await invoke<string>("read_text_file", { path });
+  // Only the file chosen in Rust's dialog is read: the path in the settings is shown, never handed over
+  const text = await invoke<string | null>("read_remembered_csv");
+
+  if (text === null) {
+    // Chosen with a version that didn't remember it in Rust: shown as not connected, to choose it once more
+    await updateSettings({ responses_file: null });
+    window.dispatchEvent(new Event(REQUESTS_CHANGED));
+    return null;
+  }
   const { requests, error } = parseResponses(text, await getTemplates());
 
   if (error) {

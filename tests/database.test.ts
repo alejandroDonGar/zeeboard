@@ -597,29 +597,36 @@ describe("helpers that read the database", () => {
 });
 
 describe("CSV export to a file", () => {
-  test("each export asks where to save and writes the CSV with a BOM for Excel", async () => {
+  test("each export hands Rust a file name and the CSV, never a path: Rust asks where and writes there", async () => {
     const { exportCsv } = await import("../src/lib/export");
-    const { save } = await import("@tauri-apps/plugin-dialog");
     const { invoke } = await import("@tauri-apps/api/core");
     await newCommission("Bust", null, null);
-    vi.mocked(save).mockResolvedValue("C:/exports/out.csv");
+    tauri.rust.save_csv = () => "C:/exports/out.csv";
 
     for (const [kind, header] of [["commissions", "Title;"], ["payments", "Date;"], ["quarterly", "Quarter;"]] as const) {
       expect(await exportCsv(kind)).toBe("C:/exports/out.csv");
-      const { path, contents } = vi.mocked(invoke).mock.lastCall![1] as { path: string; contents: string };
-      expect(path).toBe("C:/exports/out.csv");
-      expect(contents.startsWith(`\uFEFF${header}`)).toBe(true);
+      const [command, args] = vi.mocked(invoke).mock.lastCall!;
+      expect(command).toBe("save_csv");
+      expect(Object.keys(args as object).sort()).toEqual(["contents", "fileName"]);
+      const { fileName, contents } = args as { fileName: string; contents: string };
+      expect(fileName).toMatch(new RegExp(`^zeeboard-${kind}-\\d{4}-\\d{2}-\\d{2}\\.csv$`));
+      expect(contents.startsWith(header)).toBe(true);
     }
+  });
+
+  test("opening a CSV asks Rust for the dialog, saying only whether to remember the file", async () => {
+    const { openCsv } = await import("../src/lib/export");
+    const { invoke } = await import("@tauri-apps/api/core");
+    tauri.rust.open_csv = () => ({ path: "C:/Drive/responses.csv", text: "Timestamp,Handle\n" });
+
+    expect(await openCsv("Choose the responses CSV", true)).toEqual({ path: "C:/Drive/responses.csv", text: "Timestamp,Handle\n" });
+    expect(invoke).toHaveBeenLastCalledWith("open_csv", { title: "Choose the responses CSV", rememberIt: true });
   });
 
   test("closing the save dialog writes nothing", async () => {
     const { exportCsv } = await import("../src/lib/export");
-    const { save } = await import("@tauri-apps/plugin-dialog");
-    const { invoke } = await import("@tauri-apps/api/core");
-    vi.mocked(save).mockResolvedValue(null);
-
+    tauri.rust.save_csv = () => null;
     expect(await exportCsv("payments")).toBeNull();
-    expect(invoke).not.toHaveBeenCalled();
   });
 });
 
@@ -706,11 +713,24 @@ describe("around the data: undo, form sync, backups and the iPad", () => {
       expect(await (await import("../src/lib/formSync")).syncFormResponses()).toBeNull();
     });
 
+    test("a file chosen before Rust remembered it shows as not connected, to choose it once more", async () => {
+      const { syncFormResponses, REQUESTS_CHANGED } = await import("../src/lib/formSync");
+      const { invoke } = await import("@tauri-apps/api/core");
+      await db.updateSettings({ responses_file: "C:/Drive/responses.csv" });
+      tauri.rust.read_remembered_csv = () => null;
+
+      expect(await syncFormResponses()).toBeNull();
+      expect(db.appSettings().responses_file).toBeNull();
+      expect(sentEvents()).toEqual([REQUESTS_CHANGED]);
+      // The path saved in the settings is never handed to Rust
+      expect(vi.mocked(invoke).mock.calls.every(([, args]) => args === undefined)).toBe(true);
+    });
+
     test("new responses are saved, notified once and announced; the check date is kept", async () => {
       const { syncFormResponses, REQUESTS_CHANGED } = await import("../src/lib/formSync");
       const { sendNotification } = await import("@tauri-apps/plugin-notification");
       await db.updateSettings({ responses_file: "C:/Drive/responses.csv" });
-      tauri.rust.read_text_file = () => csv("fox_one", "fox_two");
+      tauri.rust.read_remembered_csv = () => csv("fox_one", "fox_two");
 
       expect(await syncFormResponses()).toEqual({ added: 2, skipped: 0 });
       expect(sendNotification).toHaveBeenCalledWith({ title: "ZeeBoard", body: "2 new commission requests" });
@@ -720,14 +740,14 @@ describe("around the data: undo, form sync, backups and the iPad", () => {
       expect(sendNotification).toHaveBeenCalledOnce();
       expect(sentEvents()).toEqual([REQUESTS_CHANGED, REQUESTS_CHANGED]);
 
-      tauri.rust.read_text_file = () => csv("fox_one", "fox_two", "fox_three");
+      tauri.rust.read_remembered_csv = () => csv("fox_one", "fox_two", "fox_three");
       await syncFormResponses();
       expect(sendNotification).toHaveBeenLastCalledWith({ title: "ZeeBoard", body: "1 new commission request" });
     });
 
     test("a file that isn't the form fails with the reason", async () => {
       await db.updateSettings({ responses_file: "C:/Drive/other.csv" });
-      tauri.rust.read_text_file = () => "a,b\n1,2";
+      tauri.rust.read_remembered_csv = () => "a,b\n1,2";
       await expect((await import("../src/lib/formSync")).syncFormResponses()).rejects.toThrow();
     });
   });

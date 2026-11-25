@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { t } from "../lib/i18n";
 import { useDialog } from "../lib/useDialog";
-import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
 import { formatMoney } from "../lib/commissionHelpers";
+import { openCsv } from "../lib/export";
 import { getAllPayments, getClients, getCommissions, importPayments, type Client, type Commission } from "../lib/database";
 import { matchPaypalRows, parsePaypalCsv, type PaypalMatch } from "../lib/paypalImport";
 import { hide } from "../lib/privacy";
@@ -12,13 +11,13 @@ export type PaypalPreview = { matches: PaypalMatch[]; clients: Client[]; commiss
 
 /** Picks the PayPal activity CSV and matches it to your clients and commissions; null if cancelled. */
 export async function pickPaypalFile(): Promise<PaypalPreview | null> {
-  const file = await open({ title: t("Choose the PayPal activity CSV"), filters: [{ name: "CSV", extensions: ["csv"] }] });
+  const file = await openCsv(t("Choose the PayPal activity CSV"), false);
 
-  if (typeof file !== "string") {
+  if (!file) {
     return null;
   }
 
-  const { rows, error } = parsePaypalCsv(await invoke<string>("read_text_file", { path: file }));
+  const { rows, error } = parsePaypalCsv(file.text);
 
   if (error) {
     throw new Error(error);

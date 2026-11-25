@@ -167,7 +167,7 @@ The inbox for people who want a commission.
 
 - The **top bar** has **Closed / Open** (you open and close your form yourself) and the **slots**: little squares for how many unfinished commissions you have (queue included) against how many you accept at once, with the total editable.
 - The left list groups **New**, **Waitlist** (with a note when you have free slots) and a collapsible **Archive**. A request with no type yet shows "Choose the type…". At the bottom, the state of the **connected form** and a **···** menu (Check now, Change file).
-- **Form responses**: ZeeBoard can read the responses of a **Google Form** from a CSV file that a small Google script keeps up to date in your Drive. It checks it when it opens and every 30 minutes, adds the new responses and shows a counter in the menu. You can also **Import** a CSV by hand.
+- **Form responses**: ZeeBoard can read the responses of a **Google Form** from a CSV file that a small Google script keeps up to date in your Drive. It checks it when it opens and every 30 minutes, adds the new responses and shows a counter in the menu. You can also **Import** a CSV by hand. If you chose the file with a version before 0.3, choose it once more: ZeeBoard now remembers it on its own side (see Privacy).
 - The open request shows who and when, **what they ask for** (links are clickable) and, beside it, the type, number of characters, an **estimated price**, contact, social account and email.
 - The footer has **Accept**, **Waitlist**, **Decline** and **Restore** (and **Open commission** / **Remove from the list** for the archived ones). Accept is disabled until the request has a type; if your slots are full, accepting asks for confirmation.
 - Accepting creates, in one step: the **client** (or reuses the one you already have, matched by handle or name), their email and tag account, the **commission** with its price, and the **tags**. It also tries to fetch the client's profile photo in the background.
@@ -338,6 +338,7 @@ The whole app is also available in **Spanish**. Switching the language reloads t
 ## Privacy and data
 
 - **Everything is stored locally** in `%APPDATA%\com.zeeboard.app\`: `zeeboard.db` (SQLite) and an `images/` folder. Uninstalling does not delete it unless you ask.
+- **Files outside that folder** are only touched through a dialog ZeeBoard opens itself: an export is written where you choose to save it, and a CSV (PayPal, form responses) is read only after you pick it. The interface can't name any other file.
 - **Images** are processed on your machine: a lightweight WebP copy for viewing and a thumbnail. Your originals are never touched.
 - **The only connection ZeeBoard makes to the internet** is the optional *Fetch photo* feature. It runs in the app's Rust side with a **closed list of servers** (Bluesky and Telegram), only over `https`, with time and size limits. Nothing else is sent anywhere.
 - The **iPad receiver** is off by default. While its switch is on, ZeeBoard listens on one port of your PC; every request needs the secret key of your link and only images are accepted. ZeeBoard never opens it to the internet itself: to reach it from mobile data you use Tailscale, a private network between your own devices.
