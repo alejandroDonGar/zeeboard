@@ -69,7 +69,7 @@ function StageViewer({
 
   return (
     <div className="grid min-h-0 min-w-0 gap-3.5 p-4 @min-[760px]:h-full @min-[760px]:grid-rows-[minmax(14rem,1fr)_auto] @min-[760px]:overflow-y-auto">
-      <div data-image-drop={`stage:${stage.id}`} className={`relative grid h-[clamp(280px,48vh,520px)] min-h-0 place-items-center [container-type:size] @min-[760px]:h-auto ${isDropTarget ? "opacity-60" : ""}`}>
+      <div data-image-drop={`stage:${stage.id}`} className={`relative grid ${image ? "h-[clamp(280px,48vh,520px)]" : "h-36"} min-h-0 place-items-center [container-type:size] @min-[760px]:h-auto ${isDropTarget ? "opacity-60" : ""}`}>
         {image ? (
           <div className="group relative inline-block">
             <button

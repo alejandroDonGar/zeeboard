@@ -894,7 +894,7 @@ function CommissionsPage() {
               {/* Header: tinted with the colours of the image being looked at */}
               <div className="hero-tint flex shrink-0 items-start gap-3 px-6 pt-5 pb-4" style={heroStyle}>
                 <div className="min-w-0 flex-1">
-                  <h2 className="font-display text-3xl leading-tight font-semibold tracking-tight [overflow-wrap:anywhere]">{activeCommission.title}</h2>
+                  <h2 title={activeCommission.title} className="line-clamp-2 font-display text-2xl leading-tight font-semibold tracking-tight [overflow-wrap:anywhere] @min-[760px]:text-3xl">{activeCommission.title}</h2>
                   {activeCommission.waiting_since && !activeCommission.cancelled_at && (
                     <span className="chip chip-info mt-1">{t("Waiting for the client")}</span>
                   )}

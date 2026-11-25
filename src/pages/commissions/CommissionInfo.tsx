@@ -52,8 +52,12 @@ function CommissionInfo({
         {type && (
           <>
             <dt className={label}>{t("Type")}</dt>
-            <dd className={value}>
-              <TagChip name={type.name} color={type.color} />
+            {/* Plain text, not a chip: a long type name stays on one line instead of a tall block */}
+            <dd className={value} title={type.name}>
+              <span className="flex min-w-0 items-center gap-1.5">
+                <i className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: type.color }} />
+                <span className="truncate">{type.name}</span>
+              </span>
             </dd>
           </>
         )}
