@@ -19,7 +19,7 @@ import {
   invoiceDescription,
 } from "../lib/commissionHelpers";
 import { TYPE_CATEGORY } from "../lib/catalog";
-import { trackedHours } from "../lib/commissionHelpers";
+import { fillMessage, formatMoney as formatAmount, paymentSummary as summaryOfPayments, trackedHours } from "../lib/commissionHelpers";
 import {
   getTemplateStages,
   getTemplates,
@@ -436,6 +436,20 @@ function CommissionsPage() {
       console.error(error);
       showToast("Could not save the change.", "error");
     }
+  }
+
+  /** Copies a ready-to-paste message for the client, filled with this commission's details */
+  async function copyMessage(template: string) {
+    if (!activeCommission) return;
+    const remaining = summaryOfPayments(activeCommission.price, paymentsByCommissionId[activeCommission.id] ?? []).remaining;
+    const text = fillMessage(template, {
+      client: activeCommission.client_name ?? "",
+      title: activeCommission.title,
+      stage: workflowStages.find((stage) => stage.id === activeCommission.current_stage_id)?.name ?? "",
+      remaining: formatAmount(remaining, activeCommission.currency),
+    });
+    await navigator.clipboard.writeText(text);
+    showToast("Message copied.", "success");
   }
 
   async function toggleWaiting() {
@@ -976,6 +990,25 @@ function CommissionsPage() {
                             {activeCommission.waiting_since ? t("Not waiting any more") : t("Waiting for the client")}
                           </button>
                         )}
+                        <hr className="my-1 border-line" />
+                        {[
+                          [t("Message: stage ready"), t("Hi {client}! {stage} of your {title} is ready. Any changes before I continue?")],
+                          [t("Message: payment reminder"), t("Hi {client}! Whenever you can, {remaining} is left for {title}. Thank you!")],
+                          [t("Message: delivered"), t("Hi {client}! Your {title} is finished. Thank you so much!")],
+                        ].map(([label, template]) => (
+                          <button
+                            key={label}
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setCommissionMenuOpen(false);
+                              copyMessage(template);
+                            }}
+                            className="block w-full rounded-sm px-2.5 py-2 text-left text-sm hover:bg-highlight"
+                          >
+                            {label}
+                          </button>
+                        ))}
                         <hr className="my-1 border-line" />
                         <button
                           type="button"

@@ -339,3 +339,8 @@ export function typicalDays(commissions: Commission[], stages: Record<number, Te
     Object.entries(byTemplate).map(([id, days]) => [id, Math.round(days.reduce((sum, value) => sum + value, 0) / days.length)]),
   );
 }
+
+/** A message to paste to the client: {client}, {title}, {stage} and {remaining} are filled in; anything else stays as written. */
+export function fillMessage(template: string, fields: Record<string, string>): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) => fields[name] ?? match);
+}

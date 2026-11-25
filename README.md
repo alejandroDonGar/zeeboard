@@ -152,6 +152,10 @@ Press **Ctrl+N** or **+ New commission**.
 
 **··· → Cancel commission…** for one that falls through, with an optional reason. Unlike deleting it, it keeps its payments (a deposit you kept still counts as income), images and history: it just leaves the board, the slots, the reminders and the iPad, and isn't counted as a delivered piece. It shows under **Finished** with a *Cancelled* chip; open it there and **··· → Reopen** to bring it back.
 
+### Messages to the client
+
+**··· → Message: stage ready / payment reminder / delivered** copies a short message filled with the client's name, the commission, its current stage and what's left to pay, ready to paste in the client's chat. They follow the app's language.
+
 ### Invoice description
 
 **··· → Copy description** copies a short text for the PayPal invoice, such as `Rendered, 2 characters (Ana, Beto) - @YourHandle`, built from the template and the characters.

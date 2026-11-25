@@ -13,6 +13,7 @@ import {
   trackedHours,
   inDefaultCurrency,
   typicalDays,
+  fillMessage,
 } from "../src/lib/commissionHelpers";
 import type { Commission, CommissionStageImage, TemplateStage } from "../src/lib/database";
 
@@ -145,6 +146,11 @@ test("typical days to deliver each type: from accepting to delivering, finished 
     { id: 4, template_id: 1, current_stage_id: null, created_at: "2026-10-01T10:00:00.000Z" } as Commission,
   ];
   expect(typicalDays(commissions, stages)).toEqual({ 1: 15 });
+});
+
+test("a message template is filled with the commission's details; unknown fields stay as written", () => {
+  expect(fillMessage("Hi {client}! {stage} of your {title} is ready. {remaining} left. {other}", { client: "Ana", title: "Bust", stage: "Sketch", remaining: "40 EUR" }))
+    .toBe("Hi Ana! Sketch of your Bust is ready. 40 EUR left. {other}");
 });
 
 test("versions uploaded in the same second keep the order they were saved in", () => {
