@@ -216,7 +216,7 @@ One screen with a list on the left (the **commission types** and then the **tags
 
 ## Finished commissions
 
-Everything you have delivered, as a register.
+Everything you have delivered, as a register. It's the other view of **Commissions**: switch between **In progress** and **Finished** at the top left of that screen (or press `Ctrl+8`).
 
 <img src="docs/images/finished.png" alt="Finished commissions grouped by month" width="900">
 
