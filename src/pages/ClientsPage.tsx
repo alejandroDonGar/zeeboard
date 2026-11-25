@@ -610,11 +610,11 @@ function ClientsPage({
 
   return (
     <>
-    <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+    <div className="flex h-full min-h-0 flex-col text-sm">
       <TopBar title="Clients" action="New client" onAction={handleOpenNewClient} />
 
-      <section className="grid min-h-0 flex-1 grid-cols-[minmax(230px,290px)_minmax(0,1fr)] gap-3">
-        <GlassPanel as="nav" className="min-h-0" contentClassName="flex flex-col p-2">
+      <section className="flex min-h-0 flex-1">
+        <GlassPanel as="nav" className="list-panel min-h-0 w-80 shrink-0 border-r border-line" contentClassName="flex flex-col p-2">
           <label className="mb-1.5 flex items-center gap-2 rounded-control border border-line bg-surface/60 px-2.5 py-1.5 text-faint focus-within:border-ink">
             <IconSearch size={16} stroke={1.75} aria-hidden="true" />
             <input
@@ -669,7 +669,7 @@ function ClientsPage({
           </div>
         </GlassPanel>
 
-        <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
+        <div className="glass relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-surface @container">
           {!clientsReady ? null : !selectedClient ? (
             <div className="flex h-full flex-col items-center justify-center p-6 text-center">
               <p className="text-lg font-semibold">{clients.length === 0 ? t("Add your first client") : t("Pick a client")}</p>

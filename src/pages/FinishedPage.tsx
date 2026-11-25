@@ -192,8 +192,17 @@ function FinishedPage({
 
   return (
     <>
-      <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+      <div className="flex h-full min-h-0 flex-col text-sm">
         <TopBar title="Finished">
+          {/* The same switch as in Commissions: Finished is its other view (M2.5) */}
+          <Segmented
+            options={[
+              { value: "open", label: "In progress" },
+              { value: "finished", label: "Finished" },
+            ]}
+            value="finished"
+            onChange={(value) => value === "open" && onOpenCommissionsPage()}
+          />
           <Segmented
             options={[
               { value: "month", label: "By month" },

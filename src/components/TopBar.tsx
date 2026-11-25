@@ -2,7 +2,10 @@ import type { ReactNode } from "react";
 import { IconPlus } from "@tabler/icons-react";
 import { t } from "../lib/i18n";
 
-/** Barra superior de cada pantalla: título pequeño, controles opcionales y la acción principal a la derecha. */
+/**
+ * Barra superior de cada pantalla: la primera fila de la superficie de trabajo, con los controles y la acción principal
+ * a la derecha. El título no se ve (la barra lateral ya dice dónde estás), pero sigue para el lector de pantalla.
+ */
 function TopBar({
   title,
   children,
@@ -23,8 +26,8 @@ function TopBar({
   onAction?: () => void;
 }) {
   return (
-    <header className="glass flex min-h-13 shrink-0 flex-wrap items-center gap-x-2.5 gap-y-2 rounded-surface py-2 pr-2.5 pl-4">
-      <h1 className="mr-1.5 text-base font-semibold tracking-tight">{t(title)}</h1>
+    <header className="flex min-h-13 shrink-0 flex-wrap items-center gap-x-2.5 gap-y-2 border-b border-line py-2 pr-2.5 pl-4">
+      <h1 className="sr-only">{t(title)}</h1>
       {children}
       <div className="flex-1" />
       {end}

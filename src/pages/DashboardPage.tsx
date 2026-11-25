@@ -176,7 +176,7 @@ function DashboardPage({ onOpenCommissionsPage, onNewCommission }: { onOpenCommi
   };
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+    <div className="flex h-full min-h-0 flex-col text-sm">
       <TopBar title="Dashboard" action="New commission" shortcut="Ctrl N" onAction={onNewCommission}>
         <span className="text-sm text-faint">{new Date().toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" })}</span>
       </TopBar>

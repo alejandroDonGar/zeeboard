@@ -46,7 +46,7 @@ const daysUntilSelectedDeadline = selectedDeadlineCommission?.deadline
   : null;
 
   return (
-    <GlassPanel as="aside" className="h-full min-h-0" contentClassName="overflow-hidden p-5">
+    <GlassPanel as="aside" className="h-full min-h-0 border-l border-line" contentClassName="overflow-hidden p-5">
       <div className="max-h-full overflow-y-auto rounded-surface border border-line bg-paper p-4">
         <p className="text-xs font-bold text-muted">
           {t("Calendar")}

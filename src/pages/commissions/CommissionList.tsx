@@ -29,7 +29,7 @@ function CommissionList({
   handleOpenCommission: (commission: Commission) => void;
 }) {
   return (
-    <GlassPanel as="nav" className="min-h-0" contentClassName="overflow-y-auto p-2">
+    <GlassPanel as="nav" className="list-panel min-h-0 w-80 shrink-0 border-r border-line" contentClassName="overflow-y-auto p-2">
       {!ready ? null : inboxGroups.every((group) => group.items.length === 0) ? (
         <p className="p-4 text-center text-sm text-faint">{noCommissions ? t("No commissions yet") : t("No matches")}</p>
       ) : (

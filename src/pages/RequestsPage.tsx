@@ -319,7 +319,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
 
   return (
     <>
-      <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+      <div className="flex h-full min-h-0 flex-col text-sm">
         <TopBar title="Requests" action="New request" onAction={() => setDraft({ ...emptyDraft })} end={
           <label className={`${btn} inline-flex cursor-pointer items-center gap-2 ${busy ? "pointer-events-none opacity-50" : ""}`}>
             <IconDownload size={16} stroke={1.75} aria-hidden="true" />
@@ -375,8 +375,8 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
           </div>
         </TopBar>
 
-        <section className="grid min-h-0 flex-1 grid-cols-[minmax(240px,320px)_minmax(0,1fr)] gap-3">
-          <GlassPanel as="nav" className="min-h-0" contentClassName="grid grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto]">
+        <section className="flex min-h-0 flex-1">
+          <GlassPanel as="nav" className="list-panel min-h-0 w-80 shrink-0 border-r border-line" contentClassName="grid grid-cols-[minmax(0,1fr)] grid-rows-[minmax(0,1fr)_auto]">
             <div className="overflow-y-auto p-2">
               {group(t("New · {n}", { n: waiting.length }))}
               {!ready ? null : waiting.length === 0 ? (
@@ -475,7 +475,7 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
             </div>
           </GlassPanel>
 
-          <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
+          <div className="glass relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-surface @container">
             {!ready ? null : !current ? (
               <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                 <p className="text-lg font-semibold">{t("Pick a request")}</p>

@@ -280,7 +280,7 @@ function SettingsPage() {
 
   return (
     <>
-      <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+      <div className="flex h-full min-h-0 flex-col text-sm">
         <TopBar title="Settings" />
 
         <div className="glass grid min-h-0 flex-1 grid-cols-[minmax(150px,210px)_minmax(0,1fr)] overflow-hidden rounded-surface">

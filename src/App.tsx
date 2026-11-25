@@ -40,16 +40,19 @@ import {
 
 type Page = "dashboard" | "commissions" | "requests" | "clients" | "finished" | "catalog" | "statistics" | "settings";
 
+// Menu order = Ctrl+1…8. Daily work first (dashboard, commissions, requests), then lookup and setup. Finished isn't in
+// the sidebar (it's a view of Commissions, PLAN-MODERNIZACION M2.5) but stays here for Ctrl+8 and the command palette.
 const navigationItems: { id: Page; label: string; icon: Icon }[] = [
   { id: "dashboard", label: "Dashboard", icon: IconLayoutDashboard },
   { id: "commissions", label: "Commissions", icon: IconBrush },
   { id: "requests", label: "Requests", icon: IconInbox },
   { id: "clients", label: "Clients", icon: IconUsers },
-  { id: "finished", label: "Finished", icon: IconCircleCheck },
-  { id: "catalog", label: "Catalog", icon: IconTags },
   { id: "statistics", label: "Statistics", icon: IconChartBar },
+  { id: "catalog", label: "Catalog", icon: IconTags },
   { id: "settings", label: "Settings", icon: IconSettings },
+  { id: "finished", label: "Finished", icon: IconCircleCheck },
 ];
+const sidebarItems = navigationItems.filter((item) => item.id !== "finished");
 
 type Progress = { done: number; total: number };
 
@@ -227,6 +230,9 @@ function App() {
   }, [currentPage]);
 
   const [paletteOpen, setPaletteOpen] = useState(false);
+  // The list of list-and-detail screens, hidden with [ to give the drawing the whole width; remembered between sessions
+  const [listFolded, setListFolded] = useState(() => localStorage.getItem("zeeboard-list-folded") === "1");
+  useEffect(() => localStorage.setItem("zeeboard-list-folded", listFolded ? "1" : "0"), [listFolded]);
   const [helpOpen, setHelpOpen] = useState(false);
   const [navKey, setNavKey] = useState(0);
 
@@ -279,6 +285,8 @@ function App() {
         go("commissions");
       } else if (!mod && !typing && event.key === "?") {
         setHelpOpen(true);
+      } else if (!mod && !typing && event.key === "[") {
+        setListFolded((folded) => !folded);
       }
     }
 
@@ -349,19 +357,20 @@ function App() {
       <div className="relative flex h-full gap-3 p-3">
         {/* Below 1180 px only the icons show (names stay for screen readers and as tooltips): the page gets the room */}
         <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-surface px-3 py-4 max-[1180px]:w-[64px] max-[1180px]:px-2">
-          <div className="mb-6 flex items-center gap-3 px-2 max-[1180px]:justify-center max-[1180px]:px-0">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-[#1f2933] ring-1 ring-white/10">
-              <Logo className="h-5 w-5 bg-[#f6f3ee]" />
+          <div className="mb-5 flex items-center gap-2.5 px-2 max-[1180px]:justify-center max-[1180px]:px-0">
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-control bg-[#1f2933] ring-1 ring-white/10">
+              <Logo className="h-4 w-4 bg-[#f6f3ee]" />
             </div>
-            <h1 className="text-xl tracking-tight max-[1180px]:sr-only">
+            <h1 className="text-lg tracking-tight max-[1180px]:sr-only">
               <b className="font-extrabold">Zee</b>
               <span className="font-medium">Board</span>
             </h1>
           </div>
 
           <nav className="space-y-0.5">
-            {navigationItems.map((item) => {
-              const isActive = currentPage === item.id;
+            {sidebarItems.map((item) => {
+              // Finished is a view of Commissions: while it's open, Commissions stays lit
+              const isActive = currentPage === item.id || (item.id === "commissions" && currentPage === "finished");
 
               return (
                 <button
@@ -369,7 +378,8 @@ function App() {
                   onClick={() => setCurrentPage(item.id)}
                   aria-current={isActive ? "page" : undefined}
                   title={t(item.label)}
-                  className={`relative flex w-full items-center gap-3 rounded-control px-3 py-2 text-left text-sm max-[1180px]:justify-center max-[1180px]:px-0 ${
+                  // Two groups, separated by space alone: daily work, then lookup and setup
+                  className={`relative flex w-full items-center gap-3 rounded-control px-3 py-2 text-left text-sm max-[1180px]:justify-center max-[1180px]:px-0 ${item.id === "clients" ? "!mt-4" : ""} ${
                     isActive ? "bg-highlight font-semibold text-ink" : "font-medium text-muted transition hover:bg-highlight/60 hover:text-ink"
                   }`}
                 >
@@ -409,8 +419,8 @@ function App() {
         </aside>
 
         <main key={navKey} className="relative min-w-0 flex-1">
-          {/* Cada pantalla dibuja sus propios paneles de cristal sobre el fondo de colores */}
-          <div className="relative h-full overflow-hidden rounded-surface">
+          {/* Una sola superficie de cristal por pantalla (M2.1): dentro, barra, lista y detalle se separan con divisores */}
+          <div className="work-surface relative h-full overflow-hidden rounded-surface" data-list-folded={listFolded || undefined}>
           {currentPage === "dashboard" && (
             <DashboardPage
               onOpenCommissionsPage={() => setCurrentPage("commissions")}
@@ -420,7 +430,7 @@ function App() {
               }}
             />
           )}
-          {currentPage === "commissions" && <CommissionsPage />}
+          {currentPage === "commissions" && <CommissionsPage onShowFinished={() => setCurrentPage("finished")} />}
           {currentPage === "clients" && (
             <ClientsPage onOpenCommissionsPage={() => setCurrentPage("commissions")} />
           )}

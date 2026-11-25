@@ -131,7 +131,7 @@ function StatisticsPage() {
   const bestClient = Math.max(...(stats?.topClients.map((client) => client.net) ?? []), 1);
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+    <div className="flex h-full min-h-0 flex-col text-sm">
       <TopBar
         title="Statistics"
         end={

@@ -76,7 +76,7 @@ import CorrectionsPanel from "./commissions/CorrectionsPanel";
 import StageViewer from "./commissions/StageViewer";
 import FinishCommissionModal, { type FinishDetails } from "../components/FinishCommissionModal";
 
-function CommissionsPage() {
+function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
   // A single form to create and edit: null = closed
   const [form, setForm] = useState<{ mode: "new" | "edit"; tagIds: number[] } | null>(null);
   const [clients, setClients] = useState<Client[]>([]);
@@ -840,7 +840,7 @@ function CommissionsPage() {
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+    <div className="flex h-full min-h-0 flex-col text-sm">
       <TopBar
         title="Commissions"
         action="New commission"
@@ -857,6 +857,15 @@ function CommissionsPage() {
           />
         }
       >
+        {/* Finished is the other view of the same commissions (M2.5), not a separate screen in the sidebar */}
+        <Segmented
+          options={[
+            { value: "open", label: "In progress" },
+            { value: "finished", label: "Finished" },
+          ]}
+          value="open"
+          onChange={(value) => value === "finished" && onShowFinished()}
+        />
         <BoardFilters
           tags={filterableTags}
           searchQuery={searchQuery}
@@ -871,9 +880,7 @@ function CommissionsPage() {
       </TopBar>
 
       <section
-        className={`grid min-h-0 flex-1 gap-3 ${
-          viewMode === "list" ? "grid-cols-[minmax(250px,320px)_minmax(0,1fr)]" : "grid-cols-[minmax(0,1fr)_320px]"
-        }`}
+        className={`min-h-0 flex-1 ${viewMode === "list" ? "flex" : "grid grid-cols-[minmax(0,1fr)_320px]"}`}
       >
         {viewMode === "list" && (
           <CommissionList
@@ -888,7 +895,7 @@ function CommissionsPage() {
           />
         )}
 
-        <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
+        <div className="glass relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-surface @container">
           {viewMode === "list" && activeCommission ? (
             <>
               {/* Header: tinted with the colours of the image being looked at */}

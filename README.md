@@ -274,12 +274,13 @@ Download your **activity CSV** from PayPal (English or Spanish headers) and choo
 
 Press **Ctrl+K** anywhere to search commissions (title, client, stage), clients (name, handle, email), requests and screens, and to run **actions**: new commission, new client, toggle private mode, switch language, switch theme, back up now, show the shortcuts. Accents and capital letters are ignored, and every word you type must match.
 
-In a narrow window (under 1180 px wide) the menu on the left shows only its icons, so the screen gets the room; hover an icon to see its name.
+The menu on the left has two groups: daily work (Dashboard, Commissions, Requests) and, below, lookup and setup (Clients, Statistics, Catalog, Settings). In a narrow window (under 1180 px wide) it shows only its icons, so the screen gets the room; hover an icon to see its name.
 
 | Shortcut | What it does |
 |---|---|
 | `Ctrl+K` | Search and actions |
-| `Ctrl+1` … `Ctrl+9` | Go to a screen, in menu order |
+| `Ctrl+1` … `Ctrl+8` | Go to a screen, in menu order (`Ctrl+8` is Finished) |
+| `[` | Hide or show the list in Commissions, Requests, Clients and Catalog, to give the detail the whole width (remembered) |
 | `Ctrl+N` | New commission |
 | `Ctrl+Shift+P` | Toggle private mode |
 | `Ctrl+V` | Paste an image into the current stage (or the open character) |

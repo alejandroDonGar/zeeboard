@@ -172,7 +172,8 @@
    Tampoco atrapa los modales "fixed" que vivan dentro. */
 .panel,
 .glass,
-.glass-heavy {
+.glass-heavy,
+.work-surface {
   background: var(--glass);
   border: 1px solid var(--glass-edge);
   box-shadow:
@@ -183,6 +184,20 @@
 
 .glass-heavy {
   background: var(--glass-heavy);
+}
+
+/* Una sola superficie de trabajo (PLAN-MODERNIZACION M2.1): el cristal es el contenedor de la pantalla, y los paneles
+   de dentro (barra, lista, detalle) dejan de ser cajas: se separan con divisores de 1 px, no con huecos ni sombras. */
+.work-surface .glass,
+.work-surface .glass-heavy {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+/* La lista de las pantallas lista-detalle se pliega con la tecla [ (M2.4) para dar todo el ancho al detalle */
+.work-surface[data-list-folded] .list-panel {
+  display: none;
 }
 
 /* Chip: etiqueta de estado o de tag. Fondo neutro, texto normal y un punto de color: el color solo señala,

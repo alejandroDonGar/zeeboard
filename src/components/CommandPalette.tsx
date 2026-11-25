@@ -59,6 +59,7 @@ const SHORTCUTS: [string, string][] = [
   ["Ctrl+V", "Paste an image into the open stage"],
   ["Ctrl+Z", "Restore what you just deleted"],
   ["Ctrl+Shift+P", "Toggle private mode"],
+  ["[", "Hide or show the list (more room for the drawing)"],
   ["?", "Show this list"],
   ["Esc", "Close"],
 ];

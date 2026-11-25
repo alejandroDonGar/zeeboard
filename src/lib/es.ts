@@ -590,6 +590,7 @@ export const es: Record<string, string> = {
   "Go to a screen (menu order)": "Ir a una pantalla (orden del menú)",
   "New commission": "Nueva comisión",
   "Toggle private mode": "Activar o quitar el modo privado",
+  "Hide or show the list (more room for the drawing)": "Ocultar o mostrar la lista (más sitio para el dibujo)",
   "Show this list": "Mostrar esta lista",
   Close: "Cerrar",
   "Search commissions, clients, screens and actions…": "Busca comisiones, clientes, pantallas y acciones…",

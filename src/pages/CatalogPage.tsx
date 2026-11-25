@@ -240,7 +240,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
 
   return (
     <>
-      <div className="flex h-full min-h-0 flex-col gap-3 text-sm">
+      <div className="flex h-full min-h-0 flex-col text-sm">
         <TopBar title="Catalog" action="New type" onAction={handleNewTemplate}
           end={
             <button
@@ -254,8 +254,8 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
           }
         />
 
-        <section className="grid min-h-0 flex-1 grid-cols-[minmax(230px,310px)_minmax(0,1fr)] gap-3">
-          <GlassPanel as="nav" className="min-h-0" contentClassName="overflow-y-auto p-2">
+        <section className="flex min-h-0 flex-1">
+          <GlassPanel as="nav" className="list-panel min-h-0 w-80 shrink-0 border-r border-line" contentClassName="overflow-y-auto p-2">
             {!ready ? null : (
               <>
                 {group(t("Commission types"), templates.length)}
@@ -297,7 +297,7 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
             )}
           </GlassPanel>
 
-          <div className="glass relative flex min-h-0 min-w-0 flex-col overflow-hidden rounded-surface @container">
+          <div className="glass relative flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-surface @container">
             {!ready ? null : selectedTemplate ? (
               <TypeEditor
                 template={selectedTemplate}
