@@ -347,12 +347,13 @@ function App() {
       <div className="relative h-screen overflow-clip bg-canvas text-ink">
       <AmbientBackground />
       <div className="relative flex h-full gap-3 p-3">
-        <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-3xl px-3 py-4">
-          <div className="mb-6 flex items-center gap-3 px-2">
+        {/* Below 1180 px only the icons show (names stay for screen readers and as tooltips): the page gets the room */}
+        <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-3xl px-3 py-4 max-[1180px]:w-[64px] max-[1180px]:px-2">
+          <div className="mb-6 flex items-center gap-3 px-2 max-[1180px]:justify-center max-[1180px]:px-0">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1f2933] ring-1 ring-white/10">
               <Logo className="h-5 w-5 bg-[#f6f3ee]" />
             </div>
-            <h1 className="text-xl tracking-tight">
+            <h1 className="text-xl tracking-tight max-[1180px]:sr-only">
               <b className="font-extrabold">Zee</b>
               <span className="font-medium">Board</span>
             </h1>
@@ -367,16 +368,15 @@ function App() {
                   key={item.id}
                   onClick={() => setCurrentPage(item.id)}
                   aria-current={isActive ? "page" : undefined}
-                  className={
-                    isActive
-                      ? "flex w-full items-center gap-3 rounded-xl bg-highlight px-3 py-2 text-left text-sm font-semibold text-ink"
-                      : "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium text-muted transition hover:bg-highlight/60 hover:text-ink"
-                  }
+                  title={t(item.label)}
+                  className={`relative flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm max-[1180px]:justify-center max-[1180px]:px-0 ${
+                    isActive ? "bg-highlight font-semibold text-ink" : "font-medium text-muted transition hover:bg-highlight/60 hover:text-ink"
+                  }`}
                 >
                   <item.icon size={18} stroke={1.5} aria-hidden="true" />
-                  {t(item.label)}
+                  <span className="max-[1180px]:sr-only">{t(item.label)}</span>
                   {item.id === "requests" && newRequests > 0 && (
-                    <span className="ml-auto text-xs font-medium text-faint tabular-nums">
+                    <span className="ml-auto text-xs font-medium text-faint tabular-nums max-[1180px]:absolute max-[1180px]:top-0.5 max-[1180px]:right-1 max-[1180px]:text-[10px]">
                       {newRequests}
                     </span>
                   )}
@@ -389,20 +389,21 @@ function App() {
             type="button"
             onClick={() => setPrivate(!privateMode)}
             title={t("Hide client names and prices while streaming (Ctrl+Shift+P)")}
-            className={`mt-auto flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition ${
+            className={`mt-auto flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm font-medium transition max-[1180px]:justify-center max-[1180px]:px-0 ${
               privateMode ? "bg-tone-warn/15 text-ink" : "text-muted hover:bg-highlight hover:text-ink"
             }`}
           >
             {privateMode ? <IconEyeOff size={18} stroke={1.5} aria-hidden="true" /> : <IconEye size={18} stroke={1.5} aria-hidden="true" />}
-            {privateMode ? t("Private mode on") : t("Private mode")}
+            <span className="max-[1180px]:sr-only">{privateMode ? t("Private mode on") : t("Private mode")}</span>
           </button>
 
           <button
             type="button"
             onClick={() => setHelpOpen(true)}
-            className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium text-muted transition hover:bg-highlight hover:text-ink"
+            title={t("Shortcuts")}
+            className="mt-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm font-medium text-muted transition hover:bg-highlight hover:text-ink max-[1180px]:justify-center max-[1180px]:px-0"
           >
-            {t("Shortcuts")}
+            <span className="max-[1180px]:sr-only">{t("Shortcuts")}</span>
             <kbd className="rounded-sm border border-line-strong px-1.5 text-xs font-medium">?</kbd>
           </button>
         </aside>

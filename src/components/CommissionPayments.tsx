@@ -141,7 +141,7 @@ function CommissionPayments({
           type="button"
           onClick={() => setOpen((value) => !value)}
           aria-expanded={open}
-          className="ml-auto text-xs font-medium text-faint transition hover:text-ink"
+          className="ml-auto rounded-sm px-1 py-1 text-xs font-medium text-faint transition hover:text-ink"
         >
           {t("Payments")}
           {payments.length > 0 ? ` · ${payments.length}` : ""} {open ? "▴" : "▾"}

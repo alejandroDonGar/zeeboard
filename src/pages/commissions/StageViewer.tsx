@@ -185,7 +185,7 @@ function StageViewer({
                   type="button"
                   onClick={() => toggleCorrections(item.id)}
                   aria-expanded={open}
-                  className={`mt-0.5 max-w-full self-start truncate rounded-sm px-1 py-0.5 text-xs transition ${
+                  className={`mt-0.5 max-w-full self-start truncate rounded-sm px-1 py-1 text-xs transition ${
                     pending > 0 ? "bg-tone-warn/15 font-semibold text-ink" : open ? "text-ink" : "text-faint hover:text-ink"
                   }`}
                 >

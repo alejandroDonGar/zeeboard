@@ -274,6 +274,8 @@ Download your **activity CSV** from PayPal (English or Spanish headers) and choo
 
 Press **Ctrl+K** anywhere to search commissions (title, client, stage), clients (name, handle, email), requests and screens, and to run **actions**: new commission, new client, toggle private mode, switch language, switch theme, back up now, show the shortcuts. Accents and capital letters are ignored, and every word you type must match.
 
+In a narrow window (under 1180 px wide) the menu on the left shows only its icons, so the screen gets the room; hover an icon to see its name.
+
 | Shortcut | What it does |
 |---|---|
 | `Ctrl+K` | Search and actions |
