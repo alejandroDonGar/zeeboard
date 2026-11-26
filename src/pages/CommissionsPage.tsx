@@ -21,7 +21,6 @@ import {
 import { TYPE_CATEGORY } from "../lib/catalog";
 import { fillMessage, formatMoney as formatAmount, formatNumber, paymentSummary as summaryOfPayments, trackedHours } from "../lib/commissionHelpers";
 import {
-  getTemplateStages,
   getTemplates,
   getCommissions,
   getAllPayments,
@@ -88,9 +87,11 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
   const [ready, setReady] = useState(false);
   const [viewMode, setViewMode] = useState<"list" | "grid">("list");
   const [activeCommissionId, setActiveCommissionId] = useState<number | null>(null);
-  const [workflowStages, setWorkflowStages] = useState<TemplateStage[]>([]);
   const [templateStagesByTemplateId, setTemplateStagesByTemplateId] = useState<Record<number, TemplateStage[]>>({});
   const activeCommission = commissions.find((commission) => commission.id === activeCommissionId) ?? null;
+  // Read from the stages already loaded for the list, in the same render: fetching them on each switch left one frame
+  // with the new commission and the old stages (the main button flashed "Start …" and changed width)
+  const workflowStages = (activeCommission?.template_id && templateStagesByTemplateId[activeCommission.template_id]) || [];
   const [duplicatingCommission, setDuplicatingCommission] = useState(false);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [finishing, setFinishing] = useState(false);
@@ -244,27 +245,6 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
     window.addEventListener(IPAD_IMAGE_ADDED, refresh);
     return () => window.removeEventListener(IPAD_IMAGE_ADDED, refresh);
   }, []);
-
-  useEffect(() => {
-    async function loadWorkflowStages() {
-      if (!activeCommission?.template_id) {
-        setWorkflowStages([]);
-        return;
-      }
-
-      try {
-        const stages = await getTemplateStages(
-          activeCommission.template_id,
-        );
-
-        setWorkflowStages(stages);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    loadWorkflowStages();
-  }, [activeCommission]);
 
   async function loadTimer() {
     setRunningTimer(await getRunningTimer());
