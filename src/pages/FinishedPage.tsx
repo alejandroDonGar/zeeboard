@@ -334,7 +334,7 @@ function FinishedPage({
       {viewed && (
         <div className="fixed inset-0 z-[999] flex flex-col items-center justify-center gap-2.5 bg-black/80 p-6 backdrop-blur-md" onClick={() => setViewed(null)}>
           <img src={imageUrl(viewed.path)} alt="" className="max-h-[82vh] max-w-[90vw] rounded-control shadow-2xl" />
-          <p className="flex w-full max-w-[90vw] items-center justify-center gap-4 text-sm text-[#ece6dc]" onClick={(event) => event.stopPropagation()}>
+          <p className="flex w-full max-w-[90vw] items-center justify-center gap-4 text-sm text-[#e9e2d6]" onClick={(event) => event.stopPropagation()}>
             {viewedCommission && (
               <>
                 <span>

@@ -50,19 +50,19 @@
 
 :root {
   color-scheme: light;
-  --canvas: #f6f3ee;
-  --surface: #ffffff;
-  --paper: #fffaf2;
-  --highlight: #f1e8da;
-  --ink: #1f2933;
-  --muted: #4f473c;
-  --faint: #6f685f;
-  --line: #e6ded2;
-  --line-strong: #d8cec0;
-  --field-border: #998e7f;
-  --primary: #1f2933;
-  --primary-hover: #2c3947;
-  --on-primary: #ffffff;
+  --canvas: #ebe5da;
+  --surface: #f8f4ed;
+  --paper: #f3eee5;
+  --highlight: #e6ddcd;
+  --ink: #2d2a26;
+  --muted: #443e37;
+  --faint: #635b52;
+  --line: #ddd4c5;
+  --line-strong: #cfc4b4;
+  --field-border: #8c8273;
+  --primary: #3b3732;
+  --primary-hover: #4a453f;
+  --on-primary: #f8f4ed;
   --tone-ok: #1a6f43;
   --tone-warn: #7a4800;
   --tone-bad: #a52a21;
@@ -74,19 +74,19 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --canvas: #16181c;
-    --surface: #1f2227;
-    --paper: #262a30;
-    --highlight: #30353c;
-    --ink: #ece6dc;
-    --muted: #cfc8bc;
-    --faint: #a39c92;
-    --line: #33373e;
-    --line-strong: #464b53;
-    --field-border: #6f757e;
-    --primary: #ece6dc;
-    --primary-hover: #ffffff;
-    --on-primary: #1f2933;
+    --canvas: #191816;
+    --surface: #211f1c;
+    --paper: #282521;
+    --highlight: #34302a;
+    --ink: #e9e2d6;
+    --muted: #cdc5b8;
+    --faint: #a39a8d;
+    --line: #36322c;
+    --line-strong: #48433b;
+    --field-border: #7a7268;
+    --primary: #e9e2d6;
+    --primary-hover: #f8f4ed;
+    --on-primary: #211f1c;
     --tone-ok: #5ec48d;
     --tone-warn: #e6a04a;
     --tone-bad: #ef7b73;
@@ -97,19 +97,19 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --canvas: #16181c;
-  --surface: #1f2227;
-  --paper: #262a30;
-  --highlight: #30353c;
-  --ink: #ece6dc;
-  --muted: #cfc8bc;
-  --faint: #a39c92;
-  --line: #33373e;
-  --line-strong: #464b53;
-  --field-border: #6f757e;
-  --primary: #ece6dc;
-  --primary-hover: #ffffff;
-  --on-primary: #1f2933;
+  --canvas: #191816;
+  --surface: #211f1c;
+  --paper: #282521;
+  --highlight: #34302a;
+  --ink: #e9e2d6;
+  --muted: #cdc5b8;
+  --faint: #a39a8d;
+  --line: #36322c;
+  --line-strong: #48433b;
+  --field-border: #7a7268;
+  --primary: #e9e2d6;
+  --primary-hover: #f8f4ed;
+  --on-primary: #211f1c;
   --tone-ok: #5ec48d;
   --tone-warn: #e6a04a;
   --tone-bad: #ef7b73;
@@ -127,12 +127,12 @@
 
 /* Cristal esmerilado casi opaco: paneles que flotan sobre el fondo de colores (AmbientBackground) */
 :root {
-  --glass: rgba(255, 252, 246, 0.8);
-  --glass-heavy: rgba(255, 250, 242, 0.9);
-  --glass-edge: rgba(255, 255, 255, 0.75);
-  --glass-top: rgba(255, 255, 255, 0.9);
-  --shadow-s: rgba(60, 40, 10, 0.08);
-  --shadow-l: rgba(60, 40, 10, 0.22);
+  --glass: rgba(248, 244, 237, 0.82);
+  --glass-heavy: rgba(246, 241, 233, 0.9);
+  --glass-edge: rgba(255, 255, 255, 0.45);
+  --glass-top: rgba(255, 255, 255, 0.55);
+  --shadow-s: rgba(60, 40, 10, 0.06);
+  --shadow-l: rgba(60, 40, 10, 0.16);
   --ambient-opacity: 0.55;
   --amb-neutral-a: #e6d6bd;
   --amb-neutral-b: #d4dbe0;
@@ -141,30 +141,30 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --glass: rgba(34, 37, 42, 0.8);
-    --glass-heavy: rgba(28, 30, 35, 0.9);
-    --glass-edge: rgba(255, 255, 255, 0.07);
-    --glass-top: rgba(255, 255, 255, 0.12);
+    --glass: rgba(36, 34, 31, 0.82);
+    --glass-heavy: rgba(30, 28, 26, 0.9);
+    --glass-edge: rgba(255, 240, 220, 0.06);
+    --glass-top: rgba(255, 240, 220, 0.1);
     --shadow-s: rgba(0, 0, 0, 0.3);
     --shadow-l: rgba(0, 0, 0, 0.55);
     --ambient-opacity: 0.45;
-    --amb-neutral-a: #2b3340;
-    --amb-neutral-b: #382f27;
-    --amb-neutral-c: #25323a;
+    --amb-neutral-a: #3a3128;
+    --amb-neutral-b: #2e2a26;
+    --amb-neutral-c: #352d24;
   }
 }
 
 :root[data-theme="dark"] {
-  --glass: rgba(34, 37, 42, 0.8);
-  --glass-heavy: rgba(28, 30, 35, 0.9);
-  --glass-edge: rgba(255, 255, 255, 0.07);
-  --glass-top: rgba(255, 255, 255, 0.12);
+  --glass: rgba(36, 34, 31, 0.82);
+  --glass-heavy: rgba(30, 28, 26, 0.9);
+  --glass-edge: rgba(255, 240, 220, 0.06);
+  --glass-top: rgba(255, 240, 220, 0.1);
   --shadow-s: rgba(0, 0, 0, 0.3);
   --shadow-l: rgba(0, 0, 0, 0.55);
   --ambient-opacity: 0.45;
-  --amb-neutral-a: #2b3340;
-  --amb-neutral-b: #382f27;
-  --amb-neutral-c: #25323a;
+  --amb-neutral-a: #3a3128;
+  --amb-neutral-b: #2e2a26;
+  --amb-neutral-c: #352d24;
 }
 
 /* Cristal esmerilado casi opaco, sin backdrop-filter: con un 80-90 % de opacidad sobre un fondo suave el desenfoque

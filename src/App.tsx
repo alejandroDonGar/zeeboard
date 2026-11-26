@@ -313,8 +313,8 @@ function App() {
     return (
       <div className="flex h-screen items-center justify-center bg-canvas text-ink">
         <div className="text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-control bg-[#1f2933] ring-1 ring-white/10">
-            <Logo className="h-9 w-9 bg-[#f6f3ee]" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-control bg-[#3b3732] ring-1 ring-white/10">
+            <Logo className="h-9 w-9 bg-[#f8f4ed]" />
           </div>
           <p className="mt-3 text-sm font-bold text-muted">
             {progress
@@ -358,8 +358,8 @@ function App() {
         {/* Below 1180 px only the icons show (names stay for screen readers and as tooltips): the page gets the room */}
         <aside className="glass-heavy flex w-60 shrink-0 flex-col rounded-surface px-3 py-4 max-[1180px]:w-[64px] max-[1180px]:px-2">
           <div className="mb-5 flex items-center gap-2.5 px-2 max-[1180px]:justify-center max-[1180px]:px-0">
-            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-control bg-[#1f2933] ring-1 ring-white/10">
-              <Logo className="h-4 w-4 bg-[#f6f3ee]" />
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-control bg-[#3b3732] ring-1 ring-white/10">
+              <Logo className="h-4 w-4 bg-[#f8f4ed]" />
             </div>
             <h1 className="text-lg tracking-tight max-[1180px]:sr-only">
               <b className="font-extrabold">Zee</b>

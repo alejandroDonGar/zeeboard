@@ -207,7 +207,7 @@ export const contrastRatio = (a: string, b: string) => contrast(rgb(a), rgb(b));
  * for mid-tone colours where neither reaches it (a cyan, an orange) the colour is darkened just enough for white text.
  */
 export function accentButton(colour: string): { background: string; color: string } {
-  const ink = "#1f2933";
+  const ink = "#2d2a26";
   if (contrastRatio(colour, ink) >= 4.5) return { background: colour, color: ink };
   let [r, g, b] = rgb(colour);
   while (contrast([r, g, b], [255, 255, 255]) < 4.5) [r, g, b] = [r, g, b].map((c) => Math.floor(c * 0.95));
@@ -227,7 +227,7 @@ export function tintStrengths(tint: string): { light: number; dark: number } {
     return Math.max(0, Math.round(strength * 100) / 100);
   };
 
-  return { light: fit("#fcf9f3", ["#1f2933", "#4f473c"], 0.34), dark: fit("#1f2227", ["#ece6dc", "#b8b0a3"], 0.3) };
+  return { light: fit("#f6f1ea", ["#2d2a26", "#443e37"], 0.34), dark: fit("#22201d", ["#e9e2d6", "#cdc5b8"], 0.3) };
 }
 
 export function useAmbient(): { colors: AmbientColors | null; layout: AmbientLayout } {

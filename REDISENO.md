@@ -442,6 +442,8 @@ Una segunda pasada, después del rediseño, para modernizar la **estructura** si
 
 **Errores de la propia auditoría corregidos al aplicarla:** los radios ya eran 3–6 px (el código redefine `rounded-2xl`/`3xl`), el foco visible ya existía, y la medida de línea y los números tabulares ya estaban.
 
+**Paleta más suave (después de 0.4.0):** el claro cansaba la vista (superficies y cristal en blanco puro, texto a 14,8:1, botón casi negro) y el oscuro mezclaba un fondo pizarra frío con texto crema. El claro baja un escalón a tonos papel (`--canvas #ebe5da`, `--surface #f8f4ed`, tinta `#2d2a26`, botón grafito `#3b3732`; bordes y sombras del cristal más suaves) y el oscuro pasa a grafito cálido (`--canvas #191816`, `--surface #211f1c`, tinta `#e9e2d6`). Texto a 13:1 y 12,8:1; el gris más claro a 4,95 y 4,72 (mínimo 4,5); bordes de campo ≥ 3,2. Los colores de estado y de tipo no cambian. Mismos valores en la página del iPad, el logo y el cálculo del tinte de la cabecera (`tintStrengths`).
+
 ---
 
 ## 11. Anexo: código completo de las maquetas
