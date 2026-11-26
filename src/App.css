@@ -225,6 +225,14 @@
 .chip-ok { --tone: var(--tone-ok); }
 .chip-warn { --tone: var(--tone-warn); }
 .chip-bad { --tone: var(--tone-bad); }
+.chip-info { --tone: var(--tone-info); }
+/* A state (late, stalled, partial…) gets a soft wash of its colour; a tag you chose (TagChip) only an outline and its
+   dot. So "what is happening to it" and "how I filed it" don't look the same (M8.6). */
+.chip-ok,
+.chip-warn,
+.chip-bad,
+.chip-info { background: color-mix(in srgb, var(--tone) 16%, var(--surface)); }
+.chip-tag { background: transparent; box-shadow: inset 0 0 0 1px var(--line-strong); }
 /* Lo único que llena de color: lo urgente de verdad (vencido) */
 .chip-solid { background: var(--tone); color: var(--on-tone); }
 .chip-solid::before { display: none; }

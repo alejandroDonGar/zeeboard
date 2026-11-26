@@ -32,7 +32,7 @@ function Change({ now, before }: { now: number | null; before: number | null }) 
   const change = changePercent(now, before);
 
   if (change === null) {
-    return <span className="text-faint">{t("No previous period")}</span>;
+    return null; // said once under the figures, not five times (M8.4)
   }
 
   return (
@@ -108,8 +108,9 @@ function StatisticsPage() {
     },
     {
       label: t("Profit"),
-      value: <Money amount={stats.current.profit} />,
-      change: <Change now={stats.current.profit} before={stats.previous?.profit ?? null} />,
+      // Without any expense, profit would just repeat Received: say how to get the real figure instead
+      value: stats.current.expenses === 0 ? "—" : <Money amount={stats.current.profit} />,
+      change: stats.current.expenses === 0 ? <span className="text-faint">{t("Add your expenses below to see it")}</span> : <Change now={stats.current.profit} before={stats.previous?.profit ?? null} />,
     },
     {
       label: t("Per hour"),
@@ -167,6 +168,9 @@ function StatisticsPage() {
             ))}
           </dl>
         )}
+        {stats && changePercent(stats.current.received, stats.previous?.received ?? null) === null && !noData && (
+          <p className="-mt-2 pb-4 text-xs text-faint">{t("No previous period")}</p>
+        )}
 
         {stats && chartMonths.length > 1 && (
           <section className="border-t border-line py-5">
@@ -186,7 +190,7 @@ function StatisticsPage() {
                   <table className="w-full border-collapse text-sm tabular-nums">
                     <thead>
                       <tr className="text-right text-faint">
-                        {[t("Template"), t("Pieces"), t("Received"), t("Average"), t("Hours"), t("Days"), t("Per hour")].map((label, index) => (
+                        {[t("Type"), t("Pieces"), t("Received"), t("Average"), t("Hours"), t("Days"), t("Per hour")].map((label, index) => (
                           <th key={label} className={`pb-2 font-medium whitespace-nowrap ${index === 0 ? "text-left" : "pl-3"}`}>
                             {label}
                           </th>

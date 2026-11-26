@@ -274,7 +274,9 @@ function FinishedPage({
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-x-3.5 gap-y-[18px]">
+                    {/* Masonry with CSS columns (like Pinterest or Behance): each drawing keeps its own shape, not cropped square */}
+                    <div className="columns-[190px] gap-x-3.5">
+
                       {[...group.commissions]
                         .sort((a, b) => deliveryDay(b).localeCompare(deliveryDay(a)))
                         .map((commission) => {
@@ -284,15 +286,15 @@ function FinishedPage({
                           const rate = rateOf(commission);
 
                           return (
-                            <div key={commission.id} className="min-w-0">
+                            <div key={commission.id} className="mb-[18px] min-w-0 break-inside-avoid">
                               {latestImage ? (
                                 <button
                                   type="button"
                                   title={t("View image")}
                                   onClick={() => setViewed({ path: latestImage.image_data_url, commissionId: commission.id })}
-                                  className="block aspect-square w-full cursor-zoom-in overflow-hidden rounded-control shadow-[0_0_0_1px_var(--line)] transition active:scale-[0.98]"
+                                  className="block w-full cursor-zoom-in overflow-hidden rounded-control shadow-[0_0_0_1px_var(--line)] transition active:scale-[0.98]"
                                 >
-                                  <img src={thumbUrl(latestImage.image_data_url)} loading="lazy" decoding="async" alt={commission.title} className="h-full w-full object-cover" />
+                                  <img src={thumbUrl(latestImage.image_data_url)} loading="lazy" decoding="async" alt={commission.title} className="block h-auto min-h-24 w-full bg-highlight" />
                                 </button>
                               ) : (
                                 <div className="aspect-square w-full rounded-control bg-highlight shadow-[0_0_0_1px_var(--line)]" />

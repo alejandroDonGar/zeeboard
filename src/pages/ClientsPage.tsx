@@ -760,8 +760,8 @@ function ClientsPage({
 
               <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto border-t border-line @min-[700px]:grid-cols-[minmax(0,1fr)_clamp(250px,30%,310px)] @min-[700px]:overflow-hidden">
                 <div className="grid min-w-0 content-start gap-6 p-5 @min-[700px]:overflow-y-auto">
-                  {/* Figures without boxes */}
-                  <div className="grid grid-cols-[repeat(auto-fit,minmax(130px,1fr))] gap-y-3.5">
+                  {/* Figures as one quiet line, not three big numbers above what matters (M8.3) */}
+                  <div className="order-first flex flex-wrap gap-x-6 gap-y-1.5">
                     {[
                       {
                         label: t("Spent"),
@@ -779,11 +779,11 @@ function ClientsPage({
                         detail: pendingAmount > 0 ? "" : t("All paid"),
                       },
                     ].map((figure) => (
-                      <div key={figure.label} className="border-l border-line px-[18px] first:border-l-0 first:pl-0">
-                        <p className="text-xs text-faint">{figure.label}</p>
-                        <p className="mt-0.5 font-display text-2xl leading-tight font-semibold tabular-nums">{figure.value}</p>
-                        <p className="mt-0.5 text-xs text-faint">{figure.detail}</p>
-                      </div>
+                      <p key={figure.label}>
+                        <span className="text-muted">{figure.label}</span>{" "}
+                        <b className="font-semibold tabular-nums">{figure.value}</b>
+                        {figure.detail && <span className="ml-1.5 text-xs text-faint">{figure.detail}</span>}
+                      </p>
                     ))}
                   </div>
 
@@ -856,7 +856,8 @@ function ClientsPage({
                     )}
                   </div>
 
-                  <div>
+                  {/* The characters and their references are what you look at while drawing: right after the figures (M8.3) */}
+                  <div className="-order-1">
                     <h4 className="mb-2 flex items-baseline gap-2 text-sm font-semibold">
                       {t("Characters")}
                       <span className="font-medium text-faint tabular-nums">{selectedCharacters.length}</span>

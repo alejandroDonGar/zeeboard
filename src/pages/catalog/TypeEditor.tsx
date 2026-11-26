@@ -275,7 +275,7 @@ function TypeEditor({
         <button type="button" onClick={onDuplicate} className={btn}>
           {t("Duplicate")}
         </button>
-        <button type="button" onClick={onDelete} className={`${btn} text-tone-bad`}>
+        <button type="button" onClick={onDelete} className={`${btn} !text-tone-bad`}>
           {t("Delete")}
         </button>
         <button

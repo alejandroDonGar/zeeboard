@@ -17,7 +17,7 @@ function TagChip({
   title?: string;
   suffix?: string;
 }) {
-  const className = `chip ${selected === false ? "chip-outline hover:text-ink" : ""} ${selected ? "ring-1 ring-ink" : ""}`;
+  const className = `chip ${selected === false ? "chip-outline hover:text-ink" : selected ? "ring-1 ring-ink" : "chip-tag"}`;
   const style = { "--tone": color } as CSSProperties;
 
   return onClick ? (

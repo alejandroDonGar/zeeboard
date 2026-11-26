@@ -306,7 +306,8 @@ function SettingsPage() {
 
           <div className="min-w-0 overflow-y-auto px-7 pt-5 pb-9">
             <h2 className="mb-4 font-display text-2xl leading-tight font-semibold tracking-tight">{t(SECTIONS.find((item) => item.id === page)!.label)}</h2>
-            <div className="max-w-[760px] pb-2">
+            {/* Narrow like macOS System Settings: each control stays close to its label (M8.5) */}
+            <div className="max-w-[600px] pb-2">
           {page === "general" && (
             <>
           <h3 className={section}>{t("Appearance")}</h3>

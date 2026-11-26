@@ -664,6 +664,7 @@ export const es: Record<string, string> = {
   "Untitled": "Sin nombre",
   "no price": "sin precio",
   "No previous period": "Sin periodo anterior",
+  "Add your expenses below to see it": "Apunta tus gastos abajo para verlo",
   "General": "General",
   "Prices and payments": "Precios y pagos",
   "Deadlines and alerts": "Plazos y avisos",

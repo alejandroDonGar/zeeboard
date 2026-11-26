@@ -34,6 +34,7 @@ import { undoToast } from "../lib/undo";
 import ConfirmModal from "../components/ConfirmModal";
 import GlassPanel from "../components/GlassPanel";
 import TopBar from "../components/TopBar";
+import { Segmented } from "../components/BoardFilters";
 import TagEditor, { type TagDraft } from "./catalog/TagEditor";
 import TypeEditor, { type TypeFigures } from "./catalog/TypeEditor";
 
@@ -91,6 +92,8 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
   const completed = (commission: Commission) => isCommissionCompleted(commission, stagesByTemplateId);
   const selectedTemplate = selection?.kind === "type" ? templates.find((template) => template.id === selection.id) ?? null : null;
   const selectedTag = selection?.kind === "tag" ? tags.find((tag) => tag.id === selection.id) ?? null : null;
+  // Which view the list shows follows what is open: a tag (or a new one) means the tags view
+  const view = selection?.kind === "tag" || selection?.kind === "new-tag" ? "tags" : "types";
 
   // What the selected type brings: what's in progress and the figures of what's been delivered
   const own = selectedTemplate ? commissions.filter((commission) => commission.template_id === selectedTemplate.id) : [];
@@ -243,11 +246,26 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
               {t("New tag")}
             </button>
           }
-        />
+        >
+          {/* Types (templates with stages and price) and tags (labels to file by) are two different things: two views (M8.2) */}
+          <Segmented
+            options={[
+              { value: "types", label: "Commission types" },
+              { value: "tags", label: "Tags" },
+            ]}
+            value={view}
+            onChange={(next) => {
+              if (next === view) return;
+              const firstTag = tagCategories[0]?.[1][0];
+              if (next === "tags") setSelection(firstTag ? { kind: "tag", id: firstTag.id } : { kind: "new-tag", category: "Extras" });
+              else setSelection(templates[0] ? { kind: "type", id: templates[0].id } : null);
+            }}
+          />
+        </TopBar>
 
         <section className="flex min-h-0 flex-1">
           <GlassPanel as="nav" className="list-panel min-h-0 w-80 shrink-0 border-r border-line" contentClassName="overflow-y-auto p-2">
-            {!ready ? null : (
+            {!ready ? null : view === "types" ? (
               <>
                 {group(t("Commission types"), templates.length)}
                 {templates.length === 0 && <p className="px-2 py-1 text-xs text-faint">{t("No templates yet. Create one on the right.")}</p>}
@@ -266,7 +284,9 @@ function CatalogPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => v
                     active > 0 ? t("{n} in progress", { n: active }) : "",
                   );
                 })}
-
+              </>
+            ) : (
+              <>
                 {tagCategories.map(([category, categoryTags]) => (
                   <div key={category}>
                     {group(category, categoryTags.length)}

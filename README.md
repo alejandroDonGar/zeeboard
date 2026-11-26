@@ -198,6 +198,7 @@ The inbox for people who want a commission.
 
 - A client has a name, platform and handle, an **email** (used to match PayPal payments), the **account to tag** when you post their work, and free notes. The header is tinted with the colours of their photo.
 - The figures show how much they have **spent** (and the average), how many commissions they have (active and done) and what is **still pending** to be paid. Their commissions are listed below with the colour bar of the type.
+- Under the name, one line with what the client has spent, how many commissions and what is still pending; right below, their **characters** with the references, which is what you look at while drawing, and then their commissions.
 - The side column has the account to **tag when posting**, contact, email and the date they became a client, plus **Notes**, which are saved by themselves when you leave the field.
 - The **photo** can be fetched from Bluesky or Telegram (**··· → Fetch photo**: tag account first, then contact account), or set by hand by clicking the avatar, dropping an image on it or pasting with Ctrl+V. Photos are downloaded once and stored on your disk. **Edit** and **··· → Delete client…** are in the header.
 
@@ -208,7 +209,7 @@ The inbox for people who want a commission.
 
 ## Catalog: types and tags
 
-One screen with a list on the left (the **commission types** and then the **tags** grouped by category) and an editor on the right.
+One screen with two views, **Commission types** and **Tags** (switch at the top left): a list on the left and an editor on the right. Types are templates with stages and a price; tags are labels to file commissions by.
 
 <img src="docs/images/templates.png" alt="Catalog" width="900">
 
@@ -225,7 +226,7 @@ Everything you have delivered, as a register. It's the other view of **Commissio
 <img src="docs/images/finished.png" alt="Finished commissions grouped by month" width="900">
 
 - A gallery grouped by **month** or by **client**, with a sticky header for each group (count and total). Search by title or client and filter by **date range**.
-- Each tile shows the image, the title, the amount and the client (or date), hours and rate per hour. The top line has how many you finished, the total and your **rate per hour** (the rate of each type is in [Statistics](#statistics)). A commission not collected yet shows its hours without a rate. Click an image to see it large (the background takes its colours); click the text to open the commission.
+- The drawings are laid out like a portfolio, each in its own shape (tall or wide, never cropped square). Each one shows the image, the title, the amount and the client (or date), hours and rate per hour. The top line has how many you finished, the total and your **rate per hour** (the rate of each type is in [Statistics](#statistics)). A commission not collected yet shows its hours without a rate. Click an image to see it large (the background takes its colours); click the text to open the commission.
 
 **Marking a commission as finished.** On the last working stage, the button reads **Mark as finished**: you set the **delivery date**, the **hours spent** (typed by hand), an optional **final image** and **final notes** (a link to the post, how it went…). **··· → Back to the previous stage** reopens it, and **Edit delivery** changes those details later. Hours and delivery date feed the register and [Statistics](#statistics).
 
