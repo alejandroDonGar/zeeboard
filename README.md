@@ -141,7 +141,7 @@ Each stage in the strip has a **+ correction** button, which opens the correctio
 
 ### Creating and editing a commission
 
-Press **Ctrl+N** or **+ New commission**.
+Press **Ctrl+N** or **+ New commission**. The form opens as a panel on the right (the screen behind stays in view), with **Create commission** always at its bottom; if it can't be used yet, it says why. **Esc** closes it. The client form opens the same way.
 
 <img src="docs/images/new-commission.png" alt="New commission form" width="900">
 
