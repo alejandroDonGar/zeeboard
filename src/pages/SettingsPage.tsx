@@ -4,6 +4,7 @@ import {
   IconCurrencyEuro,
   IconDatabase,
   IconDeviceTablet,
+  IconMessage,
   IconShieldCheck,
   IconTrash,
   type Icon,
@@ -40,6 +41,7 @@ import ConfirmModal from "../components/ConfirmModal";
 import { getLanguage, locale, setLanguage, t, type Language } from "../lib/i18n";
 import PaypalImport, { pickPaypalFile, type PaypalPreview } from "../components/PaypalImport";
 import IpadSettings from "../components/IpadSettings";
+import MessageSettings from "../components/MessageSettings";
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) {
@@ -49,12 +51,13 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-type SectionId = "general" | "pricing" | "deadlines" | "ipad" | "backups" | "data" | "trash";
+type SectionId = "general" | "pricing" | "deadlines" | "messages" | "ipad" | "backups" | "data" | "trash";
 
 const SECTIONS: { id: SectionId; label: string; Icon: Icon }[] = [
   { id: "general", label: "General", Icon: IconAdjustments },
   { id: "pricing", label: "Prices and payments", Icon: IconCurrencyEuro },
   { id: "deadlines", label: "Deadlines and alerts", Icon: IconClock },
+  { id: "messages", label: "Messages", Icon: IconMessage },
   { id: "ipad", label: "iPad", Icon: IconDeviceTablet },
   { id: "backups", label: "Backups", Icon: IconShieldCheck },
   { id: "data", label: "Data and storage", Icon: IconDatabase },
@@ -698,6 +701,8 @@ function SettingsPage() {
           </div>
             </>
           )}
+
+          {page === "messages" && <MessageSettings />}
 
           {page === "ipad" && (
             <>

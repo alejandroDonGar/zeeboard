@@ -102,6 +102,14 @@ export type AppSettings = {
   /** CSV of form responses (kept up to date by the Google script in your Drive) */
   responses_file: string | null;
   last_form_sync: string | null;
+  /** Messages to clients: {artist} and {tos} in any template */
+  artist_name: string | null;
+  tos_url: string | null;
+  /** Your own text for each template; null = the default one, in the app's language */
+  msg_stage: string | null;
+  msg_payment: string | null;
+  msg_delivery: string | null;
+  msg_decline: string | null;
 };
 
 // Loaded once at startup so any screen can read them without await
@@ -121,6 +129,12 @@ let settings: AppSettings = {
   slots_total: 5,
   responses_file: null,
   last_form_sync: null,
+  artist_name: null,
+  tos_url: null,
+  msg_stage: null,
+  msg_payment: null,
+  msg_delivery: null,
+  msg_decline: null,
 };
 
 export function appSettings(): AppSettings {
@@ -140,7 +154,7 @@ export async function loadSettings(): Promise<void> {
   const rows = await database.select<Row[]>(
     `SELECT default_currency, extra_character_rate, auto_backup_enabled, auto_backup_folder, auto_backup_keep,
        last_auto_backup, promise_max_days, reminders_enabled, reminder_days_before, stalled_enabled, stalled_days,
-       slots_open, slots_total, responses_file, last_form_sync
+       slots_open, slots_total, responses_file, last_form_sync, artist_name, tos_url, msg_stage, msg_payment, msg_delivery, msg_decline
      FROM settings WHERE id = 1;`,
   );
 
@@ -163,7 +177,8 @@ export async function updateSettings(changes: Partial<AppSettings>): Promise<voi
     `UPDATE settings SET default_currency = ?, extra_character_rate = ?, auto_backup_enabled = ?,
        auto_backup_folder = ?, auto_backup_keep = ?, last_auto_backup = ?, promise_max_days = ?,
        reminders_enabled = ?, reminder_days_before = ?, stalled_enabled = ?, stalled_days = ?,
-       slots_open = ?, slots_total = ?, responses_file = ?, last_form_sync = ? WHERE id = 1;`,
+       slots_open = ?, slots_total = ?, responses_file = ?, last_form_sync = ?, artist_name = ?, tos_url = ?,
+       msg_stage = ?, msg_payment = ?, msg_delivery = ?, msg_decline = ? WHERE id = 1;`,
     [
       next.default_currency,
       next.extra_character_rate,
@@ -180,6 +195,12 @@ export async function updateSettings(changes: Partial<AppSettings>): Promise<voi
       next.slots_total,
       next.responses_file,
       next.last_form_sync,
+      next.artist_name,
+      next.tos_url,
+      next.msg_stage,
+      next.msg_payment,
+      next.msg_delivery,
+      next.msg_decline,
     ],
   );
   settings = next;

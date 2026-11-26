@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import {
-  fillMessage,
+  clientMessage,
   formatMoney,
   inDefaultCurrency,
   isCommissionCompleted,
@@ -119,7 +119,7 @@ function DashboardPage({
   const dueThisWeek = active.filter((commission) => commission.deadline && (new Date(`${commission.deadline}T00:00:00`).getTime() - today) / DAY <= 7).length;
 
   async function copyReminder(commission: Commission) {
-    const text = fillMessage(t("Hi {client}! Whenever you can, {remaining} is left for {title}. Thank you!"), {
+    const text = clientMessage("payment", {
       client: commission.client_name ?? "",
       title: commission.title,
       remaining: formatMoney(remainingOf(commission), commission.currency),

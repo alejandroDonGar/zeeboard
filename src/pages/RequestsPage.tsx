@@ -23,7 +23,7 @@ import {
   type CommissionRequest,
   type Template,
 } from "../lib/database";
-import { calculateCommissionPrice, formatMoney, isoDay, loadOpenCommissions, typicalDays } from "../lib/commissionHelpers";
+import { calculateCommissionPrice, clientMessage, formatMoney, isoDay, loadOpenCommissions, typicalDays } from "../lib/commissionHelpers";
 import { getCommissions, getStagesByTemplate } from "../lib/database";
 import { autoTagIds, normalizeHandle, parseResponses } from "../lib/formImport";
 import { REQUESTS_CHANGED, syncFormResponses } from "../lib/formSync";
@@ -283,6 +283,11 @@ function RequestsPage({ onOpenCommissionsPage }: { onOpenCommissionsPage: () => 
     run(async () => {
       await setRequestStatus(request.id, status);
       setSelectedId(null);
+      // Declining copies the message for them (Settings → Messages), to paste in their DM or email
+      if (status === "declined") {
+        await navigator.clipboard.writeText(clientMessage("decline", { client: request.name }));
+        showToast("Declined. Message copied.", "success");
+      }
     }, status === "waitlist" ? "Could not move it" : "Could not decline");
   }
 

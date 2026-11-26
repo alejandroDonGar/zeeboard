@@ -19,7 +19,7 @@ import {
   invoiceDescription,
 } from "../lib/commissionHelpers";
 import { TYPE_CATEGORY } from "../lib/catalog";
-import { fillMessage, formatMoney as formatAmount, formatNumber, paymentSummary as summaryOfPayments, trackedHours } from "../lib/commissionHelpers";
+import { clientMessage, type MessageKind, formatMoney as formatAmount, formatNumber, paymentSummary as summaryOfPayments, trackedHours } from "../lib/commissionHelpers";
 import {
   getTemplates,
   getCommissions,
@@ -418,10 +418,10 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
   }
 
   /** Copies a ready-to-paste message for the client, filled with this commission's details */
-  async function copyMessage(template: string) {
+  async function copyMessage(kind: MessageKind) {
     if (!activeCommission) return;
     const remaining = summaryOfPayments(activeCommission.price, paymentsByCommissionId[activeCommission.id] ?? []).remaining;
-    const text = fillMessage(template, {
+    const text = clientMessage(kind, {
       client: activeCommission.client_name ?? "",
       title: activeCommission.title,
       stage: workflowStages.find((stage) => stage.id === activeCommission.current_stage_id)?.name ?? "",
@@ -1006,18 +1006,20 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
                           </button>
                         )}
                         <hr className="my-1 border-line" />
-                        {[
-                          [t("Message: stage ready"), t("Hi {client}! {stage} of your {title} is ready. Any changes before I continue?")],
-                          [t("Message: payment reminder"), t("Hi {client}! Whenever you can, {remaining} is left for {title}. Thank you!")],
-                          [t("Message: delivered"), t("Hi {client}! Your {title} is finished. Thank you so much!")],
-                        ].map(([label, template]) => (
+                        {(
+                          [
+                            [t("Message: stage ready"), "stage"],
+                            [t("Message: payment reminder"), "payment"],
+                            [t("Message: delivered"), "delivery"],
+                          ] as const
+                        ).map(([label, kind]) => (
                           <button
                             key={label}
                             type="button"
                             role="menuitem"
                             onClick={() => {
                               setCommissionMenuOpen(false);
-                              copyMessage(template);
+                              copyMessage(kind);
                             }}
                             className="block w-full rounded-chip px-2.5 py-2 text-left text-sm hover:bg-highlight"
                           >
@@ -1222,6 +1224,7 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
       {showFinishModal && activeCommission && (
         <FinishCommissionModal
           title={activeCommission.title}
+          client={activeCommission.client_name ?? ""}
           hours={activeCommission.hours ?? (tracked.total || null)}
           notes={activeCommission.final_notes}
           isSaving={finishing}

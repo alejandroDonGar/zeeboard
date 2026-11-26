@@ -294,7 +294,14 @@ async function addColumn(database: ZeeDatabase, table: string, definition: strin
  * A new change is a new function at the end; one that has shipped is never edited. Each must be safe to run twice:
  * there is no transaction (the plugin's pool doesn't guarantee one connection), so a crash before the version is saved repeats it.
  */
-const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity, cancelling, waiting, timer, exchange, expenses];
+const MIGRATIONS: ((database: ZeeDatabase) => Promise<void>)[] = [baseline, indexes, integrity, cancelling, waiting, timer, exchange, expenses, messages];
+
+/** Migration 9: messages to clients. Your name and terms link, and your own text for each template (null = the default one). */
+async function messages(database: ZeeDatabase): Promise<void> {
+  for (const column of ["artist_name", "tos_url", "msg_stage", "msg_payment", "msg_delivery", "msg_decline"]) {
+    await addColumn(database, "settings", `${column} TEXT`);
+  }
+}
 
 /** Migration 8: money spent on the work (materials, software, fees), in the default currency, for the real profit. */
 async function expenses(database: ZeeDatabase): Promise<void> {

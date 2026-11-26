@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { isoDay, parsePrice } from "../lib/commissionHelpers";
+import { clientMessage, isoDay, parsePrice } from "../lib/commissionHelpers";
+import { useToast } from "../context/ToastContext";
 import { pickImagePaths } from "../lib/images";
 import { t } from "../lib/i18n";
 import { useDialog } from "../lib/useDialog";
@@ -12,6 +13,7 @@ const field = "rounded-control border border-field-border bg-surface px-3 py-2 t
 /** Final details of a piece. Hours and notes come prefilled when a finished commission is finished again. */
 function FinishCommissionModal({
   title,
+  client,
   hours: previousHours,
   notes: previousNotes,
   isSaving,
@@ -19,6 +21,7 @@ function FinishCommissionModal({
   onCancel,
 }: {
   title: string;
+  client: string;
   hours: number | null;
   notes: string | null;
   isSaving: boolean;
@@ -30,6 +33,12 @@ function FinishCommissionModal({
   const [notes, setNotes] = useState(previousNotes ?? "");
   const [imagePaths, setImagePaths] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
+
+  async function copyDelivery() {
+    await navigator.clipboard.writeText(clientMessage("delivery", { client, title }));
+    showToast("Message copied.", "success");
+  }
 
   function confirm() {
     try {
@@ -91,6 +100,9 @@ function FinishCommissionModal({
         {error && <p className="mt-3 text-sm text-tone-bad">{error}</p>}
 
         <div className="mt-6 flex justify-end gap-3">
+          <button type="button" onClick={() => copyDelivery().catch(console.error)} className="mr-auto rounded-control px-2 py-2 text-sm font-semibold text-muted hover:text-ink">
+            {t("Copy delivery message")}
+          </button>
           <button onClick={onCancel} className="rounded-control border border-field-border px-4 py-2 font-semibold">
             {t("Cancel")}
           </button>

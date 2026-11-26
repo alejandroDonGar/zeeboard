@@ -158,7 +158,7 @@ Press **Ctrl+N** or **+ New commission**. The form opens as a panel on the right
 
 ### Messages to the client
 
-**··· → Message: stage ready / payment reminder / delivered** copies a short message filled with the client's name, the commission, its current stage and what's left to pay, ready to paste in the client's chat. They follow the app's language.
+**··· → Message: stage ready / payment reminder / delivered** copies a short message filled with the client's name, the commission, its current stage and what's left to pay, ready to paste in the client's chat. **Mark as finished** also has **Copy delivery message**. The texts are yours to change in [Settings → Messages](#settings); until you do, they follow the app's language.
 
 ### Invoice description
 
@@ -188,7 +188,7 @@ The inbox for people who want a commission.
 - **Form responses**: ZeeBoard can read the responses of a **Google Form** from a CSV file that a small Google script keeps up to date in your Drive. It checks it when it opens and every 30 minutes, adds the new responses and shows a counter in the menu. You can also **Import** a CSV by hand. If you chose the file with a version before 0.3, choose it once more: ZeeBoard now remembers it on its own side (see Privacy).
 - The open request shows who and when, **what they ask for** (links are clickable) and, beside it, the type, number of characters, an **estimated price**, contact, social account and email.
 - Beside the estimated price, **Delivery ≈** says when it would arrive if you accepted it today: today plus the days that type usually takes you, from accepting to delivering (it shows once you have delivered one).
-- Right under what they ask for: **Accept** (`A`), **Waitlist** (`W`) and **Decline** (`D`), and **Restore**, **Open commission** or **Remove from the list** for the archived ones. After waitlisting or declining, the next request waiting opens by itself, so you can answer them all with the keyboard. Accept is disabled until the request has a type; if your slots are full, accepting asks for confirmation.
+- Right under what they ask for: **Accept** (`A`), **Waitlist** (`W`) and **Decline** (`D`), and **Restore**, **Open commission** or **Remove from the list** for the archived ones. Declining also copies the decline message (Settings → Messages) to paste in their DM or email. After waitlisting or declining, the next request waiting opens by itself, so you can answer them all with the keyboard. Accept is disabled until the request has a type; if your slots are full, accepting asks for confirmation.
 - Accepting creates, in one step: the **client** (or reuses the one you already have, matched by handle or name), their email and tag account, the **commission** with its price, and the **tags**. It also tries to fetch the client's profile photo in the background.
 - **+ New request** adds one by hand, and it goes through exactly the same flow.
 
@@ -329,6 +329,7 @@ Sections on the left, the chosen one on the right. Everything saves by itself.
 - **General**: theme and language.
 - **Prices and payments**: default currency (EUR, USD or GBP), the extra-character percentage, and your **payment platforms** with their fixed and percentage fees, with a live example (`200 → 193.85`).
 - **Deadlines and alerts**: the longest time you promise, delivery reminders and stalled alerts, each with its own number of days and an on/off switch.
+- **Messages**: your artist name and terms link, and the four messages you copy for clients (stage ready, payment reminder, delivery, declining a request). Each one says where it's used; edit the text, add the client, the commission, the stage, what's left, your name or your terms link with a click, and see a preview with example data. **Back to the original text** undoes your changes.
 - **iPad**: the [iPad receiver](#receiving-images-from-the-ipad).
 - **Backups**, **Data and storage** (PayPal import, CSV export, disk use, unused images, and an **error report** with the last errors to copy and send if something doesn't work) and **Trash**, below.
 

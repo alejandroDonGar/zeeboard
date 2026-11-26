@@ -1,6 +1,7 @@
 import { locale, t } from "./i18n";
 import { isPrivate } from "./privacy";
 import {
+  appSettings,
   getCommissions,
   getStagesByTemplate,
   getStageImagesByCommission,
@@ -348,4 +349,20 @@ export function typicalDays(commissions: Commission[], stages: Record<number, Te
 /** A message to paste to the client: {client}, {title}, {stage} and {remaining} are filled in; anything else stays as written. */
 export function fillMessage(template: string, fields: Record<string, string>): string {
   return template.replace(/\{(\w+)\}/g, (match, name: string) => fields[name] ?? match);
+}
+
+export type MessageKind = "stage" | "payment" | "delivery" | "decline";
+
+/** The text each template starts with (translated), until you write your own in Settings → Messages */
+export const DEFAULT_MESSAGES: Record<MessageKind, string> = {
+  stage: "Hi {client}! {stage} of your {title} is ready. Any changes before I continue?",
+  payment: "Hi {client}! Whenever you can, {remaining} is left for {title}. Thank you!",
+  delivery: "Hi {client}! Your {title} is finished. Thank you so much!",
+  decline: "Hi {client}! Thank you for your request. I can't take it right now, sorry.",
+};
+
+/** A message ready to paste: your text (or the default one) with the fields, your name and your terms link filled in */
+export function clientMessage(kind: MessageKind, fields: Record<string, string>, text = appSettings()[`msg_${kind}`]): string {
+  const { artist_name, tos_url } = appSettings();
+  return fillMessage(text ?? t(DEFAULT_MESSAGES[kind]), { artist: artist_name ?? "", tos: tos_url ?? "", ...fields });
 }
