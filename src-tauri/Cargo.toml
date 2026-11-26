@@ -1,6 +1,6 @@
 [package]
 name = "zeeboard"
-version = "0.2.0"
+version = "0.4.0"
 description = "ZeeBoard: commission manager for artists"
 authors = ["AverageZebraBoy"]
 license = "MIT"

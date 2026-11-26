@@ -6568,7 +6568,7 @@ dependencies = [
 
 [[package]]
 name = "zeeboard"
-version = "0.2.0"
+version = "0.4.0"
 dependencies = [
  "fast_image_resize",
  "if-addrs",
