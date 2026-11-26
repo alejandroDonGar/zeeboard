@@ -418,6 +418,32 @@ Estado: **hechos** — lógica del Catálogo, seguridad del iPad y copias, limpi
 
 ---
 
+## 10 bis. Modernización (noviembre de 2026)
+
+Una segunda pasada, después del rediseño, para modernizar la **estructura** sin cambiar la identidad de la maqueta D (Fraunces + Manrope, paleta cálida, cristal, esquinas rectas de 3–6 px). La auditoría con las medidas está en `AUDITORIA-VISUAL.md` y el plan paso a paso en `PLAN-MODERNIZACION.md`. Rama `modernizacion`, un commit por fase.
+
+**Principio:** el dibujo manda; la interfaz acompaña.
+
+| Fase | Qué se hizo |
+|---|---|
+| 0 | Capturas reproducibles de la demo (`scripts/capturas.mjs`) y test de contraste de los colores (`tests/tokens.test.ts`). |
+| 1 | Dos grises de texto que se distinguen y borde de campos a 3:1 (WCAG 1.4.11); escala de 7 tamaños (12–34 px) y la serif solo en títulos, nombres y cifras; radios con nombre de su papel (`chip`, `control`, `surface`); foco de 2 px también en los campos. |
+| 2 | Una sola superficie de cristal por pantalla con divisores de 1 px; barra superior sin título repetido; menú en dos grupos; lista de 320 px que se pliega con `[`; Terminadas como vista de Comisiones. |
+| 3 | Una sola acción principal con el color del tipo (oscurecido lo justo para 4,5:1); cronómetro en la cabecera; «volver a la etapa anterior» en el menú; la etapa sin imagen enseña la anterior atenuada; inspector por secciones plegables; lista más legible. |
+| 4 | El Panel como bandeja de hoy: una columna, grupos por motivo con su acción (copiar recordatorio, esperando al cliente) y el dinero en una frase. |
+| 5 | Solicitudes: la decisión bajo la petición, teclas A/W/D y la siguiente se abre sola. |
+| 6 | Borrar lo que va a la papelera sin «¿seguro?», con Deshacer en el aviso (que no se cierra con el ratón encima). |
+| 7 | Bienvenida con la app vacía y datos de ejemplo que se cargan y se quitan sin tocar lo creado a mano (`src/lib/sampleData.ts`). |
+| 8 | Terminadas en mampostería, Catálogo en dos vistas, Clientes con los personajes arriba, Estadísticas sin textos repetidos, Ajustes más estrecho y chips de estado distintos de las etiquetas. |
+| 9 | Formularios de comisión y cliente como panel lateral, con el botón siempre visible. |
+| 10 | Capturas nuevas del README y de la página, y este registro. |
+
+**Lo que no se hizo, y por qué:** un recorrido de etapas nuevo arriba del detalle (la tira de etapas ya es el recorrido: habría dicho el estado dos veces); sacar las plazas de la barra de Solicitudes y separar las contestadas (poco valor frente al trabajo); el precio por personaje extra como campo (toca un cálculo de dinero; iría aparte con migración y test).
+
+**Errores de la propia auditoría corregidos al aplicarla:** los radios ya eran 3–6 px (el código redefine `rounded-2xl`/`3xl`), el foco visible ya existía, y la medida de línea y los números tabulares ya estaban.
+
+---
+
 ## 11. Anexo: código completo de las maquetas
 
 Generado con `python maquetas-ui/anexo.py`; no editar a mano.
