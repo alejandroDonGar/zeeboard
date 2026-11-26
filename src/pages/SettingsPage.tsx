@@ -12,6 +12,7 @@ import {
 import TopBar from "../components/TopBar";
 import { Segmented } from "../components/BoardFilters";
 import { useEffect, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { backupBeforeCleanup, chooseAutoBackupFolder, exportBackup, pickBackupFolder, restoreBackup, runAutoBackup } from "../lib/backup";
 import { applyTheme, getTheme, type ThemeChoice } from "../lib/theme";
 import {
@@ -73,6 +74,11 @@ function SettingsPage() {
   const [exportingKind, setExportingKind] = useState<ExportKind | null>(null);
   const [exportMessage, setExportMessage] = useState<string | null>(null);
   const [auto, setAuto] = useState(appSettings());
+  // Windows' own startup entry is the setting (src-tauri/src/background.rs); null until read
+  const [background, setBackground] = useState<boolean | null>(null);
+  useEffect(() => {
+    invoke<boolean>("background_enabled").then(setBackground).catch(console.error);
+  }, []);
   const [paypal, setPaypal] = useState<PaypalPreview | null>(null);
   const [lastImport, setLastImport] = useState<string | null>(null);
 
@@ -346,6 +352,27 @@ function SettingsPage() {
                 ]}
                 value={getLanguage()}
                 onChange={setLanguage}
+              />
+            </div>
+
+            <div className={row}>
+              <div className="flex-1">
+                <p className="font-semibold">{t("Keep running in the background")}</p>
+                <p className="text-sm text-muted">
+                  {t("Opens with Windows in the tray, and closing the window keeps it there, so reminders arrive with the window closed. Quit from the tray icon.")}
+                </p>
+              </div>
+              <Segmented
+                options={[
+                  { value: "off", label: t("Off") },
+                  { value: "on", label: t("On") },
+                ]}
+                value={background ? "on" : "off"}
+                onChange={(value) =>
+                  invoke("set_background", { on: value === "on" })
+                    .then(() => setBackground(value === "on"))
+                    .catch((error) => showToast(t("Could not change it: {error}", { error: String(error) }), "error"))
+                }
               />
             </div>
           </div>

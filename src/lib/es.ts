@@ -742,4 +742,9 @@ export const es: Record<string, string> = {
   "Copy delivery message": "Copiar mensaje de entrega",
   "Declined. Message copied.": "Rechazada. Mensaje copiado.",
   "Hi {client}! Thank you for your request. I can't take it right now, sorry.": "¡Hola {client}! Gracias por tu solicitud. Ahora mismo no puedo aceptarla, lo siento.",
+  "Open ZeeBoard": "Abrir ZeeBoard",
+  "Quit": "Salir",
+  "Keep running in the background": "Seguir abierto en segundo plano",
+  "Opens with Windows in the tray, and closing the window keeps it there, so reminders arrive with the window closed. Quit from the tray icon.": "Se abre con Windows en la bandeja y, al cerrar la ventana, sigue ahí: los avisos llegan aunque la ventana esté cerrada. Para salir, usa el icono de la bandeja.",
+  "Could not change it: {error}": "No se pudo cambiar: {error}",
 };

@@ -1,4 +1,5 @@
 import "./App.css";
+import { invoke } from "@tauri-apps/api/core";
 import { useCallback, useEffect, useState } from "react";
 import { initializeDatabase, migrateLegacyImages, migratePaymentTags, purgeOldTrash, restoreLastTrash } from "./lib/database";
 import { initImageUrls } from "./lib/images";
@@ -263,6 +264,11 @@ function App() {
   // On change the whole app repaints with data hidden or visible
   const privateMode = usePrivacy();
   const [newRequests, setNewRequests] = useState(0);
+
+  // The tray menu (src-tauri/src/background.rs) in the app's language
+  useEffect(() => {
+    invoke("tray_labels", { open: t("Open ZeeBoard"), quit: t("Quit") }).catch(console.error);
+  }, []);
 
   useEffect(() => {
     const count = () =>

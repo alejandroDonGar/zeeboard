@@ -260,7 +260,7 @@ ZeeBoard watches your commissions and tells you what needs attention, in the das
 - **Stalled**: no new image, correction, payment or stage change for a number of days (21 by default). Not while it is marked **··· → Waiting for the client** (their feedback or payment); moving it to another stage unmarks it.
 - **Unpaid**: the commission left the first stage of its template (your sketch was approved) and nothing has been paid yet.
 
-Alerts are checked when the app opens and every 30 minutes while it stays open. All the numbers are in [Settings](#settings).
+Alerts are checked when the app opens and every 30 minutes while it stays open. To get them with the window closed, switch on **Settings → General → Keep running in the background**. All the numbers are in [Settings](#settings).
 
 ## Importing PayPal payments
 
@@ -326,7 +326,7 @@ Skip the email: draw on the iPad and send the images straight to a commission st
 
 Sections on the left, the chosen one on the right. Everything saves by itself.
 
-- **General**: theme and language.
+- **General**: theme, language and **Keep running in the background**: ZeeBoard opens with Windows hidden in the tray, and closing the window keeps it there, so reminders still arrive. Click the tray icon to open it; quit from its menu. Opening ZeeBoard again (Start menu, desktop) shows the one already running instead of a second copy.
 - **Prices and payments**: default currency (EUR, USD or GBP), the extra-character percentage, and your **payment platforms** with their fixed and percentage fees, with a live example (`200 → 193.85`).
 - **Deadlines and alerts**: the longest time you promise, delivery reminders and stalled alerts, each with its own number of days and an on/off switch.
 - **Messages**: your artist name and terms link, and the four messages you copy for clients (stage ready, payment reminder, delivery, declining a request). Each one says where it's used; edit the text, add the client, the commission, the stage, what's left, your name or your terms link with a click, and see a preview with example data. **Back to the original text** undoes your changes.

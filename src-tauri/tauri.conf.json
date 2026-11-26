@@ -13,6 +13,7 @@
     "windows": [
       {
         "title": "ZeeBoard",
+        "visible": false,
         "width": 1200,
         "height": 760,
         "minWidth": 1050,
