@@ -378,8 +378,7 @@ function App() {
                   onClick={() => setCurrentPage(item.id)}
                   aria-current={isActive ? "page" : undefined}
                   title={t(item.label)}
-                  // Two groups, separated by space alone: daily work, then lookup and setup
-                  className={`relative flex w-full items-center gap-3 rounded-control px-3 py-2 text-left text-sm max-[1180px]:justify-center max-[1180px]:px-0 ${item.id === "clients" ? "!mt-4" : ""} ${
+                  className={`relative flex w-full items-center gap-3 rounded-control px-3 py-2 text-left text-sm max-[1180px]:justify-center max-[1180px]:px-0 ${
                     isActive ? "bg-highlight font-semibold text-ink" : "font-medium text-muted transition hover:bg-highlight/60 hover:text-ink"
                   }`}
                 >

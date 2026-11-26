@@ -1167,7 +1167,7 @@ function CommissionsPage({ onShowFinished }: { onShowFinished: () => void }) {
                       type="button"
                       onClick={() => (nextIsFinish ? setShowFinishModal(true) : handleMoveStage(1))}
                       style={typeOf(activeCommission)?.color ? accentButton(typeOf(activeCommission)!.color) : undefined}
-                      className="inline-flex items-center gap-2 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow-sm transition hover:brightness-110 active:scale-[0.97]"
+                      className="inline-flex items-center gap-2 rounded-control bg-primary px-4 py-2 text-sm font-semibold text-on-primary shadow-sm transition duration-300 hover:brightness-110 active:scale-[0.97]"
                     >
                       <IconCheck size={16} stroke={2} aria-hidden="true" />
                       {nextIsFinish
