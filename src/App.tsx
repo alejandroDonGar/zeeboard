@@ -18,7 +18,7 @@ import { REQUESTS_CHANGED, syncFormResponses } from "./lib/formSync";
 import { getRequests } from "./lib/database";
 import { announceRestored, DATA_RESTORED } from "./lib/undo";
 import { t } from "./lib/i18n";
-import { finishFromIpad, ipadSettings, listenIpadFinish, listenIpadImages, pushSnapshot, saveIpadImage, startIpad } from "./lib/ipad";
+import { advanceFromIpad, finishFromIpad, ipadSettings, listenIpadAdvance, listenIpadFinish, listenIpadImages, pushSnapshot, saveIpadImage, startIpad } from "./lib/ipad";
 import Logo from "./components/Logo";
 import AmbientBackground from "./components/AmbientBackground";
 import { setAmbientPage } from "./lib/ambient";
@@ -170,6 +170,17 @@ function IpadReceiver() {
           .catch((error) => {
             console.error(error);
             showToast(t("Could not finish the commission from the iPad: {error}", { error: String(error) }), "error");
+          }),
+      );
+    }).then(track);
+
+    listenIpadAdvance((advance) => {
+      enqueue(() =>
+        advanceFromIpad(advance)
+          .then(() => pushSnapshot().catch(console.error))
+          .catch((error) => {
+            console.error(error);
+            showToast(t("Could not move the commission from the iPad: {error}", { error: String(error) }), "error");
           }),
       );
     }).then(track);

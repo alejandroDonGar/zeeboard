@@ -203,6 +203,7 @@ export const es: Record<string, string> = {
   "Image received from the iPad.": "Imagen recibida desde el iPad.",
   "Commission finished from the iPad.": "Comisión terminada desde el iPad.",
   "Could not finish the commission from the iPad: {error}": "No se pudo terminar la comisión desde el iPad: {error}",
+  "Could not move the commission from the iPad: {error}": "No se pudo pasar de etapa la comisión desde el iPad: {error}",
   "That alternative no longer exists: the image was added as a new one.": "Esa alternativa ya no existe: la imagen se ha añadido como una nueva.",
   "Could not save the image from the iPad: {error}": "No se pudo guardar la imagen del iPad: {error}",
   "Mark as not done": "Marcar como pendiente",

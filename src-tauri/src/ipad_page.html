@@ -12,21 +12,41 @@
   * { box-sizing: border-box; }
   body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse 60% 40% at 80% 5%, var(--g1), transparent), radial-gradient(ellipse 50% 35% at 5% 95%, var(--g2), transparent), var(--bg); color: var(--ink); font: 17px/1.5 -apple-system, "Segoe UI", system-ui, sans-serif; padding: env(safe-area-inset-top) 16px calc(24px + env(safe-area-inset-bottom)); }
   main { max-width: 560px; margin: 0 auto; padding-top: 20px; }
+  h1, .title { font-family: ui-serif, Georgia, serif; }
   h1 { font-size: 28px; font-weight: 800; line-height: 1.1; letter-spacing: -.02em; margin: 0 0 4px; }
   h2 { font-size: 15px; font-weight: 700; color: var(--muted); margin: 24px 0 10px; }
   p { margin: 0; color: var(--muted); }
   .item, .btn { display: block; width: 100%; text-align: left; border: 1px solid var(--line); background: var(--glass); color: var(--ink); border-radius: 6px; padding: 14px 16px; margin-bottom: 10px; font: inherit; }
+  .item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; }
+  .item .mini { width: 48px; height: 48px; flex: none; border-radius: 4px; object-fit: cover; background: var(--bg); }
+  .item .grow { flex: 1; min-width: 0; }
   .item b { display: block; }
   .item span { color: var(--muted); font-size: 15px; }
+  .chip { flex: none; border-radius: 3px; padding: 2px 8px; font-size: 14px; color: var(--muted); }
+  .chip.soon { background: color-mix(in srgb, #c98a1a 22%, transparent); color: var(--ink); }
+  .chip.late { background: color-mix(in srgb, var(--bad) 18%, transparent); color: var(--bad); font-weight: 700; }
+  .title { font-size: 26px; font-weight: 700; line-height: 1.15; margin: 14px 0 2px; color: var(--ink); }
+  #stages { display: grid; grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); gap: 8px; }
+  .stage { border: 0; background: none; color: var(--ink); padding: 4px; font: inherit; font-size: 14px; text-align: left; }
+  .stage .thumb { width: 100%; aspect-ratio: 4 / 3; border-radius: 4px; border: 1px solid var(--line); background: var(--card); object-fit: cover; display: block; }
+  .stage.on .thumb { outline: 2px solid var(--ink); outline-offset: 2px; }
+  .stage b { display: block; margin-top: 6px; font-weight: 600; }
+  .stage .later { color: var(--muted); font-weight: 400; }
+  .drop { display: grid; place-items: center; text-align: center; min-height: 170px; margin-top: 16px; padding: 16px; border: 2px dashed var(--line); border-radius: 6px; background: var(--glass); }
+  .drop b { display: block; font-size: 18px; }
+  .drop span { color: var(--muted); font-size: 15px; }
+  .drop.over { border-style: solid; border-color: var(--accent, var(--ink)); background: color-mix(in srgb, var(--accent, var(--ink)) 14%, var(--card)); }
+  progress { display: block; width: 100%; height: 6px; margin-top: 4px; accent-color: var(--ink); }
+  #advance { margin-top: 16px; }
+  details { margin-top: 24px; } summary { font-size: 15px; font-weight: 700; color: var(--muted); margin-bottom: 10px; }
   .btn { text-align: center; font-weight: 700; }
   .btn.primary { background: var(--primary); color: var(--on); border-color: var(--primary); }
-  select { width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--line); background: var(--glass); color: var(--ink); font: inherit; }
   #chosen { font-weight: 700; color: var(--ink); }
-  #targets { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-  .target { border: 2px solid var(--line); background: var(--glass); color: var(--ink); border-radius: 6px; padding: 8px; font: inherit; text-align: left; }
+  #targets { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+  .target { display: grid; grid-template-columns: 44px 1fr; column-gap: 10px; align-items: center; border: 2px solid var(--line); background: var(--glass); color: var(--ink); border-radius: 6px; padding: 6px; font: inherit; text-align: left; }
   .target.on { border-color: var(--primary); }
-  .target .thumb { width: 100%; aspect-ratio: 1; border-radius: 4px; background: var(--bg); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 34px; color: var(--muted); }
-  .target b { display: block; margin-top: 6px; font-size: 15px; }
+  .target .thumb { grid-row: span 2; width: 44px; height: 44px; border-radius: 4px; background: var(--bg); object-fit: cover; display: flex; align-items: center; justify-content: center; font-size: 22px; color: var(--muted); }
+  .target b { display: block; font-size: 15px; }
   .target span { display: block; color: var(--muted); font-size: 13px; line-height: 1.3; }
   #refs { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
   #refs a { display: block; border-radius: 4px; overflow: hidden; border: 1px solid var(--line); aspect-ratio: 1; }
@@ -62,23 +82,24 @@
 
   <section id="send" hidden>
     <button class="back" id="back"></button>
-    <h2 id="t-sending"></h2>
-    <p id="chosen"></p>
+    <p class="title" id="chosen"></p>
+    <p id="chosen-sub"></p>
     <h2 id="t-stage"></h2>
-    <select id="stage"></select>
+    <div id="stages"></div>
     <div id="target-box" hidden>
       <h2 id="t-target"></h2>
       <div id="targets"></div>
     </div>
-    <h2 id="t-photos"></h2>
-    <label class="btn primary" id="pick"></label>
+    <label class="drop" id="pick" for="files"><div><b id="drop-text"></b><span id="t-drop-sub"></span></div></label>
     <input id="files" type="file" accept="image/*" multiple>
     <ul id="queue"></ul>
-    <div id="refs-box" hidden>
-      <h2 id="t-refs"></h2>
+    <button class="btn primary" id="advance" hidden></button>
+    <p class="hint" id="a-msg"></p>
+    <details id="refs-box" hidden>
+      <summary id="t-refs"></summary>
       <div id="refs"></div>
       <p class="hint" id="t-refs-hint"></p>
-    </div>
+    </details>
 
     <div id="finish-box">
       <h2 id="t-finish"></h2>
@@ -99,9 +120,9 @@
 </main>
 
 <script>
-const es = { commission: "Elige la comisión", sending: "Enviando a", stage: "Etapa", target: "Añadir como", photos: "Imágenes", pick: "Elegir imágenes", back: "Cambiar de comisión", newAlt: "Nueva alternativa", newAltSub: "otra opción para el cliente", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No hay comisiones abiertas.", refs: "Referencias", refsHint: "Toca una para verla en grande y mantén pulsado para guardarla en Fotos.", offline: "No se pudo conectar con ZeeBoard. ¿Está abierto en el PC y con el interruptor activado?",
+const es = { commission: "Elige la comisión", stage: "Etapa", target: "Añadir como", inProgress: "En curso", queue: "En cola", notStarted: "sin empezar", days: (n) => n + " d", late: (n) => n + " d tarde", drop: (stage) => "Suelta aquí la imagen de " + stage, dropSub: "o toca para elegirla", start: (stage) => "Empezar " + stage, done: (stage) => stage + " hecho", back: "Cambiar de comisión", newAlt: "Nueva alternativa", newAltSub: "otra opción para el cliente", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No hay comisiones abiertas.", refs: "Referencias", refsHint: "Toca una para verla en grande y mantén pulsado para guardarla en Fotos.", offline: "No se pudo conectar con ZeeBoard. ¿Está abierto en el PC y con el interruptor activado?",
   finish: "Terminar", finishOpen: "Terminar esta comisión…", date: "Fecha de entrega", hours: "Horas dedicadas", fnotes: "Notas finales (enlace a la publicación, cómo fue…)", final: "Imagen final", pickFinal: "Elegir imagen final", confirm: "Marcar como terminada", hoursBad: "Escribe las horas como un número, por ejemplo 7,5", imagesFailed: "No se pudieron enviar las imágenes. Revisa la lista y vuelve a intentarlo.", finishFailed: "No se pudo terminar la comisión.", finished: "Comisión terminada", selected: (n) => n + (n === 1 ? " imagen lista para enviar" : " imágenes listas para enviar") };
-const en = { commission: "Pick the commission", sending: "Sending to", stage: "Stage", target: "Add as", photos: "Images", pick: "Choose images", back: "Change commission", newAlt: "New alternative", newAltSub: "another option for the client", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No open commissions.", refs: "References", refsHint: "Tap one to see it full size, then press and hold to save it to Photos.", offline: "Could not reach ZeeBoard. Is it open on the PC with the switch on?",
+const en = { commission: "Pick the commission", stage: "Stage", target: "Add as", inProgress: "In progress", queue: "Queue", notStarted: "not started", days: (n) => n + " d", late: (n) => n + " d late", drop: (stage) => "Drop the " + stage + " image here", dropSub: "or tap to choose it", start: (stage) => "Start " + stage, done: (stage) => stage + " done", back: "Change commission", newAlt: "New alternative", newAltSub: "another option for the client", versionSub: (v) => "v" + v + " → v" + (v + 1), none: "No open commissions.", refs: "References", refsHint: "Tap one to see it full size, then press and hold to save it to Photos.", offline: "Could not reach ZeeBoard. Is it open on the PC with the switch on?",
   finish: "Finish", finishOpen: "Finish this commission…", date: "Delivery date", hours: "Hours spent", fnotes: "Final notes (link to the post, how it went…)", final: "Final image", pickFinal: "Choose final image", confirm: "Mark as finished", hoursBad: "Enter the hours as a number, like 7.5", imagesFailed: "The images could not be sent. Check the list and try again.", finishFailed: "Could not finish the commission.", finished: "Commission finished", selected: (n) => n + (n === 1 ? " image ready to send" : " images ready to send") };
 const spanish = navigator.language.toLowerCase().startsWith("es");
 const L = spanish ? es : en;
@@ -113,17 +134,16 @@ let data = { commissions: [] };
 let chosen = null;
 // null = a new alternative; a number = a new version of that alternative of the stage
 let target = null;
+// The stage the images go to: the current one until another is tapped in the strip
+let stageId = null;
 // Finished from this page: hidden at once, before the app refreshes the list
 const finishedHere = new Set();
 let finalFiles = [];
 
 $("t-commission").textContent = L.commission;
-$("t-sending").textContent = L.sending;
 $("t-stage").textContent = L.stage;
 $("t-target").textContent = L.target;
-$("t-photos").textContent = L.photos;
-$("pick").textContent = L.pick;
-$("pick").htmlFor = "files";
+$("t-drop-sub").textContent = L.dropSub;
 $("back").textContent = "‹ " + L.back;
 $("t-refs").textContent = L.refs;
 $("t-refs-hint").textContent = L.refsHint;
@@ -149,6 +169,7 @@ async function load() {
     renderList();
   } catch (error) {
     $("status").textContent = L.offline;
+    setTimeout(load, 5000);
   }
 }
 
@@ -157,17 +178,54 @@ function renderList() {
   box.innerHTML = "";
   const open = data.commissions.filter((commission) => !finishedHere.has(commission.id));
   if (!open.length) { box.textContent = L.none; return; }
-  for (const commission of open) {
-    const button = document.createElement("button");
-    button.className = "item";
-    const title = document.createElement("b");
-    const client = document.createElement("span");
-    title.textContent = commission.title;
-    client.textContent = commission.client || "";
-    button.append(title, client);
-    button.onclick = () => choose(commission);
-    box.appendChild(button);
+  // As on the PC: those already in a stage, then the queued ones; nearest delivery first
+  open.sort((a, b) => (a.deadline || "9999").localeCompare(b.deadline || "9999"));
+  for (const [label, items] of [[L.inProgress, open.filter((c) => c.currentStageId !== null)], [L.queue, open.filter((c) => c.currentStageId === null)]]) {
+    if (!items.length) continue;
+    const heading = document.createElement("h2");
+    heading.textContent = label + " · " + items.length;
+    box.appendChild(heading);
+    for (const commission of items) box.appendChild(listItem(commission));
   }
+}
+
+function listItem(commission) {
+  const button = document.createElement("button");
+  button.className = "item";
+  const text = document.createElement("div");
+  text.className = "grow";
+  const title = document.createElement("b");
+  const sub = document.createElement("span");
+  const index = commission.stages.findIndex((stage) => stage.id === commission.currentStageId);
+  title.textContent = commission.title;
+  sub.textContent = [commission.client, index >= 0 ? commission.stages[index].name + " " + (index + 1) + "/" + commission.stages.length : L.notStarted].filter(Boolean).join(" · ");
+  text.append(title, sub);
+  button.append(thumbOrBox(commission.thumb, "mini"), text);
+  const days = daysLeft(commission.deadline);
+  if (days !== null) {
+    const chip = document.createElement("span");
+    chip.className = "chip" + (days < 0 ? " late" : days <= 3 ? " soon" : "");
+    chip.textContent = days < 0 ? L.late(-days) : L.days(days);
+    button.appendChild(chip);
+  }
+  button.onclick = () => choose(commission);
+  return button;
+}
+
+function daysLeft(deadline) {
+  if (!deadline) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return Math.round((new Date(deadline.slice(0, 10) + "T00:00") - today) / 864e5);
+}
+
+const thumbUrl = (path) => "/thumb?k=" + encodeURIComponent(key) + "&p=" + path;
+
+function thumbOrBox(thumb, className) {
+  const picture = document.createElement(thumb ? "img" : "div");
+  if (thumb) { picture.src = thumbUrl(thumb); picture.alt = ""; }
+  picture.className = className;
+  return picture;
 }
 
 function choose(commission) {
@@ -176,17 +234,12 @@ function choose(commission) {
   if (!history.state) history.pushState({ send: true }, "");
   $("list").hidden = true;
   $("send").hidden = false;
-  $("chosen").textContent = commission.title + (commission.client ? " · " + commission.client : "");
-  const select = $("stage");
-  select.innerHTML = "";
-  for (const stage of commission.stages) {
-    const option = document.createElement("option");
-    option.value = stage.id;
-    option.textContent = stage.name;
-    option.selected = stage.id === commission.currentStageId;
-    select.appendChild(option);
-  }
-  renderTargets();
+  $("chosen").textContent = commission.title;
+  $("chosen-sub").textContent = commission.client || "";
+  $("send").style.setProperty("--accent", commission.accent.background);
+  stageId = commission.currentStageId ?? (commission.stages[0] && commission.stages[0].id);
+  $("a-msg").textContent = "";
+  renderStages();
   renderRefs();
   resetFinish();
 }
@@ -241,7 +294,7 @@ function renderRefs() {
     link.href = "/image?k=" + encodeURIComponent(key) + "&p=" + ref.image;
     link.target = "_blank";
     const picture = document.createElement("img");
-    picture.src = "/thumb?k=" + encodeURIComponent(key) + "&p=" + ref.thumb;
+    picture.src = thumbUrl(ref.thumb);
     picture.alt = ref.label || character;
     picture.loading = "lazy";
     link.appendChild(picture);
@@ -249,9 +302,59 @@ function renderRefs() {
   }
 }
 
+// The stages as on the PC: thumbnail, done ✓, later ones greyed; tapping one sends the images there
+function renderStages() {
+  const box = $("stages");
+  box.innerHTML = "";
+  const current = chosen.stages.findIndex((stage) => stage.id === chosen.currentStageId);
+  chosen.stages.forEach((stage, index) => {
+    const button = document.createElement("button");
+    button.className = "stage" + (stage.id === stageId ? " on" : "");
+    button.setAttribute("aria-pressed", stage.id === stageId);
+    const name = document.createElement("b");
+    name.textContent = (index < current ? "✓ " : "") + stage.name;
+    if (index > current) name.className = "later";
+    const alt = stage.alts.find((item) => item.thumb);
+    button.append(thumbOrBox(alt && alt.thumb, "thumb"), name);
+    button.onclick = () => { stageId = stage.id; renderStages(); };
+    box.appendChild(button);
+  });
+  const stage = chosen.stages.find((item) => item.id === stageId);
+  $("drop-text").textContent = L.drop(stage ? stage.name : "");
+  renderTargets();
+  renderAdvance();
+}
+
+// The main button of the PC: start a queued commission or close the current stage. On the last visible stage
+// (the next one is the hidden delivery) there is none: that is "Finish" below.
+function renderAdvance() {
+  const index = chosen.stages.findIndex((stage) => stage.id === chosen.currentStageId);
+  const next = chosen.stages[index + 1];
+  const button = $("advance");
+  button.hidden = !next;
+  button.disabled = false;
+  if (!next) return;
+  button.textContent = index < 0 ? L.start(next.name) : L.done(chosen.stages[index].name);
+  button.style.background = button.style.borderColor = chosen.accent.background;
+  button.style.color = chosen.accent.color;
+}
+
+$("advance").onclick = async () => {
+  $("advance").disabled = true;
+  $("a-msg").textContent = "";
+  try {
+    const response = await fetch("/advance?k=" + encodeURIComponent(key) + "&commission=" + chosen.id + "&from=" + (chosen.currentStageId ?? ""), { method: "POST" });
+    if (!response.ok) throw new Error(response.status);
+    setTimeout(refreshAfterSend, 1500);
+  } catch (error) {
+    $("advance").disabled = false;
+    $("a-msg").textContent = L.offline;
+  }
+};
+
 // What the images of this stage can be added to: a new alternative, or a new version of an existing one
 function renderTargets() {
-  const stage = chosen.stages.find((item) => String(item.id) === $("stage").value);
+  const stage = chosen.stages.find((item) => item.id === stageId);
   const alts = (stage && stage.alts) || [];
   const box = $("targets");
   box.innerHTML = "";
@@ -261,16 +364,8 @@ function renderTargets() {
   const card = (alt, title, subtitle, thumb) => {
     const button = document.createElement("button");
     button.className = "target" + (alt === target ? " on" : "");
-    let picture;
-    if (thumb) {
-      picture = document.createElement("img");
-      picture.src = "/thumb?k=" + encodeURIComponent(key) + "&p=" + thumb;
-      picture.alt = "";
-    } else {
-      picture = document.createElement("div");
-      picture.textContent = alt === null ? "+" : "▢";
-    }
-    picture.className = "thumb";
+    const picture = thumbOrBox(thumb, "thumb");
+    if (!thumb) picture.textContent = alt === null ? "+" : "▢";
     const name = document.createElement("b");
     const sub = document.createElement("span");
     name.textContent = title;
@@ -284,16 +379,27 @@ function renderTargets() {
   for (const alt of alts) card(alt.alt, alt.label, L.versionSub(alt.version), alt.thumb);
 }
 
-$("stage").onchange = renderTargets;
 // Going back (this button, the swipe or the browser's back) returns to the list instead of leaving the page
 function showList() { $("send").hidden = true; $("list").hidden = false; $("queue").innerHTML = ""; load(); }
 $("back").onclick = () => (history.state ? history.back() : showList());
 window.onpopstate = showList;
 
-$("files").onchange = async (event) => {
+async function sendAll(files) {
+  for (const file of files) await upload(file);
+}
+$("files").onchange = (event) => {
   const files = [...event.target.files];
   event.target.value = "";
-  for (const file of files) await upload(file);
+  sendAll(files);
+};
+// Dragged from the drawing app in Split View
+const drop = $("pick");
+drop.ondragover = (event) => { event.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = (event) => {
+  event.preventDefault();
+  drop.classList.remove("over");
+  sendAll([...event.dataTransfer.files].filter((file) => file.type.startsWith("image/")));
 };
 
 // After a send the list changes (new thumbnail and version): read it again, keeping the stage and the choice
@@ -301,7 +407,11 @@ async function refreshAfterSend() {
   try {
     await fetchData();
     const fresh = data.commissions.find((commission) => commission.id === chosen.id);
-    if (fresh) { chosen = fresh; renderTargets(); }
+    if (!fresh) return;
+    // Following the current stage (or it no longer exists): keep following it after a "done"
+    if (stageId === chosen.currentStageId || !fresh.stages.some((stage) => stage.id === stageId)) stageId = fresh.currentStageId ?? (fresh.stages[0] && fresh.stages[0].id);
+    chosen = fresh;
+    renderStages();
   } catch (error) { /* the next send shows the problem */ }
 }
 
@@ -311,14 +421,17 @@ async function refreshAfterSend() {
 function upload(file, opts = {}) {
   return new Promise((resolve) => {
     const row = document.createElement("li");
-    row.textContent = file.name + " · 0 %";
+    const bar = document.createElement("progress");
+    bar.max = 100;
+    bar.value = 0;
+    row.append(file.name, bar);
     (opts.list || $("queue")).prepend(row);
 
     const final = opts.stage !== undefined;
     const request = new XMLHttpRequest();
-    request.open("POST", "/upload?k=" + encodeURIComponent(key) + "&commission=" + chosen.id + "&stage=" + (final ? opts.stage : $("stage").value) + (final || target === null ? "" : "&alt=" + target));
+    request.open("POST", "/upload?k=" + encodeURIComponent(key) + "&commission=" + chosen.id + "&stage=" + (final ? opts.stage : stageId) + (final || target === null ? "" : "&alt=" + target));
     request.upload.onprogress = (event) => {
-      if (event.lengthComputable) row.textContent = file.name + " · " + Math.round((event.loaded / event.total) * 100) + " %";
+      if (event.lengthComputable) bar.value = Math.round((event.loaded / event.total) * 100);
     };
     request.onload = () => {
       const ok = request.status === 200;

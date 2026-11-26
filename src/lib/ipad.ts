@@ -3,7 +3,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { groupAlternatives, loadOpenCommissions } from "./commissionHelpers";
-import { createCommissionStageImage, createImageVersion, finishCommission, getCommissionReferences, getCommissionStageImages, getCommissions, getStageImagesByCommission, getStagesByTemplate, getTemplateStages, type Commission } from "./database";
+import { accentButton } from "./ambient";
+import { createCommissionStageImage, createImageVersion, finishCommission, getCommissionReferences, getCommissionStageImages, getCommissions, getStageImagesByCommission, getStagesByTemplate, getTemplates, getTemplateStages, updateCommissionStage, type Commission, type CommissionStageImage } from "./database";
 import { getThumbPath, isProcessedImage } from "./images";
 import { latestOfAlternative } from "./ipadLink";
 import { hide } from "./privacy";
@@ -52,22 +53,32 @@ export async function pushSnapshot(): Promise<void> {
   const withTemplate = (await loadOpenCommissions()).filter(
     (commission): commission is Commission & { template_id: number } => commission.template_id !== null,
   );
-  const [stagesOf, imagesOf] = await Promise.all([
+  const [stagesOf, imagesOf, templates] = await Promise.all([
     getStagesByTemplate(withTemplate.map((commission) => commission.template_id)),
     getStageImagesByCommission(withTemplate.map((commission) => commission.id)),
+    getTemplates(),
   ]);
+  const colorOf = new Map(templates.map((template) => [template.id, template.color]));
 
   // ponytail: references stay one query per commission (open ones only, a handful); group them if that list grows
   const entries = await Promise.all(withTemplate.map(async (commission) => {
     const stages = stagesOf[commission.template_id];
     const images = imagesOf[commission.id];
     const references = await getCommissionReferences(commission.id);
+    const newest = images
+      .filter((image) => isProcessedImage(image.image_data_url))
+      .reduce<CommissionStageImage | null>((last, image) => (!last || image.created_at >= last.created_at ? image : last), null);
 
     return {
       id: commission.id,
       title: commission.title,
       client: hide(commission.client_name ?? ""),
       currentStageId: commission.current_stage_id,
+      deadline: commission.deadline,
+      // The newest image, to tell the commissions apart at a glance
+      thumb: newest ? getThumbPath(newest.image_data_url) : null,
+      // The main button in the type's colour, readable as on the PC
+      accent: accentButton(colorOf.get(commission.template_id) ?? "#475569"),
       // The hidden last stage ("delivery"): where the final images of a finished commission go
       lastStageId: stages[stages.length - 1]?.id ?? null,
       // Character references, to keep them on the iPad: the server only hands out images listed here
@@ -170,5 +181,33 @@ export async function finishFromIpad(finish: IpadFinish): Promise<void> {
 
   await finishCommission(commission.id, last.id, { deliveredAt: finish.deliveredAt, hours: finish.hours, notes: finish.notes });
   // The commissions screen re-reads without remounting (a form may be open)
+  window.dispatchEvent(new Event(IPAD_IMAGE_ADDED));
+}
+
+export type IpadAdvance = { commissionId: number; from: number | null };
+
+export const listenIpadAdvance = (onAdvance: (advance: IpadAdvance) => void) =>
+  listen<IpadAdvance>("ipad-advance", (event) => onAdvance(event.payload));
+
+/**
+ * "Stage done" (or "Start" for a queued one) sent from the iPad: the same as the main button. Only if the commission is
+ * still in the stage the iPad showed (a double tap or a change on the PC does nothing), and never into the hidden last
+ * stage: finishing has its own form.
+ */
+export async function advanceFromIpad({ commissionId, from }: IpadAdvance): Promise<void> {
+  const commission = (await getCommissions()).find((item) => item.id === commissionId);
+
+  if (!commission || commission.template_id === null || commission.current_stage_id !== from) {
+    throw new Error("The commission changed on the PC meanwhile");
+  }
+
+  const stages = await getTemplateStages(commission.template_id);
+  const next = stages[stages.findIndex((stage) => stage.id === from) + 1];
+
+  if (!next || next === stages[stages.length - 1]) {
+    throw new Error("That was the last stage: finish the commission instead");
+  }
+
+  await updateCommissionStage(commission.id, next.id);
   window.dispatchEvent(new Event(IPAD_IMAGE_ADDED));
 }

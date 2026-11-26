@@ -89,6 +89,14 @@ struct IpadFinish {
     notes: String,
 }
 
+/// "Stage done" from the iPad: `from` is the stage the iPad showed (none = still queued), so a double tap moves it only once
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct IpadAdvance {
+    commission_id: i64,
+    from: Option<i64>,
+}
+
 const MAX_FINISH_BODY: u64 = 32 * 1024;
 
 /// Validates what comes from the network before the app saves it: a real date, sane hours, notes not huge
@@ -232,6 +240,14 @@ fn handle(app: AppHandle, request: Request, token: String, snapshot: Arc<Mutex<S
         }
         (Method::Post, "/upload") => upload(&app, request, &params),
         (Method::Post, "/finish") => finish(&app, request),
+        (Method::Post, "/advance") => match params.get("commission").and_then(|id| id.parse::<i64>().ok()) {
+            Some(commission_id) => {
+                let from = params.get("from").and_then(|id| id.parse::<i64>().ok());
+                let _ = app.emit("ipad-advance", IpadAdvance { commission_id, from });
+                send(request, 200, "application/json", r#"{"ok":true}"#);
+            }
+            None => send(request, 400, "text/plain; charset=utf-8", "Falta la comisión"),
+        },
         _ => send(request, 404, "text/plain; charset=utf-8", "No encontrado"),
     }
 }

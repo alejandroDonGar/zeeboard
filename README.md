@@ -304,14 +304,16 @@ For streaming or screen sharing. **Ctrl+Shift+P** (or the button in the menu) hi
 
 Skip the email: draw on the iPad and send the images straight to a commission stage.
 
-<img src="docs/images/ipad-page.png" alt="The iPad page: pick a stage and whether the image is a new alternative or a new version" width="420">
+<img src="docs/images/ipad-page.png" alt="The iPad page: the stages with thumbnails, new alternative or new version, the box to drop the image and the Sketch done button" width="420">
 
 1. In **Settings → iPad** switch **Receive images from the iPad** on. ZeeBoard shows a **QR code** and a link.
 2. Open the link on the iPad (scan the QR with the camera, then add the page to the Home Screen if you like). ZeeBoard must be open on the PC.
-3. Pick the **commission** (**‹ Change commission**, or the iPad's back gesture, returns to the list to send to another one), the **stage** (the current one by default) and what the image is: a **new alternative** (default) or a **new version** of one of the stage's alternatives, shown with its thumbnail.
-4. Choose the images and send. They go through the same processing as any image and appear in the commission straight away.
-5. Below, **References** shows the reference images of the client's characters (and of any character from another client linked to the commission). Tap one to open it full size and press and hold to save it to Photos.
-6. At the bottom, **Finish this commission…** marks it as finished right from the iPad: the **delivery date** (today by default), the **hours spent**, the **final notes** and the **final images**, which are sent first to the commission's last stage. When everything has arrived the commission moves to *Finished*, exactly as with **Mark as finished** on the PC. If an image fails, nothing is finished and you can try again.
+3. Pick the **commission**. The list shows each one with its newest image, the stage it is in (*Lineart 2/4*) and the days left (late ones in red), in progress first and the queue below, nearest delivery first. **‹ Change commission**, or the iPad's back gesture, returns to the list.
+4. The **stages** show as on the PC, with their thumbnails and the current one already chosen; tap another to send there. Then pick what the image is: a **new alternative** (default) or a **new version** of one of the stage's alternatives, shown with its thumbnail.
+5. **Drop** the image on the big box (drag it from your drawing app in Split View) or tap the box to choose it. Each image shows a progress bar and goes through the same processing as any image; it appears in the commission straight away.
+6. The main button does what it does on the PC: **Start Sketch** for a queued commission, **Sketch done** to move on to the next stage. The last stage has none: that is **Finish** below. If the commission was moved on the PC meanwhile, the tap does nothing (and a double tap moves it only once).
+7. **References** (folded) shows the reference images of the client's characters (and of any character from another client linked to the commission). Tap one to open it full size and press and hold to save it to Photos.
+8. At the bottom, **Finish this commission…** marks it as finished right from the iPad: the **delivery date** (today by default), the **hours spent**, the **final notes** and the **final images**, which are sent first to the commission's last stage. When everything has arrived the commission moves to *Finished*, exactly as with **Mark as finished** on the PC. If an image fails, nothing is finished and you can try again.
 
 <img src="docs/images/ipad-finish.png" alt="The iPad page's Finish block: delivery date, hours, final notes and final image" width="420">
 

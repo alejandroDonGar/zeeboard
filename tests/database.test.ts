@@ -4,6 +4,7 @@ import { DatabaseSync } from "node:sqlite";
 import { rawDatabase, resetDatabase, resetStatementCount, statementCount } from "./support/tauri-sql";
 import { readFileSync, readdirSync } from "node:fs";
 import { TYPE_CATEGORY } from "../src/lib/catalog";
+import { accentButton } from "../src/lib/ambient";
 
 vi.mock("@tauri-apps/plugin-sql", async () => {
   const { loadDatabase } = await import("./support/tauri-sql");
@@ -1057,7 +1058,10 @@ describe("around the data: undo, form sync, backups and the iPad", () => {
       const listed = (title: string) => commissions.find((item: { title: string }) => item.title === title);
       expect(commissions.map((item: { title: string }) => item.title).sort()).toEqual(["No stages", "Open", "Open too"]);
       expect(listed("Open")).toEqual({
-        id: open, title: "Open", client: "Ana", currentStageId: sketch.id, lastStageId: delivery.id,
+        id: open, title: "Open", client: "Ana", currentStageId: sketch.id, lastStageId: delivery.id, deadline: null,
+        // The newest image (processed ones only), and the main button in the type's colour
+        thumb: PROCESSED(3).replace("images/", "images/thumbs/"),
+        accent: accentButton((await db.getTemplates()).find((item) => item.id === templateId)!.color),
         refs: [{ character: "Luna", label: "Reference 1", image: PROCESSED(1), thumb: PROCESSED(1).replace("images/", "images/thumbs/") }],
         stages: [
           { id: sketch.id, name: "Sketch", alts: [
