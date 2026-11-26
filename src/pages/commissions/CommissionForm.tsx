@@ -175,11 +175,11 @@ function CommissionForm({
   }
 
   return (
-    <div className="modal-backdrop">
-      <div role="dialog" aria-modal="true" aria-label={mode === "new" ? t("New commission") : t("Edit commission")} className="grid max-h-[90vh] w-[900px] max-w-[94vw] grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] overflow-hidden modal-card rounded-surface">
+    <div className="modal-backdrop side-panel-backdrop">
+      <div role="dialog" aria-modal="true" aria-label={mode === "new" ? t("New commission") : t("Edit commission")} className="side-panel flex flex-col overflow-y-auto modal-card">
         <DialogBehavior onClose={() => onClose()} />
-        {/* Left: pick */}
-        <div className="min-h-0 space-y-5 overflow-y-auto p-6">
+        {/* Top: pick */}
+        <div className="space-y-5 p-6">
           <input
             autoFocus
             value={commissionTitle}
@@ -376,8 +376,8 @@ function CommissionForm({
           </div>
         </div>
 
-        {/* Right: live summary, price, delivery and notes */}
-        <div className="flex min-h-0 flex-col gap-4 overflow-y-auto border-l border-line bg-paper p-6">
+        {/* Below: live summary, price, delivery and notes */}
+        <div className="flex flex-1 flex-col gap-4 border-t border-line bg-paper p-6">
           <div>
             <p className={formLabel}>{t("Summary")}</p>
             <p className="truncate text-lg font-semibold">{commissionTitle.trim() || "Untitled commission"}</p>
@@ -473,7 +473,9 @@ function CommissionForm({
             />
           </label>
 
-          <div className="flex justify-end gap-2">
+          {/* Always in view at the bottom of the panel; when the button can't be used yet, it says why */}
+          <div className="sticky bottom-0 -mx-6 -mb-6 mt-auto flex items-center justify-end gap-2 border-t border-line bg-paper px-6 py-3">
+            {!commissionTitle.trim() && <span className="mr-auto text-xs text-faint">{t("Type a title to create it")}</span>}
             <button
               type="button"
               onClick={() => onClose()}

@@ -279,6 +279,7 @@ export const es: Record<string, string> = {
   "Background, pose, details to remember…": "Fondo, pose, detalles que recordar…",
   "Saving…": "Guardando…",
   "Create commission": "Crear comisión",
+  "Type a title to create it": "Escribe un título para crearla",
   "Save changes": "Guardar cambios",
   "Commission saved.": "Comisión guardada.",
   "Commission created.": "Comisión creada.",

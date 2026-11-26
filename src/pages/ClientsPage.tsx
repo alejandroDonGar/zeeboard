@@ -1177,8 +1177,8 @@ function ClientsPage({
         </div>
       )}
       {clientForm && (
-        <div className="modal-backdrop">
-          <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="w-[480px] modal-card rounded-surface p-6">
+        <div className="modal-backdrop side-panel-backdrop">
+          <div role="dialog" aria-modal="true" aria-label={clientForm === "new" ? t("New client") : t("Edit client")} className="side-panel overflow-y-auto modal-card p-6">
             <DialogBehavior onClose={closeClientForm} />
             <h3 className="text-lg font-semibold text-ink">
               {clientForm === "new" ? t("New client") : t("Edit client")}
